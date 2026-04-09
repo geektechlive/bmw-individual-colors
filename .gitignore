@@ -39,3 +39,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# reference images (forum screenshots used during development)
+/*.png
+
+# seed data (large, not part of source)
+scripts/seed-data*.json
