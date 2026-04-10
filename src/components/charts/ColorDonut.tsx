@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import {
   PieChart,
   Pie,
@@ -15,6 +16,8 @@ interface Props {
 }
 
 export default function ColorDonut({ data }: Props) {
+  const [activeIndex, setActiveIndex] = useState<number | null>(null);
+
   const top20 = data.slice(0, 20);
   const otherCount = data.slice(20).reduce((s, d) => s + d.count, 0);
 
@@ -24,6 +27,7 @@ export default function ColorDonut({ data }: Props) {
       : top20;
 
   const total = chartData.reduce((s, d) => s + d.count, 0);
+  const activeColor = activeIndex !== null ? chartData[activeIndex]?.color : null;
 
   return (
     <ResponsiveContainer width="100%" height={480}>
@@ -38,17 +42,26 @@ export default function ColorDonut({ data }: Props) {
           outerRadius={150}
           paddingAngle={1}
           label={false}
+          onMouseEnter={(_, index) => setActiveIndex(index)}
+          onMouseLeave={() => setActiveIndex(null)}
         >
-          {chartData.map((entry) => (
-            <Cell key={entry.color} fill={entry.hex} stroke="#1e2a3a" strokeWidth={1} />
+          {chartData.map((entry, index) => (
+            <Cell
+              key={entry.color}
+              fill={entry.hex}
+              stroke={index === activeIndex ? '#ffffff' : '#1e2a3a'}
+              strokeWidth={index === activeIndex ? 2 : 1}
+              opacity={activeIndex === null || index === activeIndex ? 1 : 0.5}
+            />
           ))}
         </Pie>
         <Tooltip
-          formatter={(value) => [
+          formatter={(value, name) => [
             `${Number(value)} (${((Number(value) / total) * 100).toFixed(1)}%)`,
-            'Count',
+            name,
           ]}
-          contentStyle={{ background: '#1e2a3a', border: '1px solid #2d3f55', color: '#e2e8f0' }}
+          contentStyle={{ background: '#1e2a3a', border: '1px solid #2d3f55', color: '#e2e8f0', borderRadius: 6 }}
+          labelStyle={{ display: 'none' }}
         />
         <Legend
           layout="vertical"
@@ -57,7 +70,14 @@ export default function ColorDonut({ data }: Props) {
           iconType="circle"
           iconSize={10}
           formatter={(value) => (
-            <span style={{ color: '#cbd5e1', fontSize: 12 }}>{value}</span>
+            <span style={{
+              color: value === activeColor ? '#ffffff' : '#94a3b8',
+              fontSize: 12,
+              fontWeight: value === activeColor ? 700 : 400,
+              transition: 'color 0.1s, font-weight 0.1s',
+            }}>
+              {value}
+            </span>
           )}
         />
       </PieChart>
