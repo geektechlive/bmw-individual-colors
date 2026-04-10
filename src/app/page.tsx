@@ -62,7 +62,6 @@ export default async function HomePage() {
               fontSize: 17,
               color: '#94a3b8',
               lineHeight: 1.6,
-              marginBottom: 36,
               maxWidth: 520,
               margin: '0 auto 36px',
             }}

@@ -12,6 +12,7 @@ export function createServerClient() {
 // Admin client — uses service role key, bypasses RLS
 // Only use in trusted server-side contexts (Server Actions, scripts)
 export function createAdminClient() {
+  if (!supabaseServiceKey) throw new Error('SUPABASE_SERVICE_ROLE_KEY is not set');
   return createSupabaseClient(supabaseUrl, supabaseServiceKey, {
     auth: { autoRefreshToken: false, persistSession: false },
   });
