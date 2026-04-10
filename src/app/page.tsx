@@ -1,7 +1,7 @@
-import nextDynamic from 'next/dynamic';
 import Link from 'next/link';
 import { getEntries, computeStats, computeColorCounts } from '../lib/queries';
-import { getColorHex } from '../lib/colors';
+import { getColorHex, colorToSlug } from '../lib/colors';
+import ColorTreemapLoader from '../components/charts/ColorTreemapLoader';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -10,8 +10,6 @@ export const metadata: Metadata = {
 };
 
 export const dynamic = 'force-dynamic';
-
-const ColorTreemap = nextDynamic(() => import('../components/charts/ColorTreemap'), { ssr: false });
 
 export default async function HomePage() {
   const entries = await getEntries();
@@ -167,7 +165,7 @@ export default async function HomePage() {
       <section style={{ background: '#0a0f1a', padding: '0 1.5rem 1.5rem' }}>
         <div style={{ maxWidth: 900, margin: '0 auto' }}>
           <div style={{ borderRadius: 12, overflow: 'hidden', border: '1px solid #1e2a3a' }}>
-            <ColorTreemap data={computeColorCounts(entries).slice(0, 30)} />
+            <ColorTreemapLoader data={computeColorCounts(entries).slice(0, 30)} />
           </div>
         </div>
       </section>
@@ -302,9 +300,9 @@ export default async function HomePage() {
                       }}
                     />
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontWeight: 700, color: '#e2e8f0', fontSize: 15 }}>
-                        {e.ext_color}
-                      </div>
+                      <Link href={`/colors/${colorToSlug(e.ext_color)}`} style={{ textDecoration: 'none' }}>
+                        <div style={{ fontWeight: 700, color: '#e2e8f0', fontSize: 15 }}>{e.ext_color}</div>
+                      </Link>
                       <div style={{ color: '#64748b', fontSize: 13, marginTop: 2 }}>
                         {e.model_year} {e.body_style}
                         {e.competition ? ' Competition' : ''} · {e.drivetrain} · {e.transmission}

@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { getColorHex } from '../lib/colors';
+import Link from 'next/link';
+import { getColorHex, colorToSlug } from '../lib/colors';
 import type { BmwEntry } from '../types';
 
 interface Props {
@@ -266,7 +267,9 @@ export default function EntryTable({ entries }: Props) {
                           flexShrink: 0,
                         }}
                       />
-                      <span style={{ color: '#e2e8f0' }}>{e.ext_color}</span>
+                      <Link href={`/colors/${colorToSlug(e.ext_color)}`} style={{ color: '#e2e8f0', textDecoration: 'none' }}>
+                        {e.ext_color}
+                      </Link>
                     </div>
                   </td>
                   <td style={tdStyle}>{e.model_year}</td>

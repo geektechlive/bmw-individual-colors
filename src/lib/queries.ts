@@ -189,6 +189,36 @@ export function computeWheelCounts(entries: BmwEntry[]): ColorCount[] {
     .sort((a, b) => b.count - a.count);
 }
 
+export async function getEntriesByColor(colorName: string): Promise<BmwEntry[]> {
+  const supabase = createServerClient();
+  const { data, error } = await supabase
+    .from('bmwic_entries')
+    .select('*')
+    .eq('ext_color', colorName)
+    .order('created_at', { ascending: false });
+  if (error) {
+    console.error('getEntriesByColor error:', error);
+    return [];
+  }
+  return data as BmwEntry[];
+}
+
+export function computeRarityLabel(count: number): string {
+  if (count <= 2) return 'Unicorn';
+  if (count <= 8) return 'Rare';
+  if (count <= 20) return 'Uncommon';
+  return 'Common';
+}
+
+export function computeRarityColor(label: string): string {
+  switch (label) {
+    case 'Unicorn': return '#862086';
+    case 'Rare': return '#E8002D';
+    case 'Uncommon': return '#e8a020';
+    default: return '#64748b';
+  }
+}
+
 export async function getLocationEntries(): Promise<BmwEntry[]> {
   const supabase = createServerClient();
   const { data, error } = await supabase

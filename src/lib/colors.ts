@@ -138,6 +138,17 @@ export function getColorFamily(colorName: string): string {
   return COLOR_FAMILY_MAP[colorName] ?? 'Other';
 }
 
+export function colorToSlug(colorName: string): string {
+  return colorName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+}
+
+export function slugToColor(slug: string): string | null {
+  const normalized = slug.toLowerCase();
+  return Object.keys(BMW_COLORS).find(
+    name => colorToSlug(name) === normalized
+  ) ?? null;
+}
+
 /** Returns true if the hex color is light enough that white text would be hard to read. */
 export function isLightColor(hex: string): boolean {
   const r = parseInt(hex.slice(1, 3), 16);
