@@ -1,5 +1,3 @@
-export const runtime = 'edge';
-
 import Link from 'next/link';
 import { getEntries, getStats } from '../lib/queries';
 import { getColorHex } from '../lib/colors';

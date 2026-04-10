@@ -1,5 +1,3 @@
-export const runtime = 'edge';
-
 import Link from 'next/link';
 import { getEntries, getColorCounts, getModelYearMatrix, getInteriorCounts, getLocationEntries } from '../../lib/queries';
 import ColorDonut from '../../components/charts/ColorDonut';
