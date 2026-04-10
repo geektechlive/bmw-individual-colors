@@ -35,8 +35,25 @@ interface ParsedEntry {
   location_state: string | null;
   location_country: string;
   forum_username: string | null;
+  posted_at: string | null;
   notes: string | null;
   _raw?: string;
+}
+
+/**
+ * Parse BimmerPost date string "MM-DD-YYYY, HH:MM AM/PM" to ISO 8601.
+ * Returns null if parsing fails.
+ */
+function parsePostDate(dateStr: string | null): string | null {
+  if (!dateStr) return null;
+  // Format: "06-20-2021, 12:42 PM"
+  const m = /^(\d{2})-(\d{2})-(\d{4}),\s*(\d+):(\d{2})\s*([AP]M)$/.exec(dateStr.trim());
+  if (!m) return null;
+  let [, month, day, year, hour, min, ampm] = m;
+  let h = parseInt(hour, 10);
+  if (ampm === "PM" && h !== 12) h += 12;
+  if (ampm === "AM" && h === 12) h = 0;
+  return new Date(`${year}-${month}-${day}T${String(h).padStart(2,"0")}:${min}:00`).toISOString();
 }
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -80,6 +97,7 @@ async function fetchPage(page: number): Promise<string> {
 interface RawPost {
   postId: string;
   username: string;
+  postDate: string | null;
   html: string;
   text: string;
 }
@@ -103,6 +121,14 @@ function extractPosts(html: string): RawPost[] {
     usernameMap.set(um[1], um[2].trim());
   }
 
+  // Build a map of postId → post date (format: "06-20-2021, 12:42 PM")
+  const dateMap = new Map<string, string>();
+  const dateRe = /<a\s+name="post(\d+)"[\s\S]{0,300}?(\d{2}-\d{2}-\d{4},\s*\d+:\d+\s*[AP]M)/g;
+  let dm: RegExpExecArray | null;
+  while ((dm = dateRe.exec(html)) !== null) {
+    dateMap.set(dm[1], dm[2].trim());
+  }
+
   // Extract each post message
   let mm: RegExpExecArray | null;
   while ((mm = msgRe.exec(html)) !== null) {
@@ -112,6 +138,7 @@ function extractPosts(html: string): RawPost[] {
     posts.push({
       postId,
       username: usernameMap.get(postId) ?? "unknown",
+      postDate: dateMap.get(postId) ?? null,
       html: rawHtml,
       text,
     });
@@ -314,7 +341,7 @@ const SKIP_BULLET = /package|option|suspension|laser|shadow|seat|drive|assist|ve
  *   -[wheels]
  *   -[packages/options — skip]
  */
-function parseBuildSection(text: string, username: string, defaultYear: number): ParsedEntry | null {
+function parseBuildSection(text: string, username: string, defaultYear: number, postDate: string | null = null): ParsedEntry | null {
   // Find everything after "Build:" to end of text; split on newlines, filter blanks
   const buildStart = /BUILD\s*:/i.exec(text);
   if (!buildStart) return null;
@@ -379,6 +406,7 @@ function parseBuildSection(text: string, username: string, defaultYear: number):
     wheels: wheelsRaw || null,
     ...locationParts,
     forum_username: username,
+    posted_at: parsePostDate(postDate),
     notes: null,
     _raw: text.slice(0, 600),
   };
@@ -392,7 +420,7 @@ function parseEntry(post: RawPost): ParsedEntry | null {
 
   // Try BUILD: format first (MY2024-style)
   if (/BUILD\s*:/i.test(post.text)) {
-    return parseBuildSection(post.text, post.username, DEFAULT_YEAR);
+    return parseBuildSection(post.text, post.username, DEFAULT_YEAR, post.postDate);
   }
 
   const fields = extractFields(post.text);
@@ -433,6 +461,7 @@ function parseEntry(post: RawPost): ParsedEntry | null {
     wheels: fields.wheels?.replace(/[*]+/g, "").trim() || null,
     ...locationParts,
     forum_username: post.username,
+    posted_at: parsePostDate(post.postDate),
     notes: null,
     _raw: post.text.slice(0, 600),
   };

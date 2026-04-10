@@ -97,6 +97,7 @@ async function main() {
     location_state: string | null;
     location_country: string;
     forum_username: string | null;
+    posted_at?: string | null;
     notes: string | null;
   }>;
 

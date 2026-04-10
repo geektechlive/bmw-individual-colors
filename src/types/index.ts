@@ -17,6 +17,7 @@ export interface BmwEntry {
   location_lng: number | null;
   forum_username: string | null;
   source_forum: string | null;
+  posted_at: string | null;
   notes: string | null;
 }
 

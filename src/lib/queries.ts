@@ -113,11 +113,11 @@ export interface GrowthPoint {
 export function computeRegistryGrowth(entries: BmwEntry[]): GrowthPoint[] {
   if (entries.length === 0) return [];
   const sorted = [...entries].sort((a, b) =>
-    new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+    new Date(a.posted_at ?? a.created_at).getTime() - new Date(b.posted_at ?? b.created_at).getTime()
   );
   const map = new Map<string, number>();
   for (const e of sorted) {
-    const d = new Date(e.created_at);
+    const d = new Date(e.posted_at ?? e.created_at);
     const key = `${d.toLocaleString('en-US', { month: 'short' })} ${d.getFullYear()}`;
     map.set(key, (map.get(key) ?? 0) + 1);
   }
