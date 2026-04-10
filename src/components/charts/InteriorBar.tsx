@@ -16,10 +16,18 @@ interface Props {
   data: ColorCount[];
 }
 
-const INTERIOR_PALETTE = [
-  '#1C69D4', '#2d7dd2', '#3a86c8', '#4a94c4', '#5aa2c0',
-  '#6ab0bc', '#7abeb8', '#8acbb4', '#9ad8b0', '#aae5ac',
-];
+const INTERIOR_HEX_MAP: Record<string, string> = {
+  'Black': '#1a1a1a',
+  'Fiona Red': '#8c1a1a',
+  'Fjord Blue': '#1a3a7c',
+  'Fjord Blue/Black': '#1a3a7c',
+  'Kyalami Orange': '#c45a1a',
+  'Sakhir Orange': '#d4661e',
+  'Silverstone': '#8a8a8a',
+  'Silverstone Grey': '#7a7a7a',
+  'Smoke White': '#d4d0cc',
+  'Tartufo Brown': '#6a3a1a',
+};
 
 export default function InteriorBar({ data }: Props) {
   if (data.length === 0) {
@@ -55,8 +63,8 @@ export default function InteriorBar({ data }: Props) {
           formatter={(v) => [Number(v), 'Entries']}
         />
         <Bar dataKey="count" radius={[0, 4, 4, 0]}>
-          {data.map((_, i) => (
-            <Cell key={i} fill={INTERIOR_PALETTE[i % INTERIOR_PALETTE.length]} />
+          {data.map((entry) => (
+            <Cell key={entry.color} fill={INTERIOR_HEX_MAP[entry.color] ?? '#888888'} />
           ))}
         </Bar>
       </BarChart>

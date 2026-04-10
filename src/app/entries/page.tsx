@@ -9,8 +9,14 @@ export const metadata: Metadata = {
 
 export const dynamic = 'force-dynamic';
 
-export default async function EntriesPage() {
+export default async function EntriesPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ submitted?: string }>;
+}) {
   const entries = await getEntries();
+  const params = await searchParams;
+  const submitted = params.submitted === '1';
 
   return (
     <main style={{ maxWidth: 1280, margin: '0 auto', padding: '2rem 1.5rem' }}>
@@ -56,6 +62,21 @@ export default async function EntriesPage() {
           + Submit Build
         </Link>
       </div>
+
+      {submitted && (
+        <div style={{
+          background: 'rgba(22, 163, 74, 0.12)',
+          border: '1px solid rgba(22, 163, 74, 0.3)',
+          borderRadius: 8,
+          padding: '12px 16px',
+          marginBottom: 16,
+          color: '#4ade80',
+          fontSize: 14,
+          fontWeight: 500,
+        }}>
+          Your build was added to the registry.
+        </div>
+      )}
 
       <div
         style={{

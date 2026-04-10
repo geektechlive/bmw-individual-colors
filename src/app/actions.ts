@@ -74,5 +74,5 @@ export async function submitEntry(
     return { error: 'Failed to save your submission. Please try again.' };
   }
 
-  redirect('/entries');
+  redirect('/entries?submitted=1');
 }

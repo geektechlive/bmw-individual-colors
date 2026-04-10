@@ -104,7 +104,9 @@ export default async function HomePage() {
               style={{
                 padding: '12px 28px',
                 background: 'transparent',
-                color: '#94a3b8',
+                color: '#e2e8f0',
+                border: '1px solid #2d3f55',
+                borderRadius: 8,
                 textDecoration: 'none',
                 fontWeight: 600,
                 fontSize: 15,

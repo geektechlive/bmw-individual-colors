@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import Link from 'next/link';
 import './globals.css';
+import NavLinks from './NavLinks';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -17,13 +18,6 @@ export const metadata: Metadata = {
   title: 'BMW M Individual Colors Registry',
   description: 'Community-driven registry tracking BMW M3 and M4 Individual color builds.',
 };
-
-const NAV_LINKS = [
-  { href: '/', label: 'Home' },
-  { href: '/entries', label: 'Entries' },
-  { href: '/reports', label: 'Reports' },
-  { href: '/submit', label: 'Submit' },
-];
 
 export default function RootLayout({
   children,
@@ -90,43 +84,7 @@ export default function RootLayout({
             </Link>
 
             {/* Nav Links */}
-            <nav style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-              {NAV_LINKS.map(({ href, label }) =>
-                label === 'Submit' ? (
-                  <Link
-                    key={href}
-                    href={href}
-                    style={{
-                      padding: '6px 14px',
-                      background: '#1C69D4',
-                      color: '#ffffff',
-                      borderRadius: 6,
-                      textDecoration: 'none',
-                      fontSize: 13,
-                      fontWeight: 700,
-                      marginLeft: 8,
-                    }}
-                  >
-                    {label}
-                  </Link>
-                ) : (
-                  <Link
-                    key={href}
-                    href={href}
-                    style={{
-                      padding: '6px 12px',
-                      color: '#94a3b8',
-                      textDecoration: 'none',
-                      fontSize: 14,
-                      fontWeight: 500,
-                      borderRadius: 6,
-                    }}
-                  >
-                    {label}
-                  </Link>
-                )
-              )}
-            </nav>
+            <NavLinks />
           </div>
         </header>
 
@@ -139,7 +97,7 @@ export default function RootLayout({
             borderTop: '1px solid #1e2a3a',
             padding: '1.5rem',
             textAlign: 'center',
-            color: '#374151',
+            color: '#64748b',
             fontSize: 13,
             background: '#070d14',
           }}

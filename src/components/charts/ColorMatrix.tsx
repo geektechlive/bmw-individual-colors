@@ -33,21 +33,30 @@ export default function ColorMatrix({ data }: Props) {
             >
               Color
             </th>
-            {columns.map((col) => (
-              <th
-                key={col}
-                style={{
-                  padding: '8px 10px',
-                  textAlign: 'center',
-                  color: '#94a3b8',
-                  border: '1px solid #2d3f55',
-                  fontWeight: 600,
-                  minWidth: 80,
-                }}
-              >
-                {col}
-              </th>
-            ))}
+            {columns.map((col) => {
+              const parts = col.split(' ');
+              const year = parts[0];
+              const modelDrive = parts.slice(1).join(' ')
+                .replace(/C AWD/, ' Comp AWD')
+                .replace(/C RWD/, ' Comp RWD')
+                .replace(/C$/, ' Comp');
+              return (
+                <th
+                  key={col}
+                  style={{
+                    padding: '8px 10px',
+                    textAlign: 'center',
+                    color: '#94a3b8',
+                    border: '1px solid #2d3f55',
+                    fontWeight: 600,
+                    minWidth: 80,
+                  }}
+                >
+                  <span style={{ display: 'block', color: '#1C69D4', fontSize: 13, fontWeight: 700 }}>{year}</span>
+                  <span style={{ display: 'block', color: '#64748b', fontSize: 11 }}>{modelDrive}</span>
+                </th>
+              );
+            })}
             <th
               style={{
                 padding: '8px 10px',

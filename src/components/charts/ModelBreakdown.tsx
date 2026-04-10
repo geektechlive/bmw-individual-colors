@@ -44,8 +44,8 @@ export default function ModelBreakdown({ entries }: Props) {
   }
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
-      <div>
+    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16 }}>
+      <div style={{ flex: '1 1 220px', minWidth: 220 }}>
         <p style={{ textAlign: 'center', color: '#94a3b8', fontSize: 13, marginBottom: 4 }}>
           Body Style
         </p>
@@ -62,7 +62,7 @@ export default function ModelBreakdown({ entries }: Props) {
         </ResponsiveContainer>
       </div>
 
-      <div>
+      <div style={{ flex: '1 1 220px', minWidth: 220 }}>
         <p style={{ textAlign: 'center', color: '#94a3b8', fontSize: 13, marginBottom: 4 }}>
           Drivetrain
         </p>
@@ -79,7 +79,7 @@ export default function ModelBreakdown({ entries }: Props) {
         </ResponsiveContainer>
       </div>
 
-      <div>
+      <div style={{ flex: '1 1 220px', minWidth: 220 }}>
         <p style={{ textAlign: 'center', color: '#94a3b8', fontSize: 13, marginBottom: 4 }}>
           Transmission
         </p>
