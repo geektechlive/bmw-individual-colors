@@ -94,6 +94,50 @@ export function getColorHex(colorName: string): string {
   return BMW_COLORS[colorName] ?? "#888888";
 }
 
+export const COLOR_FAMILY_MAP: Record<string, string> = {
+  // Blues
+  "Aegean Blue": "Blues", "Atlantis Blue Metallic": "Blues", "Black Blue": "Blues",
+  "Daytona Beach Blue": "Blues", "Enzian Blue": "Blues", "Eridan Blue": "Blues",
+  "Frozen Portimao Blue": "Blues", "Gentian Blue Metallic": "Blues",
+  "Marina Bay Blue": "Blues", "Mauritius Blue": "Blues", "Mexico Blue": "Blues",
+  "Midnight Blue": "Blues", "Marhon Blue": "Blues", "Portimao Blue": "Blues",
+  "Riviera Blue": "Blues", "San Marino Blue": "Blues", "Santorini Blue": "Blues",
+  "Snapper Rocks Blue": "Blues", "Tanzanite Blue": "Blues", "Tanzanite Blue II": "Blues",
+  "Velvet Blue": "Blues", "Violet Blue": "Blues", "Voodoo Blue": "Blues",
+  "Blue Bay Lagoon Metallic": "Blues", "Borusan Turkish Blue": "Blues",
+  "Laguna Seca Blue": "Blues", "Santorini Blue II": "Blues",
+  // Greens
+  "Brewster Green": "Greens", "British Racing Green": "Greens",
+  "Isle of Man Green": "Greens", "Jack Green": "Greens",
+  "Oxford Green II Metallic": "Greens", "Verde Ermes": "Greens",
+  "Agave": "Greens", "Anglesey Green Metallic": "Greens",
+  "Goodwood Green Pearl": "Greens", "Irish Green": "Greens", "Lime Green": "Greens",
+  // Reds & Oranges
+  "Fire Orange": "Reds & Oranges", "Fire Orange III": "Reds & Oranges",
+  "Frozen Orange II": "Reds & Oranges", "Imola Red": "Reds & Oranges",
+  "Rosso Corsa": "Reds & Oranges", "Sunset Orange": "Reds & Oranges",
+  "Sakhir Orange III": "Reds & Oranges", "Ruby Star Neo": "Reds & Oranges",
+  // Yellows
+  "Speed Yellow": "Yellows", "Dakar Yellow": "Yellows", "Dakar Yellow II": "Yellows",
+  // Purples
+  "Twilight Purple": "Purples", "Wildberry": "Purples",
+  "Techno Violet Metallic": "Purples", "Daytona Violet": "Purples",
+  // Greys & Blacks
+  "Chalk": "Greys & Blacks", "Cosmos Black": "Greys & Blacks",
+  "Dravit Grey Metallic": "Greys & Blacks", "Fashion Grey": "Greys & Blacks",
+  "Frozen Black": "Greys & Blacks", "Frozen Dark Grey": "Greys & Blacks",
+  "Frozen Deep Grey": "Greys & Blacks", "Grey Black": "Greys & Blacks",
+  "Grigio Telesto": "Greys & Blacks", "Gunmetal Gray II": "Greys & Blacks",
+  "Jerez Black": "Greys & Blacks", "Lime Rock Grey": "Greys & Blacks",
+  "Mora Metallic": "Greys & Blacks", "Nardo Grey": "Greys & Blacks",
+  "Oxide Grey": "Greys & Blacks", "Thunder": "Greys & Blacks",
+  "Sepia Metallic III": "Greys & Blacks",
+};
+
+export function getColorFamily(colorName: string): string {
+  return COLOR_FAMILY_MAP[colorName] ?? 'Other';
+}
+
 /** Returns true if the hex color is light enough that white text would be hard to read. */
 export function isLightColor(hex: string): boolean {
   const r = parseInt(hex.slice(1, 3), 16);
