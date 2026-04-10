@@ -71,7 +71,7 @@ export async function submitEntry(
 
   if (error) {
     console.error('Insert error:', error);
-    return { error: `Database error: ${error.message}` };
+    return { error: 'Failed to save your submission. Please try again.' };
   }
 
   redirect('/entries');

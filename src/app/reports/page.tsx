@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { getEntries, getColorCounts, getModelYearMatrix, getInteriorCounts, getLocationEntries } from '../../lib/queries';
+import { getEntries, computeColorCounts, computeModelYearMatrix, computeInteriorCounts, getLocationEntries } from '../../lib/queries';
 import ColorDonut from '../../components/charts/ColorDonut';
 import ColorTreemap from '../../components/charts/ColorTreemap';
 import ColorMatrix from '../../components/charts/ColorMatrix';
@@ -37,13 +37,10 @@ const cardDescStyle: React.CSSProperties = {
 };
 
 export default async function ReportsPage() {
-  const [entries, colorCounts, matrixData, interiorCounts, locationEntries] = await Promise.all([
-    getEntries(),
-    getColorCounts(),
-    getModelYearMatrix(),
-    getInteriorCounts(),
-    getLocationEntries(),
-  ]);
+  const [entries, locationEntries] = await Promise.all([getEntries(), getLocationEntries()]);
+  const colorCounts = computeColorCounts(entries);
+  const matrixData = computeModelYearMatrix(entries);
+  const interiorCounts = computeInteriorCounts(entries);
 
   return (
     <main style={{ maxWidth: 1280, margin: '0 auto', padding: '2rem 1.5rem' }}>

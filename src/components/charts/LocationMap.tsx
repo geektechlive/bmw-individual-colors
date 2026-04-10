@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-// @ts-ignore
 import { ComposableMap, Geographies, Geography, Marker } from 'react-simple-maps';
 import { getColorHex } from '../../lib/colors';
 import type { BmwEntry } from '../../types';
@@ -23,11 +22,10 @@ export default function LocationMap({ entries }: Props) {
         projectionConfig={{ scale: 147 }}
       >
         <Geographies geography={GEO_URL}>
-          {({ geographies }: { geographies: unknown[] }) =>
-            geographies.map((geo: unknown, i: number) => (
+          {({ geographies }) =>
+            geographies.map((geo) => (
               <Geography
-                key={i}
-                // @ts-ignore
+                key={geo.rsmKey}
                 geography={geo}
                 fill="#1e2a3a"
                 stroke="#2d3f55"

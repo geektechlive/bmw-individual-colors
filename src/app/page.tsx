@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { getEntries, getStats } from '../lib/queries';
+import { getEntries, computeStats } from '../lib/queries';
 import { getColorHex } from '../lib/colors';
 import type { Metadata } from 'next';
 
@@ -11,7 +11,8 @@ export const metadata: Metadata = {
 export const dynamic = 'force-dynamic';
 
 export default async function HomePage() {
-  const [stats, entries] = await Promise.all([getStats(), getEntries()]);
+  const entries = await getEntries();
+  const stats = computeStats(entries);
   const latest5 = entries.slice(0, 5);
 
   return (

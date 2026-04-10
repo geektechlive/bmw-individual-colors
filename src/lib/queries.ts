@@ -16,18 +16,15 @@ export async function getEntries(): Promise<BmwEntry[]> {
   return data as BmwEntry[];
 }
 
-export async function getStats(): Promise<Stats> {
-  const entries = await getEntries();
-  const totalEntries = entries.length;
-  const totalColors = new Set(entries.map((e) => e.ext_color)).size;
-  const totalCountries = new Set(
-    entries.map((e) => e.location_country).filter(Boolean)
-  ).size;
-  return { totalEntries, totalColors, totalCountries };
+export function computeStats(entries: BmwEntry[]): Stats {
+  return {
+    totalEntries: entries.length,
+    totalColors: new Set(entries.map((e) => e.ext_color)).size,
+    totalCountries: new Set(entries.map((e) => e.location_country).filter(Boolean)).size,
+  };
 }
 
-export async function getColorCounts(): Promise<ColorCount[]> {
-  const entries = await getEntries();
+export function computeColorCounts(entries: BmwEntry[]): ColorCount[] {
   const map = new Map<string, number>();
   for (const e of entries) {
     map.set(e.ext_color, (map.get(e.ext_color) ?? 0) + 1);
@@ -55,9 +52,7 @@ export interface MatrixData {
   grandTotal: number;
 }
 
-export async function getModelYearMatrix(): Promise<MatrixData> {
-  const entries = await getEntries();
-
+export function computeModelYearMatrix(entries: BmwEntry[]): MatrixData {
   // Build column keys: "YYYY M3C AWD", etc.
   const colSet = new Set<string>();
   for (const e of entries) {
@@ -97,8 +92,7 @@ export async function getModelYearMatrix(): Promise<MatrixData> {
   return { columns, rows, columnTotals, grandTotal };
 }
 
-export async function getInteriorCounts(): Promise<ColorCount[]> {
-  const entries = await getEntries();
+export function computeInteriorCounts(entries: BmwEntry[]): ColorCount[] {
   const map = new Map<string, number>();
   for (const e of entries) {
     const ic = e.interior_color?.trim();
