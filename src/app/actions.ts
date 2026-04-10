@@ -11,20 +11,39 @@ export async function submitEntry(
   _prevState: FormState,
   formData: FormData
 ): Promise<FormState> {
-  const city = (formData.get('location_city') as string)?.trim() ?? '';
-  const state = (formData.get('location_state') as string)?.trim() ?? '';
-  // Form sends ISO code in location_country; full name in location_country_name
-  const country = (formData.get('location_country_name') as string)?.trim()
-    || (formData.get('location_country') as string)?.trim()
-    || 'United States';
+  // ── Turnstile verification ────────────────────────────────────────────────
+  const token = formData.get('cf-turnstile-response') as string;
+  if (!token) {
+    return { error: 'Please complete the bot verification.' };
+  }
+  const tsRes = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+    method: 'POST',
+    body: JSON.stringify({ secret: process.env.TURNSTILE_SECRET_KEY, response: token }),
+    headers: { 'Content-Type': 'application/json' },
+  });
+  const { success } = await tsRes.json() as { success: boolean };
+  if (!success) {
+    return { error: 'Bot verification failed. Please try again.' };
+  }
 
+  // ── Required fields ───────────────────────────────────────────────────────
   const ext_color = (formData.get('ext_color') as string)?.trim();
-
   if (!ext_color) {
     return { error: 'Individual color is required.' };
   }
 
-  // Geocode via Nominatim
+  const forum_username = (formData.get('forum_username') as string)?.trim();
+  if (!forum_username) {
+    return { error: 'Forum username is required.' };
+  }
+
+  const city = (formData.get('location_city') as string)?.trim() ?? '';
+  const state = (formData.get('location_state') as string)?.trim() ?? '';
+  const country = (formData.get('location_country_name') as string)?.trim()
+    || (formData.get('location_country') as string)?.trim()
+    || 'United States';
+
+  // ── Geocode via Nominatim ─────────────────────────────────────────────────
   let location_lat: number | null = null;
   let location_lng: number | null = null;
 
@@ -33,9 +52,7 @@ export async function submitEntry(
       const q = [city, state, country].filter(Boolean).join(',');
       const geoRes = await fetch(
         `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&format=json&limit=1`,
-        {
-          headers: { 'User-Agent': 'bmw-individual-colors/1.0' },
-        }
+        { headers: { 'User-Agent': 'bmw-individual-colors/1.0' } }
       );
       const geoData = await geoRes.json();
       if (geoData.length > 0) {
@@ -43,11 +60,11 @@ export async function submitEntry(
         location_lng = parseFloat(geoData[0].lon);
       }
     } catch (e) {
-      // Geocoding failure is non-fatal
       console.warn('Geocoding failed:', e);
     }
   }
 
+  // ── Insert ────────────────────────────────────────────────────────────────
   const supabase = createAdminClient();
   const { error } = await supabase.from('bmwic_entries').insert({
     model_year: parseInt(formData.get('model_year') as string, 10),
@@ -64,7 +81,7 @@ export async function submitEntry(
     location_country: country,
     location_lat,
     location_lng,
-    forum_username: (formData.get('forum_username') as string)?.trim() || null,
+    forum_username,
     source_forum: (formData.get('source_forum') as string)?.trim() || 'BimmerPost',
     notes: (formData.get('notes') as string)?.trim() || null,
   });
@@ -75,4 +92,29 @@ export async function submitEntry(
   }
 
   redirect('/entries?submitted=1');
+}
+
+export async function flagEntry(id: string): Promise<void> {
+  const supabase = createAdminClient();
+  await supabase.rpc('increment_flag', { entry_id: id });
+}
+
+export async function deleteEntry(id: string, token: string): Promise<{ error?: string }> {
+  if (token !== process.env.ADMIN_TOKEN) {
+    return { error: 'Unauthorized' };
+  }
+  const supabase = createAdminClient();
+  const { error } = await supabase.from('bmwic_entries').delete().eq('id', id);
+  if (error) return { error: error.message };
+  return {};
+}
+
+export async function dismissFlag(id: string, token: string): Promise<{ error?: string }> {
+  if (token !== process.env.ADMIN_TOKEN) {
+    return { error: 'Unauthorized' };
+  }
+  const supabase = createAdminClient();
+  const { error } = await supabase.from('bmwic_entries').update({ flag_count: 0 }).eq('id', id);
+  if (error) return { error: error.message };
+  return {};
 }

@@ -85,6 +85,7 @@ export default function EntryForm() {
 
   // Forum
   const [forum, setForum] = useState('BimmerPost');
+  const [forumUsername, setForumUsername] = useState('');
 
   const filteredColors = useMemo(
     () => COLOR_NAMES.filter((c) => c.toLowerCase().includes(colorSearch.toLowerCase())),
@@ -371,11 +372,15 @@ export default function EntryForm() {
             </label>
           ))}
         </div>
+        <label style={labelStyle} htmlFor="forum_username">Forum Username *</label>
         <input
           type="text"
           id="forum_username"
           name="forum_username"
           placeholder={`Your ${forum} username`}
+          required
+          value={forumUsername}
+          onChange={(e) => setForumUsername(e.target.value)}
           style={inputStyle}
         />
       </div>
@@ -392,15 +397,22 @@ export default function EntryForm() {
         />
       </div>
 
+      {/* Turnstile bot protection */}
+      <div
+        className="cf-turnstile"
+        data-sitekey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY}
+        data-theme="dark"
+      />
+
       <button
         type="submit"
-        disabled={isPending}
+        disabled={isPending || !forumUsername.trim()}
         style={{
           padding: '12px 24px',
-          background: isPending ? '#374151' : '#1C69D4',
+          background: isPending || !forumUsername.trim() ? '#374151' : '#1C69D4',
           color: '#ffffff', border: 'none', borderRadius: 8,
           fontSize: 15, fontWeight: 700,
-          cursor: isPending ? 'not-allowed' : 'pointer',
+          cursor: isPending || !forumUsername.trim() ? 'not-allowed' : 'pointer',
           alignSelf: 'flex-start', transition: 'background 0.2s',
         }}
       >

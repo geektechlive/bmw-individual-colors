@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { getEntriesByColor, getEntries, computeRarityLabel, computeRarityColor } from '../../../lib/queries';
 import { slugToColor, getColorHex, getColorFamily } from '../../../lib/colors';
+import FlagButton from '../../../components/FlagButton';
 import type { Metadata } from 'next';
 
 export const dynamic = 'force-dynamic';
@@ -177,6 +178,7 @@ export default async function ColorDetailPage({ params }: { params: Promise<{ sl
                   <div style={{ color: '#64748b', fontSize: 11, flexShrink: 0 }}>
                     {new Date(e.posted_at ?? e.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
                   </div>
+                  <FlagButton id={e.id} />
                 </div>
               );
             })}

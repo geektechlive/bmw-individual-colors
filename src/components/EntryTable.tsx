@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { getColorHex, colorToSlug } from '../lib/colors';
+import FlagButton from './FlagButton';
 import type { BmwEntry } from '../types';
 
 interface Props {
@@ -229,13 +230,14 @@ export default function EntryTable({ entries }: Props) {
               <th style={thStyle} onClick={() => handleSort('forum_username')}>
                 Forum User{arrow('forum_username')}
               </th>
+              <th style={{ ...thStyle, cursor: 'default', width: 36 }}></th>
             </tr>
           </thead>
           <tbody>
             {sorted.length === 0 && (
               <tr>
                 <td
-                  colSpan={9}
+                  colSpan={10}
                   style={{ ...tdStyle, textAlign: 'center', color: '#64748b', padding: '2rem' }}
                 >
                   No entries found.
@@ -295,6 +297,9 @@ export default function EntryTable({ entries }: Props) {
                       <span style={{ color: '#475569' }}>[{e.source_forum}]{' '}</span>
                     ) : null}
                     {e.forum_username ?? ''}
+                  </td>
+                  <td style={{ ...tdStyle, textAlign: 'center', padding: '6px 4px' }}>
+                    <FlagButton id={e.id} />
                   </td>
                 </tr>
               );

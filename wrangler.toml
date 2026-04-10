@@ -10,3 +10,6 @@ binding = "ASSETS"
 [[services]]
 binding = "WORKER_SELF_REFERENCE"
 service = "bmw-individual-colors"
+
+[vars]
+NEXT_PUBLIC_TURNSTILE_SITE_KEY = "0x4AAAAAAC6yXfM_xBBaAkKj"
