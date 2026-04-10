@@ -18,12 +18,16 @@ const INTERIOR_OPTIONS = [
 ];
 
 const WHEEL_OPTIONS = [
+  '824M',
   '825M',
-  '825M Bi-Color',
+  '825M Orbit Grey',
+  '825M Silver',
   '826M',
   '826M Bi-Color',
-  '821M',
-  '763M',
+  '827M',
+  '963M',
+  '1000M',
+  '1000M Gold/Bronze',
 ];
 
 const FORUMS = [
