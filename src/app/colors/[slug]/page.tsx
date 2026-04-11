@@ -1,6 +1,8 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { getEntriesByColor, getEntries, computeRarityLabel, computeRarityColor } from '../../../lib/queries';
+
+export const dynamic = 'force-dynamic';
 import { slugToColor, getColorHex, getColorFamily } from '../../../lib/colors';
 import FlagButton from '../../../components/FlagButton';
 import type { Metadata } from 'next';

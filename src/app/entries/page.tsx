@@ -1,5 +1,7 @@
 import Link from 'next/link';
 import { getEntries } from '../../lib/queries';
+
+export const dynamic = 'force-dynamic';
 import EntryTable from '../../components/EntryTable';
 import SubmittedBanner from '../../components/SubmittedBanner';
 import type { Metadata } from 'next';
