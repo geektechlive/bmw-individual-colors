@@ -321,7 +321,7 @@ export default function EntryTable({ entries }: Props) {
                   <td style={{ ...tdStyle, textAlign: 'center', padding: '6px 4px' }}>
                     <Link
                       href={`/edit/${e.id}`}
-                      style={{ color: '#475569', fontSize: 13, textDecoration: 'none' }}
+                      style={{ color: '#1C69D4', fontSize: 15, textDecoration: 'none', padding: 8, display: 'inline-block', lineHeight: 1 }}
                       title="Edit this entry"
                     >
                       ✏
