@@ -11,11 +11,12 @@ export const metadata: Metadata = {
 export default async function EntriesPage({
   searchParams,
 }: {
-  searchParams: Promise<{ submitted?: string }>;
+  searchParams: Promise<{ submitted?: string; updated?: string }>;
 }) {
   const entries = await getEntries();
   const params = await searchParams;
   const submitted = params.submitted === '1';
+  const updated = params.updated === '1';
 
   return (
     <main style={{ maxWidth: 1280, margin: '0 auto', padding: '2rem 1.5rem' }}>
@@ -63,6 +64,12 @@ export default async function EntriesPage({
       </div>
 
       {submitted && <SubmittedBanner />}
+      {updated && (
+        <SubmittedBanner
+          title="Entry updated"
+          body="Your changes have been saved and will appear in the registry shortly."
+        />
+      )}
 
       <div
         style={{
@@ -70,6 +77,7 @@ export default async function EntriesPage({
           border: '1px solid #2d3f55',
           borderRadius: 12,
           padding: '1.5rem',
+          overflow: 'hidden',
         }}
       >
         <EntryTable entries={entries} />

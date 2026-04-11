@@ -2,7 +2,12 @@
 
 import { useState } from 'react';
 
-export default function SubmittedBanner() {
+interface Props {
+  title?: string;
+  body?: string;
+}
+
+export default function SubmittedBanner({ title, body }: Props) {
   const [visible, setVisible] = useState(true);
 
   if (!visible) return null;
@@ -22,10 +27,10 @@ export default function SubmittedBanner() {
     >
       <div style={{ flex: 1 }}>
         <div style={{ color: '#fbbf24', fontSize: 15, fontWeight: 700, marginBottom: 2 }}>
-          Submission received
+          {title ?? 'Submission received'}
         </div>
         <div style={{ color: '#fde68a', fontSize: 13 }}>
-          Your submission is in the queue and could take up to 5 minutes to appear. Please be patient.
+          {body ?? 'Your submission is in the queue and could take up to 5 minutes to appear. Please be patient.'}
         </div>
       </div>
       <button

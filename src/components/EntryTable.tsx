@@ -231,13 +231,14 @@ export default function EntryTable({ entries }: Props) {
                 Forum User{arrow('forum_username')}
               </th>
               <th style={{ ...thStyle, cursor: 'default', width: 36 }}></th>
+              <th style={{ ...thStyle, cursor: 'default', width: 48 }}></th>
             </tr>
           </thead>
           <tbody>
             {sorted.length === 0 && (
               <tr>
                 <td
-                  colSpan={10}
+                  colSpan={11}
                   style={{ ...tdStyle, textAlign: 'center', color: '#64748b', padding: '2rem' }}
                 >
                   No entries found.
@@ -316,6 +317,15 @@ export default function EntryTable({ entries }: Props) {
                   </td>
                   <td style={{ ...tdStyle, textAlign: 'center', padding: '6px 4px' }}>
                     <FlagButton id={e.id} />
+                  </td>
+                  <td style={{ ...tdStyle, textAlign: 'center', padding: '6px 4px' }}>
+                    <Link
+                      href={`/edit/${e.id}`}
+                      style={{ color: '#475569', fontSize: 13, textDecoration: 'none' }}
+                      title="Edit this entry"
+                    >
+                      ✏
+                    </Link>
                   </td>
                 </tr>
               );
