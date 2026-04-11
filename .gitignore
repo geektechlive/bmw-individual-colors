@@ -12,6 +12,8 @@
 
 # testing
 /coverage
+/test-results
+/playwright-report
 
 # next.js
 /.next/
@@ -48,3 +50,7 @@ next-env.d.ts
 
 # seed data (large, not part of source)
 scripts/seed-data*.json
+
+# claude code
+.claude/
+.wrangler/
