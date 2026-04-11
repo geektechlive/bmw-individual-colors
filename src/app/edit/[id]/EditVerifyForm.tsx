@@ -1,6 +1,6 @@
 'use client';
 
-import { useActionState } from 'react';
+import { useActionState, useEffect, useState } from 'react';
 import { verifyForumUsername } from '../../actions';
 
 const inputStyle: React.CSSProperties = {
@@ -29,6 +29,24 @@ interface Props {
 
 export default function EditVerifyForm({ entryId }: Props) {
   const [state, action, isPending] = useActionState(verifyForumUsername, {});
+  const [turnstileDone, setTurnstileDone] = useState(false);
+
+  // Register global Turnstile callbacks once on mount
+  useEffect(() => {
+    (window as any).__tsSuccess = () => setTurnstileDone(true);
+    (window as any).__tsExpired = () => setTurnstileDone(false);
+    (window as any).__tsError = () => setTurnstileDone(false);
+  }, []);
+
+  // Reset the widget whenever the server returns an error so the user can retry
+  useEffect(() => {
+    if (state?.error && (window as any).turnstile) {
+      (window as any).turnstile.reset('.cf-turnstile');
+      setTurnstileDone(false);
+    }
+  }, [state?.error]);
+
+  const canSubmit = !isPending && turnstileDone;
 
   return (
     <form action={action} style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
@@ -68,24 +86,27 @@ export default function EditVerifyForm({ entryId }: Props) {
 
       <div
         className="cf-turnstile"
-        data-sitekey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? '0x4AAAAAAC6yXfM_xBBaAkKj'}
+        data-sitekey="0x4AAAAAAC6yXfM_xBBaAkKj"
         data-theme="dark"
+        data-callback="__tsSuccess"
+        data-expired-callback="__tsExpired"
+        data-error-callback="__tsError"
       />
 
       <button
         type="submit"
-        disabled={isPending}
+        disabled={!canSubmit}
         style={{
           padding: '12px 24px',
-          background: isPending ? '#374151' : '#1C69D4',
-          color: '#ffffff',
+          background: canSubmit ? '#1C69D4' : '#374151',
+          color: canSubmit ? '#ffffff' : '#6b7280',
           border: 'none',
           borderRadius: 8,
           fontSize: 15,
           fontWeight: 700,
-          cursor: isPending ? 'not-allowed' : 'pointer',
+          cursor: canSubmit ? 'pointer' : 'not-allowed',
           alignSelf: 'flex-start',
-          transition: 'background 0.2s',
+          transition: 'background 0.2s, color 0.2s',
         }}
       >
         {isPending ? 'Verifying...' : 'Verify & Edit'}
