@@ -88,10 +88,92 @@ export const BMW_COLORS: Record<string, string> = {
   "Sakhir Orange III":         "#c45a1a",
   "Santorini Blue II":         "#1a3560",
   "Sepia Metallic III":        "#7a5a3a",
+
+  // Frozen individual colors
+  "Frozen Cashmere Silver Metallic":  "#c4bfb8",
+  "Frozen Dark Silver":               "#8a8a8a",
+  "Frozen Maple":                     "#c4a87a",
+  "Frozen Pure Grey":                 "#8a8a8a",
+  "Frozen Preciosa Red Metallic":     "#c87272",
+  "Preciosa Red Metallic":            "#b01c1c",
+
+  // Additional Individual program colors
+  "Almandine Brown Metallic":  "#6a3a2a",
+  "Almeria Blue":              "#1e4a8c",
+  "Cashmere Silver Metallic":  "#b4b0aa",
+  "Cedar Brown":               "#6a3a1a",
+  "Chianti Red":               "#8c1a1a",
+  "Cinnabar Red":              "#b42a1a",
+  "Como Blue Metallic":        "#1a3a6a",
+  "Copper":                    "#aa5c1e",
+  "Dolomite Grey":             "#9a9a9a",
+  "Eridan Blue Metallic":      "#1e3d6e",
+  "Gold Bronze":               "#aa7a2a",
+  "Himalaya Grey":             "#8a8a8a",
+  "Kyoto Green Metallic":      "#2a5a3a",
+  "Lanzarote Bronze":          "#7a5a2a",
+  "Macao Blue Metallic":       "#1a3a7a",
+  "Mandalika Blue":            "#1a4a8c",
+  "Monza Blue":                "#1a2a6a",
+  "Mugello Blue":              "#1a3a7a",
+  "Nurburgring Blue":          "#1a2a5c",
+  "Picasso Red":               "#8c1a1a",
+  "Pyrite Bronze":             "#7a5a1a",
+  "Sepang Bronze":             "#8a6a2a",
+  "Silicon Grey":              "#8a8a8a",
+  "Smoked White":              "#ddd8d2",
+  "Snowy White":               "#f0ede8",
+  "Solar Orange":              "#d45a1a",
+  "Stormwater":                "#6a7a8a",
+  "Turbine Grey":              "#7a7a7a",
+  "Verde Mantis":              "#4a8a2a",
+  "Violett Petrol":            "#2a4a6a",
+  "Wagon Green":               "#2a5a2a",
+  "Zinnober Red":              "#b42a1a",
 };
 
+/**
+ * For custom/unknown color names, infer a reasonable hex from keywords in the name.
+ * "Frozen" variants get a muted/desaturated version of their base color.
+ */
+export function guessColorFromName(name: string): string {
+  const n = name.toLowerCase();
+  const isFrozen = n.includes('frozen') || n.includes('matte');
+
+  if (/\bred\b|scarlet|crimson|carmine|corsa|ruby|preciosa|chianti|cinnabar|imola|zinnober|picasso|rosso/.test(n))
+    return isFrozen ? '#c87878' : '#b01c1c';
+  if (/\borange\b|sakhir|solar/.test(n))
+    return isFrozen ? '#d4906a' : '#c2410c';
+  if (/\byellow\b|dakar|speed\s*yellow/.test(n))
+    return isFrozen ? '#d4c46a' : '#ca8a04';
+  if (/\bgreen\b|verde|isle\s*of\s*man|brewster|racing\s*green|kyoto|mantis|wagon\s*green|irish\s*green|jack\s*green/.test(n))
+    return isFrozen ? '#6a9c6a' : '#15803d';
+  if (/\bblue\b|azure|cobalt|sapphire|portimao|tanzanite|enzian|gentian|marina|mauritius|riviera|snapper|voodoo|aegean|atlantis|eridan|laguna|monza|macao|mandalika|mugello|nurburgring|como|almeria/.test(n))
+    return isFrozen ? '#6a7a9c' : '#1e3a8a';
+  if (/\bpurple\b|\bviolet\b|\bwildberry\b|twilight/.test(n))
+    return isFrozen ? '#8a6a9c' : '#6d28d9';
+  if (/\bpink\b|\brose\b/.test(n))
+    return isFrozen ? '#d49aaa' : '#db2777';
+  if (/\bbronze\b|pyrite|sepang|lanzarote/.test(n))
+    return '#8a6a2a';
+  if (/\bgold\b|\bcopper\b/.test(n))
+    return '#b45309';
+  if (/\bbrown\b|\bsepia\b|\bcedar\b|almandine/.test(n))
+    return '#7a4a2a';
+  if (/\bsilver\b|cashmere/.test(n))
+    return isFrozen ? '#c4bfb8' : '#9ca3af';
+  if (/\bwhite\b|smoked\s*white|snowy/.test(n))
+    return '#e0dbd5';
+  if (/\bblack\b|cosmos|jerez/.test(n))
+    return '#1a1a1a';
+  if (/\bgrey\b|\bgray\b|nardo|oxide|dravit|grigio|gunmetal|fashion\s*grey|silicon|dolomite|turbine|himalaya|stormwater|lime\s*rock/.test(n))
+    return isFrozen ? '#9a9a9a' : '#6b7280';
+
+  return '#888888';
+}
+
 export function getColorHex(colorName: string): string {
-  return BMW_COLORS[colorName] ?? "#888888";
+  return BMW_COLORS[colorName] ?? guessColorFromName(colorName);
 }
 
 export const COLOR_FAMILY_MAP: Record<string, string> = {
@@ -122,6 +204,31 @@ export const COLOR_FAMILY_MAP: Record<string, string> = {
   // Purples
   "Twilight Purple": "Purples", "Wildberry": "Purples",
   "Techno Violet Metallic": "Purples", "Daytona Violet": "Purples",
+  // Reds & Oranges (additional)
+  "Frozen Preciosa Red Metallic": "Reds & Oranges", "Preciosa Red Metallic": "Reds & Oranges",
+  "Chianti Red": "Reds & Oranges", "Cinnabar Red": "Reds & Oranges",
+  "Picasso Red": "Reds & Oranges", "Zinnober Red": "Reds & Oranges",
+  "Solar Orange": "Reds & Oranges",
+  // Greens (additional)
+  "Kyoto Green Metallic": "Greens", "Verde Mantis": "Greens", "Wagon Green": "Greens",
+  // Blues (additional)
+  "Almeria Blue": "Blues", "Como Blue Metallic": "Blues", "Macao Blue Metallic": "Blues",
+  "Mandalika Blue": "Blues", "Monza Blue": "Blues", "Mugello Blue": "Blues",
+  "Nurburgring Blue": "Blues", "Violett Petrol": "Blues",
+  // Greys & Blacks (additional)
+  "Cashmere Silver Metallic": "Greys & Blacks", "Frozen Cashmere Silver Metallic": "Greys & Blacks",
+  "Dolomite Grey": "Greys & Blacks", "Frozen Dark Silver": "Greys & Blacks",
+  "Frozen Pure Grey": "Greys & Blacks", "Himalaya Grey": "Greys & Blacks",
+  "Silicon Grey": "Greys & Blacks", "Smoked White": "Greys & Blacks",
+  "Snowy White": "Greys & Blacks", "Stormwater": "Greys & Blacks",
+  "Turbine Grey": "Greys & Blacks",
+  // Browns & Metallic (map to Greys & Blacks for now)
+  "Almandine Brown Metallic": "Greys & Blacks", "Cedar Brown": "Greys & Blacks",
+  "Copper": "Greys & Blacks", "Gold Bronze": "Greys & Blacks",
+  "Lanzarote Bronze": "Greys & Blacks", "Pyrite Bronze": "Greys & Blacks",
+  "Sepang Bronze": "Greys & Blacks",
+  // Yellows (additional)
+  "Frozen Maple": "Yellows",
   // Greys & Blacks
   "Chalk": "Greys & Blacks", "Cosmos Black": "Greys & Blacks",
   "Dravit Grey Metallic": "Greys & Blacks", "Fashion Grey": "Greys & Blacks",
@@ -135,7 +242,17 @@ export const COLOR_FAMILY_MAP: Record<string, string> = {
 };
 
 export function getColorFamily(colorName: string): string {
-  return COLOR_FAMILY_MAP[colorName] ?? 'Other';
+  if (COLOR_FAMILY_MAP[colorName]) return COLOR_FAMILY_MAP[colorName];
+  const n = colorName.toLowerCase();
+  if (/\bred\b|scarlet|crimson|carmine|corsa|ruby|preciosa|chianti|cinnabar|imola|zinnober|picasso|rosso/.test(n)) return 'Reds & Oranges';
+  if (/\borange\b|sakhir|solar/.test(n)) return 'Reds & Oranges';
+  if (/\byellow\b|dakar|speed\s*yellow/.test(n)) return 'Yellows';
+  if (/\bgreen\b|verde|isle\s*of\s*man|brewster|racing\s*green|kyoto|mantis|wagon\s*green|irish\s*green|jack\s*green/.test(n)) return 'Greens';
+  if (/\bblue\b|azure|cobalt|sapphire|portimao|tanzanite|enzian|gentian|marina|mauritius|riviera|snapper|voodoo|aegean|atlantis|eridan|laguna|monza|macao|mandalika|mugello|nurburgring|como|almeria/.test(n)) return 'Blues';
+  if (/\bpurple\b|\bviolet\b|\bwildberry\b|twilight/.test(n)) return 'Purples';
+  if (/\bpink\b|\brose\b/.test(n)) return 'Purples';
+  if (/\bblack\b|\bwhite\b|\bsilver\b|\bgrey\b|\bgray\b|\bbronze\b|\bgold\b|\bbrown\b|\bsepia\b|\bcopper\b/.test(n)) return 'Greys & Blacks';
+  return 'Other';
 }
 
 export function colorToSlug(colorName: string): string {
