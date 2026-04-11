@@ -65,16 +65,24 @@ export default async function EntriesPage({
 
       {submitted && (
         <div style={{
-          background: 'rgba(22, 163, 74, 0.12)',
-          border: '1px solid rgba(22, 163, 74, 0.3)',
-          borderRadius: 8,
-          padding: '12px 16px',
-          marginBottom: 16,
-          color: '#4ade80',
-          fontSize: 14,
-          fontWeight: 500,
+          background: 'rgba(22, 163, 74, 0.15)',
+          border: '2px solid #16a34a',
+          borderRadius: 10,
+          padding: '20px 24px',
+          marginBottom: 24,
+          display: 'flex',
+          alignItems: 'center',
+          gap: 16,
         }}>
-          Your build was added to the registry.
+          <span style={{ fontSize: 36, lineHeight: 1 }}>✅</span>
+          <div>
+            <div style={{ color: '#4ade80', fontSize: 18, fontWeight: 800, marginBottom: 4 }}>
+              Build submitted successfully!
+            </div>
+            <div style={{ color: '#86efac', fontSize: 14 }}>
+              Your car has been added to the BMW Individual Colors Registry. Thank you for contributing.
+            </div>
+          </div>
         </div>
       )}
 

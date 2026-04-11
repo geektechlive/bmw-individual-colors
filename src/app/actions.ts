@@ -5,6 +5,8 @@ import { createAdminClient } from '../lib/supabase';
 
 interface FormState {
   error?: string;
+  duplicate?: boolean;
+  duplicateInfo?: string;
 }
 
 export async function submitEntry(
@@ -61,6 +63,30 @@ export async function submitEntry(
       }
     } catch (e) {
       console.warn('Geocoding failed:', e);
+    }
+  }
+
+  // ── Duplicate check ───────────────────────────────────────────────────────
+  const forceSubmit = formData.get('force_submit') === '1';
+  if (!forceSubmit) {
+    const supabase = createAdminClient();
+    const model_year_check = parseInt(formData.get('model_year') as string, 10);
+    const body_style_check = formData.get('body_style') as string;
+    const drivetrain_check = formData.get('drivetrain') as string;
+    const { data: existing } = await supabase
+      .from('bmwic_entries')
+      .select('id')
+      .eq('forum_username', forum_username)
+      .eq('ext_color', ext_color)
+      .eq('model_year', model_year_check)
+      .eq('body_style', body_style_check)
+      .eq('drivetrain', drivetrain_check)
+      .limit(1);
+    if (existing && existing.length > 0) {
+      return {
+        duplicate: true,
+        duplicateInfo: `${model_year_check} ${body_style_check} ${drivetrain_check} in ${ext_color} is already registered under "${forum_username}".`,
+      };
     }
   }
 

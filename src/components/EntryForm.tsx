@@ -121,6 +121,48 @@ export default function EntryForm() {
         </div>
       )}
 
+      {state?.duplicate && (
+        <div style={{
+          padding: '20px',
+          background: 'rgba(234,179,8,0.12)',
+          border: '2px solid #eab308',
+          borderRadius: 10,
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 12,
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <span style={{ fontSize: 24 }}>⚠️</span>
+            <span style={{ color: '#fde047', fontSize: 17, fontWeight: 800, letterSpacing: '-0.01em' }}>
+              POTENTIAL DUPLICATE ENTRY
+            </span>
+          </div>
+          <p style={{ margin: 0, color: '#fef08a', fontSize: 14, lineHeight: 1.5 }}>
+            {state.duplicateInfo}
+          </p>
+          <p style={{ margin: 0, color: '#ca8a04', fontSize: 13 }}>
+            If you own a second car with this exact spec, click <strong style={{ color: '#fde047' }}>Submit Anyway</strong>. Otherwise, do not resubmit.
+          </p>
+          <input type="hidden" name="force_submit" value="1" />
+          <button
+            type="submit"
+            style={{
+              padding: '10px 20px',
+              background: '#854d0e',
+              border: '2px solid #eab308',
+              borderRadius: 7,
+              color: '#fde047',
+              fontSize: 14,
+              fontWeight: 800,
+              cursor: 'pointer',
+              alignSelf: 'flex-start',
+            }}
+          >
+            Submit Anyway — I own two of this spec
+          </button>
+        </div>
+      )}
+
       {/* Model Year + Body Style */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
         <div style={fieldStyle}>
