@@ -5,8 +5,6 @@ import { slugToColor, getColorHex, getColorFamily } from '../../../lib/colors';
 import FlagButton from '../../../components/FlagButton';
 import type { Metadata } from 'next';
 
-export const dynamic = 'force-dynamic';
-
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
   const colorName = slugToColor(slug);

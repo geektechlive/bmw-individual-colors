@@ -7,8 +7,6 @@ export const metadata: Metadata = {
   title: 'Reports — BMW Individual Colors Registry',
 };
 
-export const dynamic = 'force-dynamic';
-
 export default async function ReportsPage() {
   const [entries, locationEntries] = await Promise.all([
     getEntries(),

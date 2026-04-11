@@ -1,8 +1,9 @@
+import { unstable_cache } from 'next/cache';
 import { createServerClient } from './supabase';
 import { BMW_COLORS, COLOR_FAMILY_MAP } from './colors';
 import type { BmwEntry, ColorCount, Stats } from '../types';
 
-export async function getEntries(): Promise<BmwEntry[]> {
+async function getEntriesUncached(): Promise<BmwEntry[]> {
   const supabase = createServerClient();
   const { data, error } = await supabase
     .from('bmwic_entries')
@@ -15,6 +16,11 @@ export async function getEntries(): Promise<BmwEntry[]> {
   }
   return data as BmwEntry[];
 }
+
+export const getEntries = unstable_cache(getEntriesUncached, ['entries'], {
+  revalidate: 300,
+  tags: ['entries'],
+});
 
 export function computeStats(entries: BmwEntry[]): Stats {
   return {
@@ -189,7 +195,7 @@ export function computeWheelCounts(entries: BmwEntry[]): ColorCount[] {
     .sort((a, b) => b.count - a.count);
 }
 
-export async function getEntriesByColor(colorName: string): Promise<BmwEntry[]> {
+async function getEntriesByColorUncached(colorName: string): Promise<BmwEntry[]> {
   const supabase = createServerClient();
   const { data, error } = await supabase
     .from('bmwic_entries')
@@ -201,6 +207,14 @@ export async function getEntriesByColor(colorName: string): Promise<BmwEntry[]> 
     return [];
   }
   return data as BmwEntry[];
+}
+
+export function getEntriesByColor(colorName: string): Promise<BmwEntry[]> {
+  return unstable_cache(
+    () => getEntriesByColorUncached(colorName),
+    ['entries-by-color', colorName],
+    { revalidate: 300, tags: ['entries'] }
+  )();
 }
 
 export function computeRarityLabel(count: number): string {
@@ -219,7 +233,7 @@ export function computeRarityColor(label: string): string {
   }
 }
 
-export async function getLocationEntries(): Promise<BmwEntry[]> {
+async function getLocationEntriesUncached(): Promise<BmwEntry[]> {
   const supabase = createServerClient();
   const { data, error } = await supabase
     .from('bmwic_entries')
@@ -233,3 +247,9 @@ export async function getLocationEntries(): Promise<BmwEntry[]> {
   }
   return data as BmwEntry[];
 }
+
+export const getLocationEntries = unstable_cache(
+  getLocationEntriesUncached,
+  ['location-entries'],
+  { revalidate: 300, tags: ['entries'] }
+);

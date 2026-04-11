@@ -1,6 +1,7 @@
 'use server';
 
 import { redirect } from 'next/navigation';
+import { revalidateTag } from 'next/cache';
 import { createAdminClient } from '../lib/supabase';
 
 interface FormState {
@@ -117,6 +118,7 @@ export async function submitEntry(
     return { error: 'Failed to save your submission. Please try again.' };
   }
 
+  revalidateTag('entries');
   redirect('/entries?submitted=1');
 }
 

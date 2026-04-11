@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, startTransition } from 'react';
+import dynamic from 'next/dynamic';
 import type { BmwEntry } from '../types';
 import {
   computeColorCounts,
@@ -12,19 +13,24 @@ import {
   computeWheelCounts,
 } from '../lib/queries';
 
-import ColorDonut from './charts/ColorDonut';
-import ColorTreemap from './charts/ColorTreemap';
 import ColorMatrix from './charts/ColorMatrix';
-import LocationMap from './charts/LocationMap';
-import InteriorBar from './charts/InteriorBar';
-import ModelBreakdown from './charts/ModelBreakdown';
-import YearTrend from './charts/YearTrend';
 import ColorInteriorMatrix from './charts/ColorInteriorMatrix';
-import RegistryGrowth from './charts/RegistryGrowth';
-import CompetitionAdoption from './charts/CompetitionAdoption';
 import DrivetrainMatrix from './charts/DrivetrainMatrix';
-import ColorFamilyTrends from './charts/ColorFamilyTrends';
-import WheelBar from './charts/WheelBar';
+
+const chartSkeleton = () => (
+  <div className="h-64 bg-gray-100 dark:bg-gray-800 animate-pulse rounded-lg" />
+);
+
+const ColorDonut = dynamic(() => import('./charts/ColorDonut'), { ssr: false, loading: chartSkeleton });
+const ColorTreemapLoader = dynamic(() => import('./charts/ColorTreemapLoader'), { ssr: false, loading: chartSkeleton });
+const LocationMap = dynamic(() => import('./charts/LocationMap'), { ssr: false, loading: chartSkeleton });
+const InteriorBar = dynamic(() => import('./charts/InteriorBar'), { ssr: false, loading: chartSkeleton });
+const ModelBreakdown = dynamic(() => import('./charts/ModelBreakdown'), { ssr: false, loading: chartSkeleton });
+const YearTrend = dynamic(() => import('./charts/YearTrend'), { ssr: false, loading: chartSkeleton });
+const RegistryGrowth = dynamic(() => import('./charts/RegistryGrowth'), { ssr: false, loading: chartSkeleton });
+const CompetitionAdoption = dynamic(() => import('./charts/CompetitionAdoption'), { ssr: false, loading: chartSkeleton });
+const ColorFamilyTrends = dynamic(() => import('./charts/ColorFamilyTrends'), { ssr: false, loading: chartSkeleton });
+const WheelBar = dynamic(() => import('./charts/WheelBar'), { ssr: false, loading: chartSkeleton });
 
 interface Props {
   entries: BmwEntry[];
@@ -151,7 +157,7 @@ export default function ReportsClient({ entries, locationEntries }: Props) {
           {allYears.map((year) => (
             <button
               key={year}
-              onClick={() => setSelectedYears(toggle(selectedYears, year))}
+              onClick={() => startTransition(() => setSelectedYears(toggle(selectedYears, year)))}
               style={chipStyle(selectedYears.includes(year))}
             >
               {year}
@@ -173,7 +179,7 @@ export default function ReportsClient({ entries, locationEntries }: Props) {
           {['M3', 'M4'].map((bs) => (
             <button
               key={bs}
-              onClick={() => setSelectedBodyStyles(toggle(selectedBodyStyles, bs))}
+              onClick={() => startTransition(() => setSelectedBodyStyles(toggle(selectedBodyStyles, bs)))}
               style={chipStyle(selectedBodyStyles.includes(bs))}
             >
               {bs}
@@ -195,7 +201,7 @@ export default function ReportsClient({ entries, locationEntries }: Props) {
           {['RWD', 'AWD'].map((dt) => (
             <button
               key={dt}
-              onClick={() => setSelectedDrivetrains(toggle(selectedDrivetrains, dt))}
+              onClick={() => startTransition(() => setSelectedDrivetrains(toggle(selectedDrivetrains, dt)))}
               style={chipStyle(selectedDrivetrains.includes(dt))}
             >
               {dt}
@@ -204,11 +210,11 @@ export default function ReportsClient({ entries, locationEntries }: Props) {
         </div>
         {hasFilters ? (
           <button
-            onClick={() => {
+            onClick={() => startTransition(() => {
               setSelectedYears([]);
               setSelectedBodyStyles([]);
               setSelectedDrivetrains([]);
-            }}
+            })}
             style={{
               fontSize: 12,
               color: '#64748b',
@@ -290,7 +296,7 @@ export default function ReportsClient({ entries, locationEntries }: Props) {
         <div style={cardStyle}>
           <div style={cardTitleStyle}>Color Treemap</div>
           <div style={cardDescStyle}>Size proportional to count — filled with actual BMW color</div>
-          <ColorTreemap data={colorCounts} />
+          <ColorTreemapLoader data={colorCounts} />
         </div>
 
         {/* Model Breakdown — full width */}

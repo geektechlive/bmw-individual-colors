@@ -31,7 +31,21 @@ test.describe('Reports page', () => {
   test('filter bar renders on reports page', async ({ page }) => {
     await page.goto('/reports');
     const text = await page.locator('body').innerText();
-    // Filter options present
     expect(text).toMatch(/M3|M4|All/);
+  });
+
+  test('charts lazy-load: skeletons replaced by SVG charts', async ({ page }) => {
+    await page.goto('/reports');
+    // Wait until multiple SVGs are in the DOM — dynamic imports fire after hydration
+    // so we poll until Recharts has rendered at least 3 charts (each produces an SVG)
+    await page.waitForFunction(
+      () => document.querySelectorAll('svg').length >= 3,
+      { timeout: 15000 }
+    );
+    const svgCount = await page.locator('svg').count();
+    expect(svgCount).toBeGreaterThan(2);
+    // All skeletons should be gone once charts are fully loaded
+    const remainingSkeletons = await page.locator('.animate-pulse').count();
+    expect(remainingSkeletons).toBe(0);
   });
 });

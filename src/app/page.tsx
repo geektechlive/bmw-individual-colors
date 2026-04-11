@@ -9,8 +9,6 @@ export const metadata: Metadata = {
   description: 'Community-driven registry tracking BMW M3 and M4 Individual color builds.',
 };
 
-export const dynamic = 'force-dynamic';
-
 export default async function HomePage() {
   const entries = await getEntries();
   const stats = computeStats(entries);

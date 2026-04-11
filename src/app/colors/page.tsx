@@ -4,7 +4,6 @@ import { getColorFamily, colorToSlug, isLightColor } from '../../lib/colors';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = { title: 'All Colors — BMW M Individual Colors Registry' };
-export const dynamic = 'force-dynamic';
 
 export default async function ColorsPage() {
   const entries = await getEntries();
