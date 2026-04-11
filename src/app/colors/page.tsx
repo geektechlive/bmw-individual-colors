@@ -3,6 +3,8 @@ import { getEntries, computeColorCounts } from '../../lib/queries';
 import { getColorFamily, colorToSlug, isLightColor } from '../../lib/colors';
 import type { Metadata } from 'next';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = { title: 'All Colors — BMW M Individual Colors Registry' };
 
 export default async function ColorsPage() {

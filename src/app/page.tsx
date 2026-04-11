@@ -4,6 +4,8 @@ import { getColorHex, colorToSlug } from '../lib/colors';
 import ColorTreemapLoader from '../components/charts/ColorTreemapLoader';
 import type { Metadata } from 'next';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = {
   title: 'BMW M Individual Colors Registry',
   description: 'Community-driven registry tracking BMW M3 and M4 Individual color builds.',

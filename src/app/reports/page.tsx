@@ -3,6 +3,8 @@ import { getEntries, getLocationEntries } from '../../lib/queries';
 import ReportsClient from '../../components/ReportsClient';
 import type { Metadata } from 'next';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = {
   title: 'Reports — BMW Individual Colors Registry',
 };
