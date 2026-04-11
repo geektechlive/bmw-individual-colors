@@ -400,7 +400,7 @@ export default function EntryForm() {
       {/* Turnstile bot protection */}
       <div
         className="cf-turnstile"
-        data-sitekey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY}
+        data-sitekey="0x4AAAAAAC6yXfM_xBBaAkKj"
         data-theme="dark"
       />
 

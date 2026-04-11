@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 export default function SubmitPage() {
   return (
     <main style={{ maxWidth: 760, margin: '0 auto', padding: '2rem 1.5rem' }}>
-      <Script src="https://challenges.cloudflare.com/turnstile/v0/api.js" strategy="lazyOnload" />
+      <Script src="https://challenges.cloudflare.com/turnstile/v0/api.js" strategy="afterInteractive" async />
       <div style={{ marginBottom: 24 }}>
         <Link
           href="/"
