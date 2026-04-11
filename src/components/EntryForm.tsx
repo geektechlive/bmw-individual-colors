@@ -126,7 +126,7 @@ export default function EntryForm() {
         <div style={fieldStyle}>
           <label style={labelStyle} htmlFor="model_year">Model Year</label>
           <select id="model_year" name="model_year" required style={inputStyle}>
-            {[2021, 2022, 2023, 2024, 2025, 2026].map((y) => (
+            {[2021, 2022, 2023, 2024, 2025, 2026, 2027, 2028, 2029, 2030, 2031, 2032, 2033, 2034, 2035].map((y) => (
               <option key={y} value={y}>{y}</option>
             ))}
           </select>
