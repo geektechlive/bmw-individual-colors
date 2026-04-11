@@ -38,7 +38,10 @@ export default function EditVerifyForm({ entryId }: Props) {
     (window as any).__tsError = () => setTurnstileDone(false);
   }, []);
 
-  // Reset the widget whenever the server returns an error so the user can retry
+  // Reset the widget whenever the server returns an error so the user can retry.
+  // setTurnstileDone(false) here is intentional — we're responding to an external
+  // state change (server error) and there's no dependency cycle risk.
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => {
     if (state?.error && (window as any).turnstile) {
       (window as any).turnstile.reset('.cf-turnstile');
