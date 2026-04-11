@@ -89,7 +89,7 @@ export default function EntryTable({ entries }: Props) {
   const thStyle: React.CSSProperties = {
     padding: '10px 12px',
     textAlign: 'left',
-    color: '#94a3b8',
+    color: '#b8c5d6',
     fontWeight: 600,
     fontSize: 12,
     textTransform: 'uppercase',
@@ -206,7 +206,7 @@ export default function EntryTable({ entries }: Props) {
       <div style={{ overflowX: 'auto' }}>
         <table style={{ borderCollapse: 'collapse', width: '100%', fontSize: 13 }}>
           <thead>
-            <tr>
+            <tr style={{ borderBottom: '2px solid #1C69D4' }}>
               <th style={thStyle} onClick={() => handleSort('ext_color')}>
                 Color{arrow('ext_color')}
               </th>
@@ -246,9 +246,7 @@ export default function EntryTable({ entries }: Props) {
             )}
             {sorted.map((e, i) => {
               const hex = getColorHex(e.ext_color);
-              const location = [e.location_city, e.location_state, e.location_country]
-                .filter(Boolean)
-                .join(', ');
+              const cityState = [e.location_city, e.location_state].filter(Boolean).join(', ');
               const model = `${e.body_style}${e.competition ? ' Comp' : ''}`;
 
               return (
@@ -261,12 +259,13 @@ export default function EntryTable({ entries }: Props) {
                       <span
                         style={{
                           display: 'inline-block',
-                          width: 16,
-                          height: 16,
+                          width: 22,
+                          height: 22,
                           borderRadius: '50%',
                           background: hex,
                           border: '1px solid #374151',
                           flexShrink: 0,
+                          boxShadow: `0 0 8px ${hex}55`,
                         }}
                       />
                       <Link href={`/colors/${colorToSlug(e.ext_color)}`} style={{ color: '#e2e8f0', textDecoration: 'none' }}>
@@ -283,20 +282,37 @@ export default function EntryTable({ entries }: Props) {
                       <span>
                         {e.interior_color}
                         {e.interior_type && (
-                          <span style={{ color: '#64748b', fontSize: 11, marginLeft: 4 }}>
+                          <span style={{ color: '#7a8fa6', fontSize: 11, marginLeft: 4 }}>
                             ({e.interior_type})
                           </span>
                         )}
                       </span>
                     )}
                   </td>
-                  <td style={{ ...tdStyle, color: '#94a3b8' }}>{e.wheels ?? ''}</td>
-                  <td style={{ ...tdStyle, color: '#94a3b8' }}>{location}</td>
-                  <td style={{ ...tdStyle, color: '#64748b' }}>
+                  <td style={{ ...tdStyle, color: '#d4c9b8' }}>{e.wheels ?? ''}</td>
+                  <td style={{ ...tdStyle }}>
+                    {cityState && <span style={{ color: '#d4c9b8', fontSize: 13 }}>{cityState}</span>}
+                    {e.location_country && (
+                      <span style={{ color: '#8a9bb0', fontSize: 11, marginLeft: cityState ? 4 : 0 }}>
+                        {e.location_country}
+                      </span>
+                    )}
+                  </td>
+                  <td style={{ ...tdStyle }}>
                     {e.source_forum ? (
-                      <span style={{ color: '#475569' }}>[{e.source_forum}]{' '}</span>
+                      <span style={{
+                        display: 'inline-block',
+                        background: '#1e2a3a',
+                        border: '1px solid #2d3f55',
+                        borderRadius: 4,
+                        padding: '1px 5px',
+                        fontSize: 10,
+                        color: '#64748b',
+                        marginRight: 5,
+                        verticalAlign: 'middle',
+                      }}>{e.source_forum}</span>
                     ) : null}
-                    {e.forum_username ?? ''}
+                    <span style={{ color: '#4d8fd4', fontWeight: 500 }}>{e.forum_username ?? ''}</span>
                   </td>
                   <td style={{ ...tdStyle, textAlign: 'center', padding: '6px 4px' }}>
                     <FlagButton id={e.id} />
