@@ -49,7 +49,7 @@ function parsePostDate(dateStr: string | null): string | null {
   // Format: "06-20-2021, 12:42 PM"
   const m = /^(\d{2})-(\d{2})-(\d{4}),\s*(\d+):(\d{2})\s*([AP]M)$/.exec(dateStr.trim());
   if (!m) return null;
-  let [, month, day, year, hour, min, ampm] = m;
+  const [, month, day, year, hour, min, ampm] = m;
   let h = parseInt(hour, 10);
   if (ampm === "PM" && h !== 12) h += 12;
   if (ampm === "AM" && h === 12) h = 0;

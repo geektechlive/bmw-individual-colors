@@ -20,6 +20,7 @@ export default async function HomePage() {
   const colorCounts = computeColorCounts(entries);
   const topColor = colorCounts[0];
 
+  // eslint-disable-next-line react-hooks/purity
   const now = Date.now();
   const thirtyDaysAgo = now - 30 * 24 * 60 * 60 * 1000;
   const recentMap = new Map<string, number>();

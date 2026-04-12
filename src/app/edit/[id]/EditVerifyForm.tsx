@@ -3,6 +3,14 @@
 import { useActionState, useEffect, useState } from 'react';
 import { verifyForumUsername } from '../../actions';
 
+// Cloudflare Turnstile attaches callbacks and the widget API to window.
+interface TurnstileWindow {
+  __tsSuccess?: () => void;
+  __tsExpired?: () => void;
+  __tsError?: () => void;
+  turnstile?: { reset: (selector: string) => void };
+}
+
 const inputStyle: React.CSSProperties = {
   width: '100%',
   padding: '8px 12px',
@@ -33,18 +41,18 @@ export default function EditVerifyForm({ entryId }: Props) {
 
   // Register global Turnstile callbacks once on mount
   useEffect(() => {
-    (window as any).__tsSuccess = () => setTurnstileDone(true);
-    (window as any).__tsExpired = () => setTurnstileDone(false);
-    (window as any).__tsError = () => setTurnstileDone(false);
+    (window as Window & TurnstileWindow).__tsSuccess = () => setTurnstileDone(true);
+    (window as Window & TurnstileWindow).__tsExpired = () => setTurnstileDone(false);
+    (window as Window & TurnstileWindow).__tsError = () => setTurnstileDone(false);
   }, []);
 
   // Reset the widget whenever the server returns an error so the user can retry.
   // setTurnstileDone(false) here is intentional — we're responding to an external
   // state change (server error) and there's no dependency cycle risk.
-  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => {
-    if (state?.error && (window as any).turnstile) {
-      (window as any).turnstile.reset('.cf-turnstile');
+    if (state?.error && (window as Window & TurnstileWindow).turnstile) {
+      (window as Window & TurnstileWindow).turnstile!.reset('.cf-turnstile');
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setTurnstileDone(false);
     }
   }, [state?.error]);

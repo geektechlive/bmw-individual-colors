@@ -4,7 +4,9 @@ import { initOpenNextCloudflareForDev } from "@opennextjs/cloudflare";
 initOpenNextCloudflareForDev();
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  experimental: {
+    optimizePackageImports: ["recharts", "react-simple-maps"],
+  },
 };
 
 export default nextConfig;
