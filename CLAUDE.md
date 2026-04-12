@@ -73,3 +73,17 @@ Single table: `bmwic_entries`. Schema matches the `BmwEntry` interface in `src/t
 ## Cloudflare Deployment
 
 `wrangler.toml` points at `.open-next/worker.js`. The `WORKER_SELF_REFERENCE` service binding is required for the OpenNext Cloudflare adapter. Env vars are set as Cloudflare Worker secrets (not in `wrangler.toml`).
+
+Deployment is **Git-triggered** — pushing to `main` kicks off a Cloudflare build automatically. Do not run `npm run deploy` unless deploying outside of CI.
+
+**Wrangler local dev secrets:** `.dev.vars` (gitignored) mirrors `.env.local` for `wrangler dev`. Add any secret needed locally to both files.
+
+**Minification:** `minify = true` lives in `wrangler.toml` (applied by wrangler at deploy time). Do NOT add it to `open-next.config.ts` — `CloudflareOverrides` does not accept that property.
+
+**ESLint:** `.wrangler/**` is in `globalIgnores` in `eslint.config.mjs`. If lint starts producing thousands of errors from minified temp files, check that this ignore is still present.
+
+**Playwright against production:**
+```bash
+ADMIN_TOKEN=<token> PLAYWRIGHT_BASE_URL=https://mcolors.geektechlive.com npx playwright test --no-deps
+```
+Test 12 (Turnstile submit) always fails in headless — expected. 48/49 is the realistic ceiling.
