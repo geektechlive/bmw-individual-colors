@@ -17,6 +17,8 @@ const eslintConfig = defineConfig([
     ".vercel/**",
     // Claude Code worktrees:
     ".claude/**",
+    // Wrangler local dev temp files:
+    ".wrangler/**",
   ]),
 ]);
 

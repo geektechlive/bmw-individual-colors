@@ -86,7 +86,8 @@ test.describe('Admin page', () => {
   });
 
   test('shows flagged entries page with valid token', async ({ page }) => {
-    await page.goto('/admin?token=bmwic-admin-local');
+    const token = process.env.ADMIN_TOKEN ?? 'bmwic-admin-local';
+    await page.goto(`/admin?token=${token}`);
     const text = await page.locator('body').innerText();
     expect(text).toMatch(/admin|flagged/i);
   });
