@@ -23,7 +23,6 @@ const chartSkeleton = () => (
 
 const ColorDonut = dynamic(() => import('./charts/ColorDonut'), { ssr: false, loading: chartSkeleton });
 const ColorTreemapLoader = dynamic(() => import('./charts/ColorTreemapLoader'), { ssr: false, loading: chartSkeleton });
-const LocationMap = dynamic(() => import('./charts/LocationMap'), { ssr: false, loading: chartSkeleton });
 const InteriorBar = dynamic(() => import('./charts/InteriorBar'), { ssr: false, loading: chartSkeleton });
 const ModelBreakdown = dynamic(() => import('./charts/ModelBreakdown'), { ssr: false, loading: chartSkeleton });
 const YearTrend = dynamic(() => import('./charts/YearTrend'), { ssr: false, loading: chartSkeleton });
@@ -34,7 +33,6 @@ const WheelBar = dynamic(() => import('./charts/WheelBar'), { ssr: false, loadin
 
 interface Props {
   entries: BmwEntry[];
-  locationEntries: BmwEntry[];
 }
 
 function toggle<T>(arr: T[], val: T): T[] {
@@ -75,7 +73,7 @@ const cardDescStyle: React.CSSProperties = {
   marginBottom: 20,
 };
 
-export default function ReportsClient({ entries, locationEntries }: Props) {
+export default function ReportsClient({ entries }: Props) {
   const [selectedYears, setSelectedYears] = useState<number[]>([]);
   const [selectedBodyStyles, setSelectedBodyStyles] = useState<string[]>([]);
   const [selectedDrivetrains, setSelectedDrivetrains] = useState<string[]>([]);
@@ -93,15 +91,6 @@ export default function ReportsClient({ entries, locationEntries }: Props) {
       return true;
     });
   }, [entries, selectedYears, selectedBodyStyles, selectedDrivetrains]);
-
-  const filteredLocationEntries = useMemo(() => {
-    return locationEntries.filter((e) => {
-      if (selectedYears.length && !selectedYears.includes(e.model_year)) return false;
-      if (selectedBodyStyles.length && !selectedBodyStyles.includes(e.body_style)) return false;
-      if (selectedDrivetrains.length && !selectedDrivetrains.includes(e.drivetrain)) return false;
-      return true;
-    });
-  }, [locationEntries, selectedYears, selectedBodyStyles, selectedDrivetrains]);
 
   const colorCounts = useMemo(() => computeColorCounts(filteredEntries), [filteredEntries]);
   const matrixData = useMemo(() => computeModelYearMatrix(filteredEntries), [filteredEntries]);
@@ -248,7 +237,6 @@ export default function ReportsClient({ entries, locationEntries }: Props) {
             { label: 'Trends', href: '#trends' },
             { label: 'Interiors', href: '#interiors' },
             { label: 'Matrix', href: '#matrix' },
-            { label: 'Map', href: '#map' },
           ].map(({ label, href }) => (
             <a
               key={label}
@@ -362,14 +350,6 @@ export default function ReportsClient({ entries, locationEntries }: Props) {
           <ColorMatrix data={matrixData} />
         </div>
 
-        {/* Location Map — full width */}
-        <div id="map" style={{ ...cardStyle, gridColumn: '1 / -1' }}>
-          <div style={cardTitleStyle}>Global Distribution Map</div>
-          <div style={cardDescStyle}>
-            {filteredLocationEntries.length} builds with location data — markers colored by Individual color
-          </div>
-          <LocationMap entries={filteredLocationEntries} />
-        </div>
       </div>
     </>
   );

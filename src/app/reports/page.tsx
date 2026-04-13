@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { getEntries, getLocationEntries } from '../../lib/queries';
+import { getEntries } from '../../lib/queries';
 import ReportsClient from '../../components/ReportsClient';
 import type { Metadata } from 'next';
 
@@ -10,10 +10,7 @@ export const metadata: Metadata = {
 };
 
 export default async function ReportsPage() {
-  const [entries, locationEntries] = await Promise.all([
-    getEntries(),
-    getLocationEntries(),
-  ]);
+  const entries = await getEntries();
 
   return (
     <main style={{ maxWidth: 1280, margin: '0 auto', padding: '2rem 1.5rem' }}>
@@ -27,7 +24,7 @@ export default async function ReportsPage() {
         Reports &amp; Analytics
       </h1>
 
-      <ReportsClient entries={entries} locationEntries={locationEntries} />
+      <ReportsClient entries={entries} />
     </main>
   );
 }
