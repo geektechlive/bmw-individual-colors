@@ -62,6 +62,87 @@ function sleep(ms: number) {
   return new Promise((r) => setTimeout(r, ms));
 }
 
+/**
+ * Strip vBulletin quote containers from raw HTML before text extraction.
+ *
+ * Uses depth tracking instead of regex because quote_container divs have nested
+ * child divs (quote_title, inner) — non-greedy regex stops at the first </div>
+ * inside the container, leaving the spec content behind.
+ *
+ * Algorithm: when we encounter a quote_container (or blockquote) opening tag,
+ * we count nested div opens/closes until depth returns to zero, then discard
+ * the entire range. Everything outside quote blocks is preserved.
+ */
+function stripQuotedHtml(html: string): string {
+  const out: string[] = [];
+  let i = 0;
+
+  while (i < html.length) {
+    // Check for a div with a quote-related class (BimmerPost uses "quotePost")
+    const divQuoteMatch = html.slice(i).match(
+      /^<div[^>]+class="[^"]*quote[^"]*"[^>]*>/i
+    );
+    if (divQuoteMatch) {
+      // Skip entire div including nested children
+      let depth = 1;
+      i += divQuoteMatch[0].length;
+      while (i < html.length && depth > 0) {
+        if (/^<div[^>]*>/i.test(html.slice(i))) {
+          const m = html.slice(i).match(/^<div[^>]*>/i)!;
+          depth++;
+          i += m[0].length;
+        } else if (html.slice(i, i + 6).toLowerCase() === "</div>") {
+          depth--;
+          i += 6;
+        } else {
+          i++;
+        }
+      }
+      continue;
+    }
+
+    // Strip generic <blockquote> blocks (depth-aware)
+    const bqMatch = html.slice(i).match(/^<blockquote[^>]*>/i);
+    if (bqMatch) {
+      let depth = 1;
+      i += bqMatch[0].length;
+      while (i < html.length && depth > 0) {
+        if (/^<blockquote[^>]*>/i.test(html.slice(i))) {
+          const m = html.slice(i).match(/^<blockquote[^>]*>/i)!;
+          depth++;
+          i += m[0].length;
+        } else if (/^<\/blockquote>/i.test(html.slice(i))) {
+          const m = html.slice(i).match(/^<\/blockquote>/i)!;
+          depth--;
+          i += m[0].length;
+        } else {
+          i++;
+        }
+      }
+      continue;
+    }
+
+    out.push(html[i]);
+    i++;
+  }
+
+  return out.join("");
+}
+
+/**
+ * Strip quoted-post blocks from decoded text.
+ *
+ * vBulletin quote blocks decode to text that starts with "Originally Posted by USERNAME".
+ * Quoters never place their own car spec after a quote — their spec either precedes the
+ * quote or is in a separate post. So greedy stripping from the first marker to end-of-text
+ * is safe.
+ */
+function stripQuotedText(text: string): string {
+  return text
+    .replace(/(?:Quote:\s*[\n\s]*)?Originally Posted by[\s\S]*/gi, "")
+    .trim();
+}
+
 function decodeHtml(html: string): string {
   return html
     .replace(/<br\s*\/?>/gi, "\n")
@@ -105,10 +186,6 @@ interface RawPost {
 function extractPosts(html: string): RawPost[] {
   const posts: RawPost[] = [];
 
-  // Match the outer post div: id="post12345678"
-  // BimmerPost vBulletin structure: each post is wrapped in a div with id="postNUMBER"
-  const postBlockRe = /id="(post(\d+))"[\s\S]*?(?=id="post\d+"|$)/g;
-
   // Simpler approach: split by post message divs
   // Each message is: <div id="post_message_XXXXXXXX" class="thePostItself">...</div>
   const msgRe = /id="post_message_(\d+)"[^>]*>([\s\S]*?)<\/div>\s*<!--\s*\/\s*message/g;
@@ -134,7 +211,7 @@ function extractPosts(html: string): RawPost[] {
   while ((mm = msgRe.exec(html)) !== null) {
     const postId = mm[1];
     const rawHtml = mm[2];
-    const text = decodeHtml(rawHtml);
+    const text = decodeHtml(stripQuotedHtml(rawHtml));
     posts.push({
       postId,
       username: usernameMap.get(postId) ?? "unknown",
@@ -418,12 +495,15 @@ let DEFAULT_YEAR = 2022;
 function parseEntry(post: RawPost): ParsedEntry | null {
   if (!isEntryPost(post.text)) return null;
 
+  // Strip any remaining quoted-post text (fallback for quote markers that survive HTML stripping)
+  const cleanText = stripQuotedText(post.text);
+
   // Try BUILD: format first (MY2024-style)
-  if (/BUILD\s*:/i.test(post.text)) {
-    return parseBuildSection(post.text, post.username, DEFAULT_YEAR, post.postDate);
+  if (/BUILD\s*:/i.test(cleanText)) {
+    return parseBuildSection(cleanText, post.username, DEFAULT_YEAR, post.postDate);
   }
 
-  const fields = extractFields(post.text);
+  const fields = extractFields(cleanText);
 
   // Require at least a color or type field
   if (!fields.ext_color && !fields.type) return null;
@@ -463,7 +543,7 @@ function parseEntry(post: RawPost): ParsedEntry | null {
     forum_username: post.username,
     posted_at: parsePostDate(post.postDate),
     notes: null,
-    _raw: post.text.slice(0, 600),
+    _raw: cleanText.slice(0, 600),
   };
 }
 
@@ -517,7 +597,8 @@ async function main() {
   );
 
   // Write clean file (without _raw)
-  const clean = entries.map(({ _raw: _, ...rest }) => rest);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const clean = entries.map(({ _raw, ...rest }) => rest);
   fs.writeFileSync(OUTPUT_FILE, JSON.stringify(clean, null, 2));
 
   console.log(`\n✓ Done. ${clean.length} unique entries parsed.`);
