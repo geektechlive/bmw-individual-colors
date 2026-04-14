@@ -111,6 +111,7 @@ export async function submitEntry(
     forum_username,
     source_forum: (formData.get('source_forum') as string)?.trim() || 'BimmerPost',
     notes: (formData.get('notes') as string)?.trim() || null,
+    user_submitted: true,
   });
 
   if (error) {

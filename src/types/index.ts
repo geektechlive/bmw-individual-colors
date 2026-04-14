@@ -20,6 +20,7 @@ export interface BmwEntry {
   posted_at: string | null;
   flag_count: number;
   notes: string | null;
+  user_submitted: boolean;
 }
 
 export interface ColorCount {
