@@ -24,6 +24,9 @@ npx tsx scripts/seed-forum.ts [threadId] [pages]  # scrape bimmerpost forum thre
 npx tsx scripts/backfill-dates.ts [--dry-run]     # backfill posted_at from forum data
 npx tsx scripts/normalize-wheels.ts [--dry-run]   # normalize wheel field to canonical names
 npx tsx scripts/normalize-locations.ts [--dry-run] # normalize location fields + re-geocode
+npx tsx scripts/audit-attributions.ts                           # scan debug JSONs for quoted-post misattributions
+npx tsx scripts/reconcile-attributions.ts [--apply]             # diff seed files vs live DB; insert/delete
+npx tsx scripts/verify-attributions.ts [--apply] [--skip-fetch] # classify DB-only entries; delete bad rows
 ```
 
 ## Architecture
@@ -74,6 +77,11 @@ ADMIN_TOKEN=                      # Guards /admin route and deleteEntry/dismissF
 
 Single table: `bmwic_entries`. Schema matches the `BmwEntry` interface in `src/types/index.ts`. No migrations directory — schema managed directly in Supabase dashboard.
 
+**Key column semantics:**
+- `user_submitted boolean` — `true` = submitted via web form; `false` = imported from forum scrape. Forum imports are **complete** — all future entries will be `true`.
+- `posted_at` — set by scraper from forum post timestamp; `null` on web form submissions (secondary indicator, less reliable than `user_submitted`).
+- `source_forum` — user-reported forum; not a reliable import/submission distinguisher (both default to 'BimmerPost').
+
 ## Cloudflare Deployment
 
 `wrangler.toml` points at `.open-next/worker.js`. The `WORKER_SELF_REFERENCE` service binding is required for the OpenNext Cloudflare adapter. Env vars are set as Cloudflare Worker secrets (not in `wrangler.toml`).
@@ -95,6 +103,11 @@ Deployment is **Git-triggered** — pushing to `main` kicks off a Cloudflare bui
 **`ssr: false` with `next/dynamic`:** Cannot be used directly in Server Component page files. Must be wrapped in a Client Component (see `RegistryMapWrapper.tsx`).
 
 **Browser-only libraries (e.g. Leaflet):** Use imperative `useRef + useEffect` initialization rather than React wrapper components. This avoids the "Map container is already initialized" error caused by React StrictMode double-invocation and HMR remounts. Guard initialization with `if (mapRef.current) return` and clean up with `map.remove()` on unmount.
+
+**Forum scraping (scripts/seed-forum.ts):**
+- BimmerPost quote blocks use `class="quotePost"`, not `quote_container`. Stripping requires depth-tracking HTML parsing — non-greedy regex fails on nested divs.
+- Thread 1835705: main Individual Colors registry, 33 pages at 22 posts/page (pp=22 is the site default, not configurable).
+- `scripts/ground-truth.json`: 34 hand-typed MY2021–2022 entries — highest-confidence truth source for attribution verification.
 
 **Playwright against production:**
 ```bash
