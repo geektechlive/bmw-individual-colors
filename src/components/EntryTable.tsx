@@ -162,7 +162,7 @@ export default function EntryTable({ entries }: Props) {
           </button>
         ))}
         <span style={{ ...labelStyle, marginLeft: 4 }}>Trans:</span>
-        {['DCT', '6MT'].map((v) => (
+        {['8AT', '6MT'].map((v) => (
           <button
             key={v}
             onClick={() => toggleArrayFilter('transmission', v)}

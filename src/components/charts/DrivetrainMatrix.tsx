@@ -8,17 +8,17 @@ interface Props {
 
 const tiles = [
   { key: 'RWD+6MT', label: 'RWD · Manual', color: '#E8002D', sub: '6MT' },
-  { key: 'RWD+DCT', label: 'RWD · Auto', color: '#862086', sub: 'DCT' },
+  { key: 'RWD+8AT', label: 'RWD · Auto', color: '#862086', sub: '8AT' },
   { key: 'AWD+6MT', label: 'AWD · Manual', color: '#1C69D4', sub: 'xDrive 6MT' },
-  { key: 'AWD+DCT', label: 'AWD · Auto', color: '#2a7a5c', sub: 'xDrive DCT' },
+  { key: 'AWD+8AT', label: 'AWD · Auto', color: '#2a7a5c', sub: 'xDrive 8AT' },
 ];
 
 export default function DrivetrainMatrix({ entries }: Props) {
   const combos: Record<string, number> = {
     'RWD+6MT': 0,
-    'RWD+DCT': 0,
+    'RWD+8AT': 0,
     'AWD+6MT': 0,
-    'AWD+DCT': 0,
+    'AWD+8AT': 0,
   };
 
   for (const e of entries) {

@@ -189,7 +189,7 @@ export default function EditEntryForm({ entry, editToken }: Props) {
         <div style={fieldStyle}>
           <label style={labelStyle} htmlFor="transmission">Transmission</label>
           <select id="transmission" name="transmission" required style={inputStyle} defaultValue={entry.transmission}>
-            <option value="DCT">DCT (8-Speed Auto)</option>
+            <option value="8AT">8AT (8-Speed Auto)</option>
             <option value="6MT">6MT (Manual)</option>
           </select>
         </div>
