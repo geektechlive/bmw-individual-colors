@@ -81,6 +81,7 @@ Single table: `bmwic_entries`. Schema matches the `BmwEntry` interface in `src/t
 - `user_submitted boolean` — `true` = submitted via web form; `false` = imported from forum scrape. Forum imports are **complete** — all future entries will be `true`.
 - `posted_at` — set by scraper from forum post timestamp; `null` on web form submissions (secondary indicator, less reliable than `user_submitted`).
 - `source_forum` — user-reported forum; not a reliable import/submission distinguisher (both default to 'BimmerPost').
+- `transmission` — valid values: `8AT` (ZF 8-speed torque converter auto) and `6MT` (manual). G80/G82 M3/M4 does **not** use DCT — that was the E9x era.
 
 ## Cloudflare Deployment
 
@@ -103,6 +104,10 @@ Deployment is **Git-triggered** — pushing to `main` kicks off a Cloudflare bui
 **`ssr: false` with `next/dynamic`:** Cannot be used directly in Server Component page files. Must be wrapped in a Client Component (see `RegistryMapWrapper.tsx`).
 
 **Browser-only libraries (e.g. Leaflet):** Use imperative `useRef + useEffect` initialization rather than React wrapper components. This avoids the "Map container is already initialized" error caused by React StrictMode double-invocation and HMR remounts. Guard initialization with `if (mapRef.current) return` and clean up with `map.remove()` on unmount.
+
+**Quoted-post misattribution (DB-level):** `audit-attributions.ts` only catches misattributions present in the debug JSON files — it misses entries from older scrape runs. To find live DB duplicates, query `user_submitted = false` grouped by `(ext_color, body_style, model_year, location_state) HAVING COUNT(*) > 1`. Inspect each group — quoted-post victims share identical build details with the original poster.
+
+**zsh bracket paths:** Quote paths with brackets in git commands: `git add "src/app/edit/[id]/file.tsx"` — unquoted, zsh glob-expands them and the command fails silently.
 
 **Forum scraping (scripts/seed-forum.ts):**
 - BimmerPost quote blocks use `class="quotePost"`, not `quote_container`. Stripping requires depth-tracking HTML parsing — non-greedy regex fails on nested divs.
