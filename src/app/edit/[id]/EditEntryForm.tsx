@@ -2,7 +2,7 @@
 
 import { useActionState, useState, useMemo } from 'react';
 import { Country, State } from 'country-state-city';
-import { updateEntry } from '../../actions';
+import { updateEntry, deleteOwnEntry } from '../../actions';
 import { BMW_COLORS, getColorHex, isLightColor } from '../../../lib/colors';
 import type { BmwEntry } from '../../../types';
 
@@ -10,11 +10,11 @@ const INTERIOR_OPTIONS = [
   'Black',
   'Fjord Blue',
   'Fiona Red',
+  'Ivory White',
   'Kyalami Orange',
   'Sakhir Orange',
   'Silverstone',
   'Silverstone Grey',
-  'Smoke White',
   'Tartufo Brown',
 ];
 
@@ -76,8 +76,18 @@ interface Props {
   editToken: string | undefined;
 }
 
+function entryToVariant(entry: BmwEntry): string {
+  if (!entry.competition) return 'Base (RWD)';
+  if (entry.drivetrain === 'AWD' || entry.drivetrain.includes('xDrive')) return 'Competition xDrive';
+  return 'Competition';
+}
+
 export default function EditEntryForm({ entry, editToken }: Props) {
   const [state, action, isPending] = useActionState(updateEntry, {});
+
+  // Variant + transmission
+  const [variant, setVariant] = useState(() => entryToVariant(entry));
+  const [transmission, setTransmission] = useState(entry.transmission || '8AT');
 
   // Color combobox — prefilled
   const [colorSearch, setColorSearch] = useState(entry.ext_color);
@@ -91,6 +101,9 @@ export default function EditEntryForm({ entry, editToken }: Props) {
 
   // Forum
   const [forum, setForum] = useState(entry.source_forum ?? 'BimmerPost');
+
+  // Delete confirmation
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
   const filteredColors = useMemo(
     () => COLOR_NAMES.filter((c) => c.toLowerCase().includes(colorSearch.toLowerCase())),
@@ -164,31 +177,42 @@ export default function EditEntryForm({ entry, editToken }: Props) {
         </div>
       </div>
 
-      {/* Competition + Drivetrain + Transmission */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16 }}>
+      {/* Variant + Transmission */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
         <div style={fieldStyle}>
-          <label style={labelStyle}>Competition Package</label>
-          <label style={{
-            display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px',
-            background: '#1e2a3a', border: '1px solid #2d3f55', borderRadius: 6,
-            cursor: 'pointer', color: '#e2e8f0', fontSize: 14,
-          }}>
-            <input type="checkbox" name="competition" defaultChecked={entry.competition} />
-            Competition
-          </label>
-        </div>
-
-        <div style={fieldStyle}>
-          <label style={labelStyle} htmlFor="drivetrain">Drivetrain</label>
-          <select id="drivetrain" name="drivetrain" required style={inputStyle} defaultValue={entry.drivetrain}>
-            <option value="AWD">AWD (xDrive)</option>
-            <option value="RWD">RWD</option>
+          <label style={labelStyle} htmlFor="variant">Variant</label>
+          <select
+            id="variant"
+            name="variant"
+            required
+            value={variant}
+            onChange={(e) => {
+              const v = e.target.value;
+              setVariant(v);
+              if (v !== 'Base (RWD)') setTransmission('8AT');
+            }}
+            style={inputStyle}
+          >
+            <option value="Base (RWD)">Base (RWD)</option>
+            <option value="Competition">Competition</option>
+            <option value="Competition xDrive">Competition xDrive</option>
           </select>
         </div>
 
         <div style={fieldStyle}>
           <label style={labelStyle} htmlFor="transmission">Transmission</label>
-          <select id="transmission" name="transmission" required style={inputStyle} defaultValue={entry.transmission}>
+          <select
+            id="transmission"
+            name="transmission"
+            required
+            value={transmission}
+            onChange={(e) => setTransmission(e.target.value)}
+            style={{
+              ...inputStyle,
+              opacity: variant !== 'Base (RWD)' ? 0.5 : 1,
+              pointerEvents: variant !== 'Base (RWD)' ? 'none' : 'auto',
+            }}
+          >
             <option value="8AT">8AT (8-Speed Auto)</option>
             <option value="6MT">6MT (Manual)</option>
           </select>
@@ -266,7 +290,7 @@ export default function EditEntryForm({ entry, editToken }: Props) {
       </div>
 
       {/* Interior */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16 }}>
         <div style={fieldStyle}>
           <label style={labelStyle} htmlFor="interior_color">Interior Color</label>
           <select id="interior_color" name="interior_color" style={inputStyle} defaultValue={entry.interior_color ?? ''}>
@@ -277,11 +301,20 @@ export default function EditEntryForm({ entry, editToken }: Props) {
         </div>
 
         <div style={fieldStyle}>
-          <label style={labelStyle} htmlFor="interior_type">Interior Type</label>
-          <select id="interior_type" name="interior_type" style={inputStyle} defaultValue={entry.interior_type ?? ''}>
+          <label style={labelStyle} htmlFor="interior_seats">Seats</label>
+          <select id="interior_seats" name="interior_seats" style={inputStyle} defaultValue={entry.interior_seats ?? ''}>
             <option value="">-- Select --</option>
-            <option value="Full Leather">Full Leather</option>
             <option value="Carbon Buckets">Carbon Buckets</option>
+            <option value="Comfort Seats">Comfort Seats</option>
+          </select>
+        </div>
+
+        <div style={fieldStyle}>
+          <label style={labelStyle} htmlFor="interior_leather">Leather</label>
+          <select id="interior_leather" name="interior_leather" style={inputStyle} defaultValue={entry.interior_leather ?? ''}>
+            <option value="">-- Select --</option>
+            <option value="Full">Full Leather</option>
+            <option value="Extended">Extended Leather</option>
           </select>
         </div>
       </div>
@@ -418,6 +451,70 @@ export default function EditEntryForm({ entry, editToken }: Props) {
       >
         {isPending ? 'Saving...' : 'Save Changes'}
       </button>
+
+      {/* Delete entry */}
+      <div style={{ borderTop: '1px solid #2d3f55', paddingTop: 20 }}>
+        {!confirmDelete ? (
+          <button
+            type="button"
+            onClick={() => setConfirmDelete(true)}
+            style={{
+              padding: '10px 20px',
+              background: 'transparent',
+              color: '#ef4444',
+              border: '1px solid #ef4444',
+              borderRadius: 8,
+              fontSize: 14,
+              fontWeight: 600,
+              cursor: 'pointer',
+            }}
+          >
+            Delete this entry
+          </button>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <p style={{ color: '#fca5a5', fontSize: 14, margin: 0 }}>
+              This will permanently remove your entry from the registry. Are you sure?
+            </p>
+            <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+              <form action={deleteOwnEntry}>
+                <input type="hidden" name="id" value={entry.id} />
+                <input type="hidden" name="edit_token" value={editToken ?? ''} />
+                <button
+                  type="submit"
+                  style={{
+                    padding: '10px 20px',
+                    background: '#ef4444',
+                    color: '#ffffff',
+                    border: 'none',
+                    borderRadius: 8,
+                    fontSize: 14,
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                  }}
+                >
+                  Yes, delete it
+                </button>
+              </form>
+              <button
+                type="button"
+                onClick={() => setConfirmDelete(false)}
+                style={{
+                  padding: '10px 20px',
+                  background: 'transparent',
+                  color: '#94a3b8',
+                  border: '1px solid #2d3f55',
+                  borderRadius: 8,
+                  fontSize: 14,
+                  cursor: 'pointer',
+                }}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
     </form>
   );
 }

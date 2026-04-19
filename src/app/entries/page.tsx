@@ -13,12 +13,13 @@ export const metadata: Metadata = {
 export default async function EntriesPage({
   searchParams,
 }: {
-  searchParams: Promise<{ submitted?: string; updated?: string }>;
+  searchParams: Promise<{ submitted?: string; updated?: string; deleted?: string }>;
 }) {
   const entries = await getEntries();
   const params = await searchParams;
   const submitted = params.submitted === '1';
   const updated = params.updated === '1';
+  const deleted = params.deleted === '1';
 
   return (
     <main style={{ maxWidth: 1280, margin: '0 auto', padding: '2rem 1.5rem' }}>
@@ -70,6 +71,12 @@ export default async function EntriesPage({
         <SubmittedBanner
           title="Entry updated"
           body="Your changes have been saved and will appear in the registry shortly."
+        />
+      )}
+      {deleted && (
+        <SubmittedBanner
+          title="Entry deleted"
+          body="Your entry has been permanently removed from the registry."
         />
       )}
 

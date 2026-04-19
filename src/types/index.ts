@@ -9,6 +9,8 @@ export interface BmwEntry {
   ext_color: string;
   interior_color: string | null;
   interior_type: string | null;
+  interior_seats: string | null;
+  interior_leather: string | null;
   wheels: string | null;
   location_city: string | null;
   location_state: string | null;

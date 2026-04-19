@@ -9,11 +9,11 @@ const INTERIOR_OPTIONS = [
   'Black',
   'Fjord Blue',
   'Fiona Red',
+  'Ivory White',
   'Kyalami Orange',
   'Sakhir Orange',
   'Silverstone',
   'Silverstone Grey',
-  'Smoke White',
   'Tartufo Brown',
 ];
 
@@ -82,6 +82,10 @@ export default function EntryForm() {
   // Location cascade state
   const [countryCode, setCountryCode] = useState('US');
   const [stateCode, setStateCode] = useState('');
+
+  // Variant + transmission
+  const [variant, setVariant] = useState('Competition');
+  const [transmission, setTransmission] = useState('8AT');
 
   // Forum
   const [forum, setForum] = useState('BimmerPost');
@@ -191,31 +195,42 @@ export default function EntryForm() {
         </div>
       </div>
 
-      {/* Competition + Drivetrain + Transmission */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16 }}>
+      {/* Variant + Transmission */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
         <div style={fieldStyle}>
-          <label style={labelStyle}>Competition Package</label>
-          <label style={{
-            display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px',
-            background: '#1e2a3a', border: '1px solid #2d3f55', borderRadius: 6,
-            cursor: 'pointer', color: '#e2e8f0', fontSize: 14,
-          }}>
-            <input type="checkbox" name="competition" defaultChecked />
-            Competition
-          </label>
-        </div>
-
-        <div style={fieldStyle}>
-          <label style={labelStyle} htmlFor="drivetrain">Drivetrain</label>
-          <select id="drivetrain" name="drivetrain" required style={inputStyle}>
-            <option value="AWD">AWD (xDrive)</option>
-            <option value="RWD">RWD</option>
+          <label style={labelStyle} htmlFor="variant">Variant</label>
+          <select
+            id="variant"
+            name="variant"
+            required
+            value={variant}
+            onChange={(e) => {
+              const v = e.target.value;
+              setVariant(v);
+              if (v !== 'Base (RWD)') setTransmission('8AT');
+            }}
+            style={inputStyle}
+          >
+            <option value="Base (RWD)">Base (RWD)</option>
+            <option value="Competition">Competition</option>
+            <option value="Competition xDrive">Competition xDrive</option>
           </select>
         </div>
 
         <div style={fieldStyle}>
           <label style={labelStyle} htmlFor="transmission">Transmission</label>
-          <select id="transmission" name="transmission" required style={inputStyle}>
+          <select
+            id="transmission"
+            name="transmission"
+            required
+            value={transmission}
+            onChange={(e) => setTransmission(e.target.value)}
+            style={{
+              ...inputStyle,
+              opacity: variant !== 'Base (RWD)' ? 0.5 : 1,
+              pointerEvents: variant !== 'Base (RWD)' ? 'none' : 'auto',
+            }}
+          >
             <option value="8AT">8AT (8-Speed Auto)</option>
             <option value="6MT">6MT (Manual)</option>
           </select>
@@ -294,7 +309,7 @@ export default function EntryForm() {
       </div>
 
       {/* Interior */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16 }}>
         <div style={fieldStyle}>
           <label style={labelStyle} htmlFor="interior_color">Interior Color</label>
           <select id="interior_color" name="interior_color" style={inputStyle}>
@@ -305,11 +320,20 @@ export default function EntryForm() {
         </div>
 
         <div style={fieldStyle}>
-          <label style={labelStyle} htmlFor="interior_type">Interior Type</label>
-          <select id="interior_type" name="interior_type" style={inputStyle}>
+          <label style={labelStyle} htmlFor="interior_seats">Seats</label>
+          <select id="interior_seats" name="interior_seats" style={inputStyle}>
             <option value="">-- Select --</option>
-            <option value="Full Leather">Full Leather</option>
             <option value="Carbon Buckets">Carbon Buckets</option>
+            <option value="Comfort Seats">Comfort Seats</option>
+          </select>
+        </div>
+
+        <div style={fieldStyle}>
+          <label style={labelStyle} htmlFor="interior_leather">Leather</label>
+          <select id="interior_leather" name="interior_leather" style={inputStyle}>
+            <option value="">-- Select --</option>
+            <option value="Full">Full Leather</option>
+            <option value="Extended">Extended Leather</option>
           </select>
         </div>
       </div>

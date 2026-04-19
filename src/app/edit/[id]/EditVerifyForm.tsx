@@ -122,6 +122,11 @@ export default function EditVerifyForm({ entryId }: Props) {
       >
         {isPending ? 'Verifying...' : 'Verify & Edit'}
       </button>
+      {!turnstileDone && !isPending && (
+        <p style={{ fontSize: 12, color: '#64748b', margin: 0 }}>
+          Complete the security check above to continue.
+        </p>
+      )}
     </form>
   );
 }

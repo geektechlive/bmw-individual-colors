@@ -9,7 +9,7 @@ export const BMW_COLORS: Record<string, string> = {
   "Enzian Blue":               "#1a2a5c",
   "Eridan Blue":               "#1e3d6e",
   "Frozen Portimao Blue":      "#1e3a8a",
-  "Gentian Blue Metallic":     "#1c3a7a",
+  "Gentian Blue":              "#1c3a7a",
   "Marina Bay Blue":           "#1e5c8c",
   "Mauritius Blue":            "#1e4a8c",
   "Mexico Blue":               "#1e5c9c",
@@ -183,7 +183,7 @@ export const COLOR_FAMILY_MAP: Record<string, string> = {
   // Blues
   "Aegean Blue": "Blues", "Atlantis Blue Metallic": "Blues", "Black Blue": "Blues",
   "Daytona Beach Blue": "Blues", "Enzian Blue": "Blues", "Eridan Blue": "Blues",
-  "Frozen Portimao Blue": "Blues", "Gentian Blue Metallic": "Blues",
+  "Frozen Portimao Blue": "Blues", "Gentian Blue": "Blues",
   "Marina Bay Blue": "Blues", "Mauritius Blue": "Blues", "Mexico Blue": "Blues",
   "Midnight Blue": "Blues", "Marhon Blue": "Blues", "Portimao Blue": "Blues",
   "Riviera Blue": "Blues", "San Marino Blue": "Blues", "Santorini Blue": "Blues",

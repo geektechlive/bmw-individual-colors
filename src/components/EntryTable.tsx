@@ -282,11 +282,15 @@ export default function EntryTable({ entries }: Props) {
                     {e.interior_color && (
                       <span>
                         {e.interior_color}
-                        {e.interior_type && (
+                        {(e.interior_seats || e.interior_leather) ? (
+                          <span style={{ color: '#7a8fa6', fontSize: 11, marginLeft: 4 }}>
+                            ({[e.interior_seats, e.interior_leather ? `${e.interior_leather} Leather` : null].filter(Boolean).join(', ')})
+                          </span>
+                        ) : e.interior_type ? (
                           <span style={{ color: '#7a8fa6', fontSize: 11, marginLeft: 4 }}>
                             ({e.interior_type})
                           </span>
-                        )}
+                        ) : null}
                       </span>
                     )}
                   </td>

@@ -70,6 +70,11 @@ export default async function ColorDetailPage({ params }: { params: Promise<{ sl
           <div style={{ fontSize: 14, color: '#64748b' }}>
             {family} · {pct}% of all registry builds
           </div>
+          {colorName === 'Gentian Blue' && (
+            <div style={{ fontSize: 12, color: '#64748b', marginTop: 4 }}>
+              Also known as: <span style={{ color: '#94a3b8' }}>Enzian Blue</span>
+            </div>
+          )}
         </div>
       </div>
 
@@ -164,7 +169,12 @@ export default async function ColorDetailPage({ params }: { params: Promise<{ sl
                       {e.model_year} {e.body_style}{e.competition ? ' Competition' : ''} · {e.drivetrain} · {e.transmission}
                     </div>
                     <div style={{ color: '#94a3b8', fontSize: 13, marginTop: 2 }}>
-                      {[e.interior_color, e.interior_type && `(${e.interior_type})`].filter(Boolean).join(' ')}
+                      {[
+                        e.interior_color,
+                        (e.interior_seats || e.interior_leather)
+                          ? `(${[e.interior_seats, e.interior_leather ? `${e.interior_leather} Leather` : null].filter(Boolean).join(', ')})`
+                          : e.interior_type ? `(${e.interior_type})` : null,
+                      ].filter(Boolean).join(' ')}
                       {e.wheels && ` · ${e.wheels}`}
                       {location && ` · ${location}`}
                     </div>

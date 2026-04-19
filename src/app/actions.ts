@@ -40,6 +40,11 @@ export async function submitEntry(
     return { error: 'Forum username is required.' };
   }
 
+  const variant = (formData.get('variant') as string) || 'Competition';
+  const competition = variant !== 'Base (RWD)';
+  const drivetrain = variant === 'Competition xDrive' ? 'AWD' : 'RWD';
+  const transmission = competition ? '8AT' : ((formData.get('transmission') as string) || '8AT');
+
   const city = (formData.get('location_city') as string)?.trim() ?? '';
   const state = (formData.get('location_state') as string)?.trim() ?? '';
   const country = (formData.get('location_country_name') as string)?.trim()
@@ -73,7 +78,6 @@ export async function submitEntry(
     const supabase = createAdminClient();
     const model_year_check = parseInt(formData.get('model_year') as string, 10);
     const body_style_check = formData.get('body_style') as string;
-    const drivetrain_check = formData.get('drivetrain') as string;
     const { data: existing } = await supabase
       .from('bmwic_entries')
       .select('id')
@@ -81,12 +85,12 @@ export async function submitEntry(
       .eq('ext_color', ext_color)
       .eq('model_year', model_year_check)
       .eq('body_style', body_style_check)
-      .eq('drivetrain', drivetrain_check)
+      .eq('drivetrain', drivetrain)
       .limit(1);
     if (existing && existing.length > 0) {
       return {
         duplicate: true,
-        duplicateInfo: `${model_year_check} ${body_style_check} ${drivetrain_check} in ${ext_color} is already registered under "${forum_username}".`,
+        duplicateInfo: `${model_year_check} ${body_style_check} ${drivetrain} in ${ext_color} is already registered under "${forum_username}".`,
       };
     }
   }
@@ -96,12 +100,13 @@ export async function submitEntry(
   const { error } = await supabase.from('bmwic_entries').insert({
     model_year: parseInt(formData.get('model_year') as string, 10),
     body_style: formData.get('body_style') as string,
-    competition: formData.get('competition') === 'on',
-    drivetrain: formData.get('drivetrain') as string,
-    transmission: formData.get('transmission') as string,
+    competition,
+    drivetrain,
+    transmission,
     ext_color,
     interior_color: (formData.get('interior_color') as string)?.trim() || null,
-    interior_type: (formData.get('interior_type') as string) || null,
+    interior_seats: (formData.get('interior_seats') as string) || null,
+    interior_leather: (formData.get('interior_leather') as string) || null,
     wheels: (formData.get('wheels') as string)?.trim() || null,
     location_city: city || null,
     location_state: state || null,
@@ -226,6 +231,11 @@ export async function updateEntry(
     return { error: 'Individual color is required.' };
   }
 
+  const variant = (formData.get('variant') as string) || 'Competition';
+  const competition = variant !== 'Base (RWD)';
+  const drivetrain = variant === 'Competition xDrive' ? 'AWD' : 'RWD';
+  const transmission = competition ? '8AT' : ((formData.get('transmission') as string) || '8AT');
+
   const city = (formData.get('location_city') as string)?.trim() ?? '';
   const state = (formData.get('location_state') as string)?.trim() ?? '';
   const country = (formData.get('location_country_name') as string)?.trim()
@@ -265,12 +275,13 @@ export async function updateEntry(
   const { error } = await supabase.from('bmwic_entries').update({
     model_year: parseInt(formData.get('model_year') as string, 10),
     body_style: formData.get('body_style') as string,
-    competition: formData.get('competition') === 'on',
-    drivetrain: formData.get('drivetrain') as string,
-    transmission: formData.get('transmission') as string,
+    competition,
+    drivetrain,
+    transmission,
     ext_color,
     interior_color: (formData.get('interior_color') as string)?.trim() || null,
-    interior_type: (formData.get('interior_type') as string) || null,
+    interior_seats: (formData.get('interior_seats') as string) || null,
+    interior_leather: (formData.get('interior_leather') as string) || null,
     wheels: (formData.get('wheels') as string)?.trim() || null,
     location_city: city || null,
     location_state: state || null,
@@ -313,4 +324,33 @@ export async function dismissFlag(id: string, token: string): Promise<{ error?: 
   const { error } = await supabase.from('bmwic_entries').update({ flag_count: 0 }).eq('id', id);
   if (error) return { error: error.message };
   return {};
+}
+
+export async function deleteOwnEntry(formData: FormData): Promise<never> {
+  const id = (formData.get('id') as string)?.trim();
+  const editToken = (formData.get('edit_token') as string)?.trim();
+
+  if (!id || !editToken) {
+    throw new Error('Missing required fields.');
+  }
+
+  const supabase = createAdminClient();
+  const { data: existing } = await supabase
+    .from('bmwic_entries')
+    .select('id, forum_username')
+    .eq('id', id)
+    .single();
+
+  if (!existing) {
+    throw new Error('Entry not found.');
+  }
+
+  const expectedToken = await generateEditToken(id, existing.forum_username ?? '');
+  if (editToken !== expectedToken) {
+    throw new Error('Unauthorized.');
+  }
+
+  await supabase.from('bmwic_entries').delete().eq('id', id);
+  revalidateTag('entries', {});
+  redirect('/entries?deleted=1');
 }
