@@ -1,36 +1,50 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# BMW Individual Colors Registry
 
-## Getting Started
+A community registry of BMW Individual paint colors submitted by owners. Browse builds, explore color rarity, and see where Individual-spec cars are registered around the world.
 
-First, run the development server:
+Live at [mcolors.geektechlive.com](https://mcolors.geektechlive.com).
+
+## Stack
+
+- **Next.js 16** (App Router, Server Components) deployed to **Cloudflare Workers** via `@opennextjs/cloudflare`
+- **Supabase** for the database
+- **Cloudflare Turnstile** for spam protection on the submit form
+- **Recharts** for analytics charts
+- **Leaflet** + `leaflet.markercluster` for the registry map
+
+## Getting started
 
 ```bash
+# Install dependencies
+npm install
+
+# Set up environment variables
+cp .env.local.example .env.local
+# Edit .env.local with your Supabase and Cloudflare Turnstile credentials
+
+# Run the dev server
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Environment variables
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Copy `.env.local.example` to `.env.local` and fill in your own values. See `SECURITY.md` for the full list and where to find each credential. Never commit `.env.local`.
 
-## Learn More
+## Commands
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+npm run dev        # local dev server (Next.js + Cloudflare Workers shim)
+npm run build      # standard Next.js build
+npm run build:cf   # Cloudflare Workers production build
+npm run lint       # ESLint
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Deployment
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Pushing to `main` triggers a Cloudflare Pages/Workers build automatically. Run `npm run build:cf` locally before pushing to catch production-build errors that the dev server won't surface.
 
-## Deploy on Vercel
+## Contributing
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Community submissions and corrections are welcome. See `SECURITY.md` before getting started — make sure your `.env.local` is in place and that you're not committing any credentials.
