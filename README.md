@@ -36,6 +36,8 @@ The app uses a single Supabase table (`bmwic_entries`). To create it from scratc
 2. Open the SQL editor and run `schema.sql` from this repo — it creates the table, RLS policies, and the `increment_flag` function
 3. Copy your project URL, anon key, and service role key into `.env.local`
 
+`schema.sql` only includes the primary key index. If you're running this at scale, consider adding indexes on `ext_color`, `model_year`, and `user_submitted` depending on your query patterns.
+
 ## Environment variables
 
 Copy `.env.local.example` to `.env.local` and fill in your own values. See `SECURITY.md` for the full list and where to find each credential. Never commit `.env.local`.
@@ -52,6 +54,10 @@ npm run lint       # ESLint
 ## Deployment
 
 Pushing to `main` triggers a Cloudflare Pages/Workers build automatically. Run `npm run build:cf` locally before pushing to catch production-build errors that the dev server won't surface.
+
+## Notes
+
+**Turnstile:** `wrangler.toml` contains the original project's Turnstile site key. If you're forking this, replace `NEXT_PUBLIC_TURNSTILE_SITE_KEY` in `wrangler.toml` and `TURNSTILE_SECRET_KEY` in `.env.local` with your own keys from the [Cloudflare Turnstile dashboard](https://dash.cloudflare.com/?to=/:account/turnstile). The existing key is domain-restricted and won't work on a different origin.
 
 ## Contributing
 
