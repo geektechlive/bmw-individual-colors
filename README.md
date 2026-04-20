@@ -28,6 +28,14 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000).
 
+## Database setup
+
+The app uses a single Supabase table (`bmwic_entries`). To create it from scratch:
+
+1. Create a new [Supabase](https://supabase.com) project
+2. Open the SQL editor and run `schema.sql` from this repo — it creates the table, RLS policies, and the `increment_flag` function
+3. Copy your project URL, anon key, and service role key into `.env.local`
+
 ## Environment variables
 
 Copy `.env.local.example` to `.env.local` and fill in your own values. See `SECURITY.md` for the full list and where to find each credential. Never commit `.env.local`.
