@@ -56,3 +56,6 @@ scripts/seed-data*.json
 # claude code
 .claude/
 .wrangler/
+
+# local notes (removed DB policies, scratch SQL, etc.)
+removed-policies.sql
