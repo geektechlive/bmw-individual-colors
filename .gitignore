@@ -59,3 +59,10 @@ scripts/seed-data*.json
 
 # local notes (removed DB policies, scratch SQL, etc.)
 removed-policies.sql
+
+# AI assistant config — internal workflow files, not for contributors
+CLAUDE.md
+AGENTS.md
+
+# scraped forum data with usernames
+scripts/ground-truth.json

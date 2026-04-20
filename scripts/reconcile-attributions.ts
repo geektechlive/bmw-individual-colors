@@ -102,7 +102,7 @@ async function geocode(
   try {
     const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&format=json&limit=1`;
     const res = await fetch(url, {
-      headers: { "User-Agent": "bmw-individual-colors/1.0 (geektechlive@gmail.com)" },
+      headers: { "User-Agent": "bmw-individual-colors/1.0 (https://mcolors.geektechlive.com)" },
     });
     const data = (await res.json()) as Array<{ lat: string; lon: string }>;
     const result = data[0]
