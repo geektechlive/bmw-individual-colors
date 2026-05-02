@@ -8,10 +8,12 @@ const BLOCKED_PATHS = [
   'wp-json/gravity',
 ]
 
+const BLOCKED_EXACT = ['/.git/config', '/.env', '/.env.local', '/.env.production']
+
 export function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname
 
-  if (path === '/.git/config' || BLOCKED_PATHS.some(p => path.includes(p))) {
+  if (BLOCKED_EXACT.includes(path) || BLOCKED_PATHS.some(p => path.includes(p))) {
     return new NextResponse(null, { status: 403 })
   }
 }
