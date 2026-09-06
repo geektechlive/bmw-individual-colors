@@ -8,6 +8,10 @@ Run `npx tsx scripts/post-to-bimmerpost.ts` to publish pending items to the foru
 
 ## [Unreleased]
 
+- **Fixed:** harden entry edit/delete/flag flows
+
+- **Added:** add changelog automation and forum posting script
+
 - **Added:** block .env and additional credential probes in middleware
 
 - **Added:** block bot probe paths in middleware
