@@ -1,0 +1,52 @@
+#!/bin/sh
+# .githooks/post-commit
+#
+# Appends an entry to CHANGELOG.md's [Unreleased] section after each commit.
+# Skips merge commits and non-user-visible types (chore, ci, build, test, style).
+# Leaves CHANGELOG.md unstaged so it's included naturally in the next commit.
+
+SUBJECT="$(git log -1 --pretty=%s)"
+
+# Skip merge commits
+case "$SUBJECT" in
+  Merge\ *) exit 0 ;;
+esac
+
+# Parse "type: message" conventional commit format
+if echo "$SUBJECT" | grep -q '^[a-z]*:'; then
+  TYPE="${SUBJECT%%:*}"
+  REST="${SUBJECT#*: }"
+else
+  TYPE="other"
+  REST="$SUBJECT"
+fi
+
+# Map type to human label; skip infrastructure-only types
+case "$TYPE" in
+  feat)              LABEL="Added" ;;
+  fix)               LABEL="Fixed" ;;
+  perf)              LABEL="Improved" ;;
+  refactor)          LABEL="Improved" ;;
+  security)          LABEL="Security" ;;
+  docs)              LABEL="Docs" ;;
+  chore|ci|build|test|style) exit 0 ;;
+  *)                 LABEL="Changed" ;;
+esac
+
+ENTRY="- **${LABEL}:** ${REST}"
+export ENTRY
+
+node << 'EOF'
+const fs = require('fs');
+const entry = process.env.ENTRY;
+const file = 'CHANGELOG.md';
+if (!fs.existsSync(file) || !entry) process.exit(0);
+let content = fs.readFileSync(file, 'utf8');
+// Insert the new entry on the line after ## [Unreleased]
+content = content.replace(
+  /(## \[Unreleased\][^\n]*\n)/,
+  `$1\n${entry}\n`
+);
+fs.writeFileSync(file, content, 'utf8');
+console.log(`[changelog] ${entry}`);
+EOF

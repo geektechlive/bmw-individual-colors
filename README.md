@@ -59,6 +59,56 @@ Pushing to `main` triggers a Cloudflare Pages/Workers build automatically. Run `
 
 **Turnstile:** `wrangler.toml` contains the original project's Turnstile site key. If you're forking this, replace `NEXT_PUBLIC_TURNSTILE_SITE_KEY` in `wrangler.toml` and `TURNSTILE_SECRET_KEY` in `.env.local` with your own keys from the [Cloudflare Turnstile dashboard](https://dash.cloudflare.com/?to=/:account/turnstile). The existing key is domain-restricted and won't work on a different origin.
 
+## Changelog & forum thread posting
+
+The repo includes an automated system for maintaining a public changelog and posting updates to a vBulletin forum thread.
+
+### How it works
+
+**`CHANGELOG.md`** uses [Keep a Changelog](https://keepachangelog.com) format. A `## [Unreleased]` section accumulates pending entries. When you post, it becomes a dated section with the forum URL.
+
+**Git hook** (`.githooks/post-commit`) appends a changelog entry automatically after every meaningful commit. Wire it up once after cloning:
+
+```bash
+git config core.hooksPath .githooks
+```
+
+Entries are generated from [Conventional Commits](https://www.conventionalcommits.org) prefixes:
+
+| Commit prefix | Changelog label |
+|---|---|
+| `feat:` | Added |
+| `fix:` | Fixed |
+| `perf:` / `refactor:` | Improved |
+| `security:` | Security |
+| `docs:` | Docs |
+| `chore:` / `ci:` / `build:` / `test:` | skipped |
+
+**Posting script** converts the pending entries to BBCode and posts them as a reply to your designated vBulletin thread. It handles login, CSRF token extraction, and post submission — no browser required.
+
+```bash
+npx tsx scripts/post-to-bimmerpost.ts --dry-run   # preview BBCode without posting
+npx tsx scripts/post-to-bimmerpost.ts             # post and update CHANGELOG.md
+```
+
+### Setup for your own forum thread
+
+1. Add credentials to `.env.local`:
+   ```
+   BIMMERPOST_USERNAME=your-forum-username
+   BIMMERPOST_PASSWORD=your-forum-password
+   ```
+2. In `scripts/post-to-bimmerpost.ts`, update the two constants at the top:
+   ```ts
+   const THREAD_ID = 'your-thread-id';         // from the thread URL (?t=)
+   const THREAD_ANCHOR_POST = 'your-post-id';  // any post ID in that thread (?p=)
+   ```
+   Both values are visible in your browser's address bar when viewing or replying to the thread.
+
+3. Run `--dry-run` first to confirm the BBCode renders as expected.
+
+This works with any standard vBulletin 3.8+ installation. The script uses form-based auth (the same flow as logging in through a browser) since vBulletin 3.x does not expose a public API.
+
 ## Contributing
 
 Community submissions and corrections are welcome. See `SECURITY.md` before getting started — make sure your `.env.local` is in place and that you're not committing any credentials.
