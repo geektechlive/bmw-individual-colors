@@ -15,14 +15,18 @@ export const metadata: Metadata = {
 
 interface Props {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ token?: string }>;
+  searchParams: Promise<{ token?: string; exp?: string }>;
 }
 
 export default async function EditPage({ params, searchParams }: Props) {
   const { id } = await params;
-  const { token } = await searchParams;
+  const { token, exp } = await searchParams;
 
-  if (!token) {
+  const expiresAt = exp ? parseInt(exp, 10) : 0;
+  // eslint-disable-next-line react-hooks/purity -- Server Component; Date.now() runs once per request on the server
+  const isExpired = token && expiresAt && Date.now() > expiresAt;
+
+  if (!token || isExpired) {
     return (
       <main style={{ maxWidth: 560, margin: '0 auto', padding: '2rem 1.5rem' }}>
         <Script
@@ -42,9 +46,14 @@ export default async function EditPage({ params, searchParams }: Props) {
         <h1 style={{ fontSize: 26, fontWeight: 800, color: '#e2e8f0', marginBottom: 6 }}>
           Edit Entry
         </h1>
-        <p style={{ color: '#64748b', fontSize: 14, marginBottom: 28 }}>
+        <p style={{ color: '#64748b', fontSize: 14, marginBottom: isExpired ? 8 : 28 }}>
           Verify you&apos;re the original submitter to make changes.
         </p>
+        {isExpired && (
+          <p style={{ color: '#fca5a5', fontSize: 13, marginBottom: 20 }}>
+            Your edit session expired. Please verify again to continue.
+          </p>
+        )}
 
         <div style={{
           background: '#0f1923',
@@ -92,7 +101,7 @@ export default async function EditPage({ params, searchParams }: Props) {
         borderRadius: 12,
         padding: '1.5rem',
       }}>
-        <EditEntryForm entry={entry as BmwEntry} editToken={token} />
+        <EditEntryForm entry={entry as BmwEntry} editToken={token} editExpiry={exp} />
       </div>
     </main>
   );

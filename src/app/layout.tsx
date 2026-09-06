@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import Link from 'next/link';
+import Script from 'next/script';
 import './globals.css';
 import NavLinks from './NavLinks';
 
@@ -27,6 +28,10 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
       <body>
+        <Script
+          src="https://challenges.cloudflare.com/turnstile/v0/api.js"
+          strategy="afterInteractive"
+        />
         {/* M-stripe top bar */}
         <div style={{ display: 'flex', height: 4, position: 'sticky', top: 0, zIndex: 51 }}>
           <div style={{ flex: 1, background: '#1C69D4' }} />

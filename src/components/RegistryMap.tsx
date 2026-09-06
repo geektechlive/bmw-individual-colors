@@ -22,19 +22,29 @@ function makeIcon(hex: string): L.DivIcon {
   });
 }
 
+function esc(str: string): string {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 function makePopupHtml(entry: BmwEntry, hex: string): string {
   const location = [entry.location_city, entry.location_state, entry.location_country]
     .filter(Boolean)
+    .map((s) => esc(s!))
     .join(', ');
   return `
     <div style="min-width:180px;font-family:inherit">
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
-        <div style="width:14px;height:14px;border-radius:50%;background:${hex};border:1px solid #ccc;flex-shrink:0"></div>
-        <strong style="font-size:13px">${entry.ext_color}</strong>
+        <div style="width:14px;height:14px;border-radius:50%;background:${esc(hex)};border:1px solid #ccc;flex-shrink:0"></div>
+        <strong style="font-size:13px">${esc(entry.ext_color)}</strong>
       </div>
       <div style="font-size:12px;color:#555;line-height:1.6">
-        <div>${entry.model_year} BMW ${entry.body_style}${entry.competition ? ' Competition' : ''}</div>
-        <div>${entry.drivetrain} · ${entry.transmission}</div>
+        <div>${esc(String(entry.model_year))} BMW ${esc(entry.body_style)}${entry.competition ? ' Competition' : ''}</div>
+        <div>${esc(entry.drivetrain)} · ${esc(entry.transmission)}</div>
         ${location ? `<div style="margin-top:4px">${location}</div>` : ''}
       </div>
     </div>
@@ -71,7 +81,7 @@ export default function RegistryMap({ entries }: Props) {
     const group = L.markerClusterGroup({ chunkedLoading: true });
 
     entries.forEach((entry) => {
-      if (!entry.location_lat || !entry.location_lng) return;
+      if (entry.location_lat == null || entry.location_lng == null) return;
       const hex = getColorHex(entry.ext_color);
       L.marker([entry.location_lat, entry.location_lng], { icon: makeIcon(hex) })
         .bindPopup(makePopupHtml(entry, hex))

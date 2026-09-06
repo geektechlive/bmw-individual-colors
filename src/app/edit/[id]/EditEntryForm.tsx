@@ -74,6 +74,7 @@ const fieldStyle: React.CSSProperties = {
 interface Props {
   entry: BmwEntry;
   editToken: string | undefined;
+  editExpiry: string | undefined;
 }
 
 function entryToVariant(entry: BmwEntry): string {
@@ -82,8 +83,9 @@ function entryToVariant(entry: BmwEntry): string {
   return 'Competition';
 }
 
-export default function EditEntryForm({ entry, editToken }: Props) {
+export default function EditEntryForm({ entry, editToken, editExpiry }: Props) {
   const [state, action, isPending] = useActionState(updateEntry, {});
+  const [deleteState, deleteAction, isDeletePending] = useActionState(deleteOwnEntry, {});
 
   // Variant + transmission
   const [variant, setVariant] = useState(() => entryToVariant(entry));
@@ -94,8 +96,12 @@ export default function EditEntryForm({ entry, editToken }: Props) {
   const [colorValue, setColorValue] = useState(entry.ext_color);
   const [showColorDrop, setShowColorDrop] = useState(false);
 
-  // Location cascade — reverse-lookup ISO code from stored country name
-  const initialCountryCode = ALL_COUNTRIES.find((c) => c.name === entry.location_country)?.isoCode ?? 'US';
+  // Location cascade — reverse-lookup ISO code from stored country name (case-insensitive fallback)
+  const foundCountry =
+    ALL_COUNTRIES.find((c) => c.name === entry.location_country) ??
+    ALL_COUNTRIES.find((c) => c.name.toLowerCase() === (entry.location_country ?? '').toLowerCase());
+  const initialCountryCode = foundCountry?.isoCode ?? 'US';
+  const countryNameMismatch = !foundCountry && !!entry.location_country;
   const [countryCode, setCountryCode] = useState(initialCountryCode);
   const [stateValue, setStateValue] = useState(entry.location_state ?? '');
 
@@ -125,9 +131,33 @@ export default function EditEntryForm({ entry, editToken }: Props) {
   }
 
   return (
+    <>
     <form action={action} style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
       <input type="hidden" name="id" value={entry.id} />
       <input type="hidden" name="edit_token" value={editToken ?? ''} />
+      <input type="hidden" name="exp" value={editExpiry ?? ''} />
+
+      {entry.edit_count > 0 && (
+        <p style={{ fontSize: 12, color: '#64748b', margin: 0 }}>
+          Edited {entry.edit_count} {entry.edit_count === 1 ? 'time' : 'times'}
+          {entry.last_edited_at && (
+            <> &middot; last updated {new Date(entry.last_edited_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</>
+          )}
+        </p>
+      )}
+
+      {countryNameMismatch && (
+        <div style={{
+          padding: '10px 14px',
+          background: 'rgba(234,179,8,0.1)',
+          border: '1px solid rgba(234,179,8,0.4)',
+          borderRadius: 6,
+          color: '#fde047',
+          fontSize: 13,
+        }}>
+          Original country &ldquo;{entry.location_country}&rdquo; was not recognized. Please select the correct country below before saving.
+        </div>
+      )}
 
       {state?.error && (
         <div style={{
@@ -452,7 +482,9 @@ export default function EditEntryForm({ entry, editToken }: Props) {
         {isPending ? 'Saving...' : 'Save Changes'}
       </button>
 
-      {/* Delete entry */}
+    </form>
+
+      {/* Delete entry — separate form, must not be nested inside the update form */}
       <div style={{ borderTop: '1px solid #2d3f55', paddingTop: 20 }}>
         {!confirmDelete ? (
           <button
@@ -476,24 +508,29 @@ export default function EditEntryForm({ entry, editToken }: Props) {
             <p style={{ color: '#fca5a5', fontSize: 14, margin: 0 }}>
               This will permanently remove your entry from the registry. Are you sure?
             </p>
+            {deleteState?.error && (
+              <p style={{ color: '#fca5a5', fontSize: 13, margin: 0 }}>{deleteState.error}</p>
+            )}
             <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-              <form action={deleteOwnEntry}>
+              <form action={deleteAction}>
                 <input type="hidden" name="id" value={entry.id} />
                 <input type="hidden" name="edit_token" value={editToken ?? ''} />
+                <input type="hidden" name="exp" value={editExpiry ?? ''} />
                 <button
                   type="submit"
+                  disabled={isDeletePending}
                   style={{
                     padding: '10px 20px',
-                    background: '#ef4444',
+                    background: isDeletePending ? '#7f1d1d' : '#ef4444',
                     color: '#ffffff',
                     border: 'none',
                     borderRadius: 8,
                     fontSize: 14,
                     fontWeight: 700,
-                    cursor: 'pointer',
+                    cursor: isDeletePending ? 'not-allowed' : 'pointer',
                   }}
                 >
-                  Yes, delete it
+                  {isDeletePending ? 'Deleting...' : 'Yes, delete it'}
                 </button>
               </form>
               <button
@@ -515,6 +552,6 @@ export default function EditEntryForm({ entry, editToken }: Props) {
           </div>
         )}
       </div>
-    </form>
+    </>
   );
 }

@@ -21,6 +21,8 @@ export interface BmwEntry {
   source_forum: string | null;
   posted_at: string | null;
   flag_count: number;
+  edit_count: number;
+  last_edited_at: string | null;
   notes: string | null;
   user_submitted: boolean;
 }

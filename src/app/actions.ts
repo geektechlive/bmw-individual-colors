@@ -10,6 +10,18 @@ interface FormState {
   duplicateInfo?: string;
 }
 
+// Constant-time string comparison to prevent timing attacks on token checks.
+function timingSafeEqual(a: string, b: string): boolean {
+  const aBytes = new TextEncoder().encode(a);
+  const bBytes = new TextEncoder().encode(b);
+  let diff = aBytes.length ^ bBytes.length;
+  const len = Math.max(aBytes.length, bBytes.length);
+  for (let i = 0; i < len; i++) {
+    diff |= (aBytes[i] ?? 0) ^ (bBytes[i] ?? 0);
+  }
+  return diff === 0;
+}
+
 export async function submitEntry(
   _prevState: FormState,
   formData: FormData
@@ -120,6 +132,13 @@ export async function submitEntry(
   });
 
   if (error) {
+    // Unique constraint violation means concurrent duplicate slipped through
+    if (error.code === '23505') {
+      return {
+        duplicate: true,
+        duplicateInfo: `This exact build is already registered under "${forum_username}".`,
+      };
+    }
     console.error('Insert error:', error);
     return { error: 'Failed to save your submission. Please try again.' };
   }
@@ -132,8 +151,11 @@ interface VerifyState {
   error?: string;
 }
 
-async function generateEditToken(id: string, username: string): Promise<string> {
-  const secret = process.env.ADMIN_TOKEN ?? '';
+const EDIT_TOKEN_TTL_MS = 60 * 60 * 1000; // 1 hour
+
+async function generateEditToken(id: string, username: string, expiresAt: number): Promise<string> {
+  const secret = process.env.ADMIN_TOKEN;
+  if (!secret) throw new Error('ADMIN_TOKEN environment variable is not configured.');
   const key = await crypto.subtle.importKey(
     'raw',
     new TextEncoder().encode(secret),
@@ -144,7 +166,7 @@ async function generateEditToken(id: string, username: string): Promise<string> 
   const sig = await crypto.subtle.sign(
     'HMAC',
     key,
-    new TextEncoder().encode(`${id}:${username.toLowerCase()}`)
+    new TextEncoder().encode(`${id}:${username.toLowerCase()}:${expiresAt}`)
   );
   return Array.from(new Uint8Array(sig))
     .map((b) => b.toString(16).padStart(2, '0'))
@@ -192,8 +214,9 @@ export async function verifyForumUsername(
     return { error: 'Username does not match the entry.' };
   }
 
-  const editToken = await generateEditToken(id, entry.forum_username ?? '');
-  redirect(`/edit/${id}?token=${editToken}`);
+  const expiresAt = Date.now() + EDIT_TOKEN_TTL_MS;
+  const editToken = await generateEditToken(id, entry.forum_username ?? '', expiresAt);
+  redirect(`/edit/${id}?token=${editToken}&exp=${expiresAt}`);
 }
 
 export async function updateEntry(
@@ -202,17 +225,22 @@ export async function updateEntry(
 ): Promise<VerifyState> {
   const id = (formData.get('id') as string)?.trim();
   const editToken = (formData.get('edit_token') as string)?.trim();
+  const expParam = (formData.get('exp') as string)?.trim();
 
-  if (!id || !editToken) {
+  if (!id || !editToken || !expParam) {
     return { error: 'Missing required fields.' };
+  }
+
+  const expiresAt = parseInt(expParam, 10);
+  if (!expiresAt || Date.now() > expiresAt) {
+    return { error: 'Your edit session has expired. Please go back and verify your username again.' };
   }
 
   const supabase = createAdminClient();
 
-  // Fetch entry to get forum_username + current location for geocode comparison
   const { data: existing } = await supabase
     .from('bmwic_entries')
-    .select('id, forum_username, location_city, location_state, location_country, location_lat, location_lng')
+    .select('id, forum_username, edit_count, location_city, location_state, location_country, location_lat, location_lng')
     .eq('id', id)
     .single();
 
@@ -220,9 +248,8 @@ export async function updateEntry(
     return { error: 'Entry not found.' };
   }
 
-  // Re-verify the HMAC token — proves the user passed Turnstile verification for this entry
-  const expectedToken = await generateEditToken(id, existing.forum_username ?? '');
-  if (editToken !== expectedToken) {
+  const expectedToken = await generateEditToken(id, existing.forum_username ?? '', expiresAt);
+  if (!timingSafeEqual(editToken, expectedToken)) {
     return { error: 'Unauthorized.' };
   }
 
@@ -242,7 +269,6 @@ export async function updateEntry(
     || (formData.get('location_country') as string)?.trim()
     || 'United States';
 
-  // Re-geocode only if location changed
   let location_lat: number | null = existing.location_lat;
   let location_lng: number | null = existing.location_lng;
 
@@ -290,6 +316,8 @@ export async function updateEntry(
     location_lng,
     source_forum: (formData.get('source_forum') as string)?.trim() || 'BimmerPost',
     notes: (formData.get('notes') as string)?.trim() || null,
+    edit_count: (existing.edit_count as number ?? 0) + 1,
+    last_edited_at: new Date().toISOString(),
   }).eq('id', id);
 
   if (error) {
@@ -301,13 +329,22 @@ export async function updateEntry(
   redirect('/entries?updated=1');
 }
 
-export async function flagEntry(id: string): Promise<void> {
+export async function flagEntry(id: string, tsToken: string): Promise<void> {
+  const tsRes = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+    method: 'POST',
+    body: JSON.stringify({ secret: process.env.TURNSTILE_SECRET_KEY, response: tsToken }),
+    headers: { 'Content-Type': 'application/json' },
+  });
+  const { success } = await tsRes.json() as { success: boolean };
+  if (!success) return;
+
   const supabase = createAdminClient();
-  await supabase.rpc('increment_flag', { entry_id: id });
+  const { error } = await supabase.rpc('increment_flag', { entry_id: id });
+  if (error) console.error('Flag error:', error);
 }
 
 export async function deleteEntry(id: string, token: string): Promise<{ error?: string }> {
-  if (token !== process.env.ADMIN_TOKEN) {
+  if (!timingSafeEqual(token, process.env.ADMIN_TOKEN ?? '')) {
     return { error: 'Unauthorized' };
   }
   const supabase = createAdminClient();
@@ -317,7 +354,7 @@ export async function deleteEntry(id: string, token: string): Promise<{ error?: 
 }
 
 export async function dismissFlag(id: string, token: string): Promise<{ error?: string }> {
-  if (token !== process.env.ADMIN_TOKEN) {
+  if (!timingSafeEqual(token, process.env.ADMIN_TOKEN ?? '')) {
     return { error: 'Unauthorized' };
   }
   const supabase = createAdminClient();
@@ -326,12 +363,21 @@ export async function dismissFlag(id: string, token: string): Promise<{ error?: 
   return {};
 }
 
-export async function deleteOwnEntry(formData: FormData): Promise<never> {
+export async function deleteOwnEntry(
+  _prevState: { error?: string },
+  formData: FormData
+): Promise<{ error?: string }> {
   const id = (formData.get('id') as string)?.trim();
   const editToken = (formData.get('edit_token') as string)?.trim();
+  const expParam = (formData.get('exp') as string)?.trim();
 
-  if (!id || !editToken) {
-    throw new Error('Missing required fields.');
+  if (!id || !editToken || !expParam) {
+    return { error: 'Missing required fields.' };
+  }
+
+  const expiresAt = parseInt(expParam, 10);
+  if (!expiresAt || Date.now() > expiresAt) {
+    return { error: 'Your edit session has expired. Please go back and verify your username again.' };
   }
 
   const supabase = createAdminClient();
@@ -342,15 +388,20 @@ export async function deleteOwnEntry(formData: FormData): Promise<never> {
     .single();
 
   if (!existing) {
-    throw new Error('Entry not found.');
+    return { error: 'Entry not found.' };
   }
 
-  const expectedToken = await generateEditToken(id, existing.forum_username ?? '');
-  if (editToken !== expectedToken) {
-    throw new Error('Unauthorized.');
+  const expectedToken = await generateEditToken(id, existing.forum_username ?? '', expiresAt);
+  if (!timingSafeEqual(editToken, expectedToken)) {
+    return { error: 'Unauthorized.' };
   }
 
-  await supabase.from('bmwic_entries').delete().eq('id', id);
+  const { error: deleteError } = await supabase.from('bmwic_entries').delete().eq('id', id);
+  if (deleteError) {
+    console.error('Delete error:', deleteError);
+    return { error: 'Failed to delete entry. Please try again.' };
+  }
+
   revalidateTag('entries', {});
   redirect('/entries?deleted=1');
 }

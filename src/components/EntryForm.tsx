@@ -470,20 +470,22 @@ export default function EntryForm() {
         data-theme="dark"
       />
 
-      <button
-        type="submit"
-        disabled={isPending || !forumUsername.trim()}
-        style={{
-          padding: '12px 24px',
-          background: isPending || !forumUsername.trim() ? '#374151' : '#1C69D4',
-          color: '#ffffff', border: 'none', borderRadius: 8,
-          fontSize: 15, fontWeight: 700,
-          cursor: isPending || !forumUsername.trim() ? 'not-allowed' : 'pointer',
-          alignSelf: 'flex-start', transition: 'background 0.2s',
-        }}
-      >
-        {isPending ? 'Submitting...' : 'Submit Build'}
-      </button>
+      {!state?.duplicate && (
+        <button
+          type="submit"
+          disabled={isPending || !forumUsername.trim()}
+          style={{
+            padding: '12px 24px',
+            background: isPending || !forumUsername.trim() ? '#374151' : '#1C69D4',
+            color: '#ffffff', border: 'none', borderRadius: 8,
+            fontSize: 15, fontWeight: 700,
+            cursor: isPending || !forumUsername.trim() ? 'not-allowed' : 'pointer',
+            alignSelf: 'flex-start', transition: 'background 0.2s',
+          }}
+        >
+          {isPending ? 'Submitting...' : 'Submit Build'}
+        </button>
+      )}
     </form>
   );
 }

@@ -67,8 +67,10 @@ export default function EntryTable({ entries }: Props) {
   });
 
   const sorted = [...filtered].sort((a, b) => {
-    const av = (a[sortKey] ?? '') as string | number;
-    const bv = (b[sortKey] ?? '') as string | number;
+    const raw_a = a[sortKey];
+    const raw_b = b[sortKey];
+    const av = typeof raw_a === 'number' ? (raw_a ?? 0) : ((raw_a ?? '') as string);
+    const bv = typeof raw_b === 'number' ? (raw_b ?? 0) : ((raw_b ?? '') as string);
     if (av < bv) return sortDir === 'asc' ? -1 : 1;
     if (av > bv) return sortDir === 'asc' ? 1 : -1;
     return 0;
