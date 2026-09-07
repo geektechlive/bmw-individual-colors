@@ -1,23 +1,28 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
-const BLOCKED_PATHS = [
+const BLOCKED_SUBSTRINGS = [
   'wp-includes',
   'xmlrpc.php',
   '_ignition',
-  'wp-json/gravity',
+  'wp-json',
+  'phpinfo',
 ]
 
-const BLOCKED_EXACT = ['/.git/config', '/.env', '/.env.local', '/.env.production']
-
 export function middleware(request: NextRequest) {
-  const path = request.nextUrl.pathname
+  const path = request.nextUrl.pathname.toLowerCase()
 
-  if (BLOCKED_EXACT.includes(path) || BLOCKED_PATHS.some(p => path.includes(p))) {
+  const isBlocked =
+    path.startsWith('/.env') ||
+    path.startsWith('/.git') ||
+    path.endsWith('.php') ||
+    BLOCKED_SUBSTRINGS.some(p => path.includes(p))
+
+  if (isBlocked) {
     return new NextResponse(null, { status: 403 })
   }
 }
 
 export const config = {
-  matcher: '/:path*',
+  matcher: '/((?!_next/static|_next/image|favicon.ico|icon.png).*)',
 }
