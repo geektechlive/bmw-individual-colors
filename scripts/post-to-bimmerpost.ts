@@ -17,16 +17,24 @@
  */
 
 import { createHash } from 'crypto';
-import { readFileSync, writeFileSync } from 'fs';
+import { readFileSync, writeFileSync, existsSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
-import { config } from 'dotenv';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const ROOT = join(__dirname, '..');
 
-config({ path: join(ROOT, '.env.local') });
+// Load .env.local so the script works without inline env vars
+const envFile = join(ROOT, '.env.local');
+if (existsSync(envFile)) {
+  for (const line of readFileSync(envFile, 'utf-8').split('\n')) {
+    const [key, ...rest] = line.split('=');
+    if (key && rest.length) process.env[key.trim()] = rest.join('=').trim();
+  }
+}
+
+const MAX_POST_LENGTH = 10_000;
 
 const FORUM_BASE = 'https://g80.bimmerpost.com/forums';
 const THREAD_ID = '2237372';
@@ -57,6 +65,10 @@ class CookieJar {
 
   header(): string {
     return Array.from(this.jar.entries()).map(([k, v]) => `${k}=${v}`).join('; ');
+  }
+
+  get(name: string): string | undefined {
+    return this.jar.get(name);
   }
 }
 
@@ -120,9 +132,12 @@ async function login(jar: CookieJar): Promise<void> {
     jar.absorb(rRes.headers);
   }
 
-  if (!jar.header().includes('bbuserid') && !jar.header().includes('bbsessionhash')) {
+  // vBulletin sets bbsessionhash for guests too, so only bbuserid (non-zero)
+  // reliably indicates an authenticated session.
+  const bbuserid = jar.get('bbuserid');
+  if (!bbuserid || bbuserid === '0') {
     throw new Error(
-      'Login failed — no auth cookies received. Check BIMMERPOST_USERNAME/PASSWORD.'
+      'Login failed — bbuserid cookie missing or zero. Check BIMMERPOST_USERNAME/PASSWORD.'
     );
   }
 }
@@ -133,6 +148,14 @@ interface ReplyFormFields {
   poststarttime: string;
   loggedinuser: string;
   subject: string;
+}
+
+// Extracts a hidden <input> value by name, tolerating either attribute order
+// (name="x" value="y" or value="y" name="x") since vBulletin templates vary.
+function getInputValue(html: string, name: string): string {
+  const nameFirst = new RegExp(`<input[^>]*name="${name}"[^>]*value="([^"]*)"`, 'i');
+  const valueFirst = new RegExp(`<input[^>]*value="([^"]*)"[^>]*name="${name}"`, 'i');
+  return html.match(nameFirst)?.[1] ?? html.match(valueFirst)?.[1] ?? '';
 }
 
 async function fetchReplyForm(jar: CookieJar): Promise<ReplyFormFields> {
@@ -148,8 +171,7 @@ async function fetchReplyForm(jar: CookieJar): Promise<ReplyFormFields> {
   jar.absorb(res.headers);
   const html = await res.text();
 
-  const get = (name: string) =>
-    html.match(new RegExp(`name="${name}"[^>]*value="([^"]*)"`))?.[1] ?? '';
+  const get = (name: string) => getInputValue(html, name);
 
   const securitytoken = get('securitytoken');
   if (!securitytoken || securitytoken === 'guest') {
@@ -158,10 +180,24 @@ async function fetchReplyForm(jar: CookieJar): Promise<ReplyFormFields> {
     );
   }
 
+  const posthash = get('posthash');
+  if (!posthash) {
+    throw new Error(
+      'Could not get posthash from reply form — login may have failed or the form structure changed.'
+    );
+  }
+
+  const poststarttime = get('poststarttime');
+  if (!poststarttime) {
+    throw new Error(
+      'Could not get poststarttime from reply form — login may have failed or the form structure changed.'
+    );
+  }
+
   return {
     securitytoken,
-    posthash: get('posthash'),
-    poststarttime: get('poststarttime'),
+    posthash,
+    poststarttime,
     loggedinuser: get('loggedinuser'),
     subject: get('subject'),
   };
@@ -203,17 +239,50 @@ async function submitReply(
   );
 
   const location = res.headers.get('location') ?? '';
-  if (!location) {
-    // vBulletin sometimes returns 200 with the form on error
-    const html = await res.text();
-    const errMatch = html.match(/class="[^"]*error[^"]*"[^>]*>([^<]+)</i);
-    if (errMatch) throw new Error(`Forum error: ${errMatch[1].trim()}`);
-    throw new Error('Post may have failed — no redirect received and no error message found.');
+
+  // Standard success path: vBulletin redirects (302/303) to showthread.php.
+  if ((res.status === 302 || res.status === 303) && location) {
+    return resolveForumUrl(location);
   }
 
-  return location.startsWith('http')
-    ? location
-    : `${FORUM_BASE}/${location.replace(/^\//, '')}`;
+  // Fallback: some proxies/configs return 200 with either a "thank you" body
+  // or a meta-refresh redirect instead of an HTTP redirect.
+  const html = await res.text();
+
+  if (html.includes('Thank you for posting')) {
+    const metaUrl = extractMetaRefreshUrl(html);
+    if (metaUrl) return resolveForumUrl(metaUrl);
+    return `${FORUM_BASE}/showthread.php?t=${THREAD_ID}`;
+  }
+
+  const metaUrl = extractMetaRefreshUrl(html);
+  if (metaUrl && metaUrl.includes('showthread.php')) {
+    return resolveForumUrl(metaUrl);
+  }
+
+  // Not a recognized success — look for a vBulletin error message.
+  const errMatch =
+    html.match(/class="[^"]*\berror\b[^"]*"[^>]*>([^<]+)</i) ??
+    html.match(/<div class="panel"[^>]*>([\s\S]*?)<\/div>/i) ??
+    html.match(/class="[^"]*\bblockrow\b[^"]*"[^>]*>\s*([^<]+)</i);
+  if (errMatch) throw new Error(`Forum error: ${errMatch[1].trim()}`);
+
+  // Some other redirect (e.g. back to the thread) without an explicit
+  // success/error marker — treat the location we do have as the result.
+  if (location) return resolveForumUrl(location);
+
+  throw new Error('Post may have failed — no redirect, no success marker, and no error message found.');
+}
+
+function resolveForumUrl(url: string): string {
+  return url.startsWith('http') ? url : `${FORUM_BASE}/${url.replace(/^\//, '')}`;
+}
+
+function extractMetaRefreshUrl(html: string): string | null {
+  const match = html.match(
+    /<meta[^>]*http-equiv=["']refresh["'][^>]*content=["'][^"']*url=([^"'>]+)["']?/i
+  );
+  return match ? match[1] : null;
 }
 
 // ─── Changelog handling ───────────────────────────────────────────────────────
@@ -225,9 +294,19 @@ function readPending(changelogPath: string): string {
   return match ? match[1].trim() : '';
 }
 
-function markPosted(changelogPath: string, postUrl: string): void {
+function markPosted(changelogPath: string, postUrl: string, entries: number): void {
   const content = readFileSync(changelogPath, 'utf8');
   const date = new Date().toISOString().split('T')[0];
+
+  // Record the last successful post BEFORE touching CHANGELOG.md, so a
+  // failed/aborted rewrite still leaves a durable record that the forum
+  // post itself succeeded.
+  const lastPostPath = join(ROOT, '.last-post.json');
+  writeFileSync(
+    lastPostPath,
+    JSON.stringify({ url: postUrl, postedAt: new Date().toISOString(), entries }, null, 2) + '\n',
+    'utf8'
+  );
 
   // Replace ## [Unreleased] header + its content block with:
   //   ## [Unreleased] (empty)
@@ -239,6 +318,14 @@ function markPosted(changelogPath: string, postUrl: string): void {
     (_, header, body, sep) =>
       `${header}\n${sep}\n\n## [${date}] — ${postUrl}\n${body.trimEnd()}\n`
   );
+
+  if (updated === content) {
+    throw new Error(
+      'markPosted: CHANGELOG.md rewrite produced no change — the [Unreleased] section format may have changed. ' +
+      `The post itself succeeded (${postUrl}); .last-post.json was written. Fix CHANGELOG.md manually.`
+    );
+  }
+
   writeFileSync(changelogPath, updated, 'utf8');
 }
 
@@ -260,13 +347,19 @@ function mdToBBCode(markdown: string): string {
 
   const closeList = () => {
     if (inList) {
-      out.push(listType === 'numbered' ? '[/LIST]' : '[/LIST]');
+      out.push('[/LIST]');
       inList = false;
       listType = null;
     }
   };
 
   for (const raw of lines) {
+    // A blank line between bullet items is just markdown paragraph spacing,
+    // not a list terminator — buffer it by skipping instead of closing.
+    if (raw.trim() === '' && inList) {
+      continue;
+    }
+
     const numberedMatch = raw.match(/^(\d+)\.\s+([\s\S]*)/);
     const bulletMatch = raw.match(/^[-*]\s+([\s\S]*)/);
     const headingMatch = raw.match(/^(#{1,3})\s+([\s\S]*)/);
@@ -321,12 +414,20 @@ async function main() {
   ].join('\n');
 
   const fullMessage = bbcode + footer;
+  const entryCount = (pending.match(/^[-*]\s+/gm) ?? []).length;
 
   console.log('\n══════════════════════════════════════');
   console.log('  BBCode preview');
   console.log('══════════════════════════════════════\n');
   console.log(fullMessage);
   console.log('\n══════════════════════════════════════\n');
+
+  if (fullMessage.length > MAX_POST_LENGTH) {
+    throw new Error(
+      `Post body is ${fullMessage.length} chars, exceeding the ${MAX_POST_LENGTH}-char limit. ` +
+      'Trim the [Unreleased] section in CHANGELOG.md before posting.'
+    );
+  }
 
   if (dryRun) {
     console.log('[dry-run] Stopped before posting. Remove --dry-run to publish.');
@@ -352,7 +453,7 @@ async function main() {
   const postUrl = await submitReply(jar, fields, fullMessage);
 
   console.log(`\nPosted: ${postUrl}`);
-  markPosted(changelogPath, postUrl);
+  markPosted(changelogPath, postUrl, entryCount);
   console.log('CHANGELOG.md updated.\n');
 }
 

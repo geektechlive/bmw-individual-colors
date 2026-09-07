@@ -66,3 +66,6 @@ AGENTS.md
 
 # scraped forum data with usernames
 scripts/ground-truth.json
+
+# forum-post automation record (local runtime artifact)
+.last-post.json

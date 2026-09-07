@@ -2,8 +2,18 @@
 # .githooks/post-commit
 #
 # Appends an entry to CHANGELOG.md's [Unreleased] section after each commit.
-# Skips merge commits and non-user-visible types (chore, ci, build, test, style).
+# Skips merge commits, commits made during a rebase, non-user-visible types
+# (chore, ci, build, test, style), and amend re-fires whose entry is already
+# present in [Unreleased].
 # Leaves CHANGELOG.md unstaged so it's included naturally in the next commit.
+
+GIT_DIR="$(git rev-parse --git-dir)"
+
+# Skip commits replayed by an in-progress rebase — post-commit fires once per
+# replayed commit, which would otherwise duplicate changelog entries.
+if [ -d "$GIT_DIR/rebase-merge" ] || [ -d "$GIT_DIR/rebase-apply" ]; then
+  exit 0
+fi
 
 SUBJECT="$(git log -1 --pretty=%s)"
 
@@ -12,10 +22,12 @@ case "$SUBJECT" in
   Merge\ *) exit 0 ;;
 esac
 
-# Parse "type: message" conventional commit format
-if echo "$SUBJECT" | grep -q '^[a-z]*:'; then
-  TYPE="${SUBJECT%%:*}"
-  REST="${SUBJECT#*: }"
+# Parse "type(scope)!: message" conventional commit format — tolerates an
+# optional scope, an optional "!" breaking-change marker, and no space
+# after the colon.
+if echo "$SUBJECT" | grep -qE '^[a-z]+(\([^)]*\))?!?:'; then
+  TYPE="$(echo "$SUBJECT" | sed -E 's/^([a-z]+)(\([^)]*\))?!?:.*/\1/')"
+  REST="$(echo "$SUBJECT" | sed -E 's/^[a-z]+(\([^)]*\))?!?:[[:space:]]*//')"
 else
   TYPE="other"
   REST="$SUBJECT"
@@ -34,6 +46,17 @@ case "$TYPE" in
 esac
 
 ENTRY="- **${LABEL}:** ${REST}"
+
+# Skip if this exact entry is already recorded in [Unreleased] — this is the
+# common signature of `git commit --amend` re-firing post-commit for a
+# logically-unchanged commit, and keeps the hook idempotent either way.
+if [ -f CHANGELOG.md ]; then
+  ALREADY_PRESENT="$(awk '/^## \[Unreleased\]/{flag=1; next} /^## /{if (flag) exit} flag' CHANGELOG.md | grep -qF -- "$ENTRY" && echo yes)"
+  if [ "$ALREADY_PRESENT" = "yes" ]; then
+    exit 0
+  fi
+fi
+
 export ENTRY
 
 node << 'EOF'
@@ -42,10 +65,17 @@ const entry = process.env.ENTRY;
 const file = 'CHANGELOG.md';
 if (!fs.existsSync(file) || !entry) process.exit(0);
 let content = fs.readFileSync(file, 'utf8');
-// Insert the new entry on the line after ## [Unreleased]
+if (!/## \[Unreleased\]/.test(content)) {
+  console.warn('[changelog] Warning: no "## [Unreleased]" heading found in CHANGELOG.md — skipping.');
+  process.exit(0);
+}
+// Insert the new entry on the line after ## [Unreleased]. Uses a replacer
+// function (not a $1-style replacement string) so literal $&/$1/$2 sequences
+// that happen to appear in the commit subject can't be reinterpreted as
+// String.replace substitution patterns and corrupt the file.
 content = content.replace(
   /(## \[Unreleased\][^\n]*\n)/,
-  `$1\n${entry}\n`
+  (_match, header) => `${header}\n${entry}\n`
 );
 fs.writeFileSync(file, content, 'utf8');
 console.log(`[changelog] ${entry}`);
