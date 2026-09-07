@@ -18,7 +18,7 @@
     "country-state-city": "^3.2.1",
     "leaflet": "^1.9.4",
     "leaflet.markercluster": "^1.5.3",
-    "next": "16.2.3",
+    "next": "16.3.4",
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "recharts": "^3.8.1"
