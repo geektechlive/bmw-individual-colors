@@ -1,5 +1,6 @@
 import Link from 'next/link';
-import { getEntries, computeStats, computeColorCounts } from '../lib/queries';
+import { getEntries } from '../lib/queries';
+import { computeStats, computeColorCounts } from '../lib/analytics';
 import { getColorHex, colorToSlug } from '../lib/colors';
 import ColorTreemapLoader from '../components/charts/ColorTreemapLoader';
 import type { Metadata } from 'next';
@@ -8,7 +9,6 @@ export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
   title: 'BMW M Individual Colors Registry',
-  description: 'Community-driven registry tracking BMW M3 and M4 Individual color builds.',
 };
 
 export default async function HomePage() {
@@ -184,7 +184,7 @@ export default async function HomePage() {
             maxWidth: 900,
             margin: '0 auto',
             display: 'grid',
-            gridTemplateColumns: 'repeat(3, 1fr)',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
             gap: 1,
           }}
         >
@@ -215,7 +215,7 @@ export default async function HomePage() {
 
       {/* Insight strip */}
       <section style={{ background: '#0f1923', borderBottom: '1px solid #1e2a3a', padding: '1rem 1.5rem' }}>
-        <div style={{ maxWidth: 900, margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 1 }}>
+        <div style={{ maxWidth: 900, margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 1 }}>
           {insightTiles.map(({ label, value, sub, hex }) => (
             <div key={label} style={{ textAlign: 'center', padding: '0.75rem 1rem' }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, marginBottom: 4 }}>
@@ -316,7 +316,12 @@ export default async function HomePage() {
                       </div>
                     )}
                     <div style={{ color: '#374151', fontSize: 11, flexShrink: 0 }}>
-                      {new Date(e.created_at).toLocaleDateString()}
+                      {new Date(e.created_at).toLocaleDateString('en-US', {
+                        timeZone: 'UTC',
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric',
+                      })}
                     </div>
                   </div>
                 );

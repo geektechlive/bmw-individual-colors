@@ -15,9 +15,37 @@ const geistMono = Geist_Mono({
   subsets: ['latin'],
 });
 
+const SITE_DESCRIPTION =
+  'Community-driven registry tracking BMW M3 and M4 Individual color builds.';
+
 export const metadata: Metadata = {
-  title: 'BMW M Individual Colors Registry',
-  description: 'Community-driven registry tracking BMW M3 and M4 Individual color builds.',
+  metadataBase: new URL('https://mcolors.geektechlive.com'),
+  title: {
+    default: 'BMW M Individual Colors Registry',
+    template: '%s | BMW M Individual Colors Registry',
+  },
+  description: SITE_DESCRIPTION,
+  openGraph: {
+    type: 'website',
+    siteName: 'BMW M Individual Colors Registry',
+    url: '/',
+    title: 'BMW M Individual Colors Registry',
+    description: SITE_DESCRIPTION,
+    images: ['/icon.png'],
+  },
+  twitter: {
+    card: 'summary',
+    title: 'BMW M Individual Colors Registry',
+    description: SITE_DESCRIPTION,
+    images: ['/icon.png'],
+  },
+  alternates: {
+    canonical: '/',
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
 };
 
 export default function RootLayout({
@@ -26,7 +54,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
+    <html lang="en" data-scroll-behavior="smooth" className={`${geistSans.variable} ${geistMono.variable}`}>
       <body>
         <Script
           src="https://challenges.cloudflare.com/turnstile/v0/api.js"

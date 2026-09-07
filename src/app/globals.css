@@ -62,3 +62,73 @@ body {
 select, input, textarea {
   color-scheme: dark;
 }
+
+/* Responsive nav (mobile hamburger) */
+.nav-desktop {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.nav-toggle {
+  display: none;
+}
+
+.nav-mobile {
+  display: none;
+}
+
+@media (max-width: 640px) {
+  .nav-desktop {
+    display: none;
+  }
+
+  .nav-toggle {
+    display: inline-flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 4px;
+    width: 36px;
+    height: 36px;
+    flex-shrink: 0;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    cursor: pointer;
+  }
+
+  .nav-toggle-bar {
+    display: block;
+    width: 18px;
+    height: 2px;
+    background: var(--text-primary);
+    border-radius: 1px;
+  }
+
+  .nav-mobile {
+    position: fixed;
+    top: 60px;
+    left: 0;
+    right: 0;
+    z-index: 49;
+    flex-direction: column;
+    gap: 2px;
+    padding: 0.75rem 1.5rem 1rem;
+    background: var(--bg-base);
+    border-bottom: 1px solid var(--border);
+    max-height: calc(100vh - 60px);
+    overflow-y: auto;
+  }
+
+  .nav-mobile--open {
+    display: flex;
+  }
+}
+
+/* Responsive containers: keep wide tables/blocks scrolling in place
+   instead of overflowing the viewport horizontally. */
+.scroll-x {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}

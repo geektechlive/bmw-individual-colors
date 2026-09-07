@@ -1,5 +1,6 @@
 import Link from 'next/link';
-import { getEntries, computeColorCounts } from '../../lib/queries';
+import { getEntries } from '../../lib/queries';
+import { computeColorCounts } from '../../lib/analytics';
 import { getColorFamily, colorToSlug, isLightColor } from '../../lib/colors';
 import type { Metadata } from 'next';
 
