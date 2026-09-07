@@ -3,6 +3,8 @@
 import { useActionState, useEffect, useState } from 'react';
 import { verifyForumUsername } from '../../actions';
 
+const TURNSTILE_SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? '0x4AAAAAAC6yXfM_xBBaAkKj';
+
 // Cloudflare Turnstile attaches callbacks and the widget API to window.
 interface TurnstileWindow {
   __tsSuccess?: () => void;
@@ -97,7 +99,7 @@ export default function EditVerifyForm({ entryId }: Props) {
 
       <div
         className="cf-turnstile"
-        data-sitekey="0x4AAAAAAC6yXfM_xBBaAkKj"
+        data-sitekey={TURNSTILE_SITE_KEY}
         data-theme="dark"
         data-callback="__tsSuccess"
         data-expired-callback="__tsExpired"

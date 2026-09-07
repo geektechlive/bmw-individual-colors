@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import Script from 'next/script';
 import { createAdminClient } from '../../../lib/supabase';
+import { generateEditToken, timingSafeEqual } from '../../../lib/edit-token';
 import EditVerifyForm from './EditVerifyForm';
 import EditEntryForm from './EditEntryForm';
 import type { BmwEntry } from '../../../types';
@@ -22,18 +22,31 @@ export default async function EditPage({ params, searchParams }: Props) {
   const { id } = await params;
   const { token, exp } = await searchParams;
 
+  const supabase = createAdminClient();
+  const { data: entry } = await supabase
+    .from('bmwic_entries')
+    .select('*')
+    .eq('id', id)
+    .is('deleted_at', null)
+    .single();
+
+  if (!entry) notFound();
+
   const expiresAt = exp ? parseInt(exp, 10) : 0;
   // eslint-disable-next-line react-hooks/purity -- Server Component; Date.now() runs once per request on the server
-  const isExpired = token && expiresAt && Date.now() > expiresAt;
+  const isExpired = !!token && expiresAt > 0 && Date.now() > expiresAt;
 
-  if (!token || isExpired) {
+  let tokenValid = false;
+  if (token && expiresAt > 0 && !isExpired) {
+    const expectedToken = await generateEditToken(id, entry.forum_username ?? '', expiresAt);
+    tokenValid = timingSafeEqual(token, expectedToken);
+  }
+
+  const needsVerification = !token || expiresAt <= 0 || isExpired || !tokenValid;
+
+  if (needsVerification) {
     return (
       <main style={{ maxWidth: 560, margin: '0 auto', padding: '2rem 1.5rem' }}>
-        <Script
-          src="https://challenges.cloudflare.com/turnstile/v0/api.js"
-          strategy="afterInteractive"
-          async
-        />
         <div style={{ marginBottom: 24 }}>
           <Link
             href="/entries"
@@ -67,16 +80,7 @@ export default async function EditPage({ params, searchParams }: Props) {
     );
   }
 
-  // Verified — fetch entry and show edit form
-  const supabase = createAdminClient();
-  const { data: entry } = await supabase
-    .from('bmwic_entries')
-    .select('*')
-    .eq('id', id)
-    .single();
-
-  if (!entry) notFound();
-
+  // Verified — entry already fetched and confirmed present above
   return (
     <main style={{ maxWidth: 760, margin: '0 auto', padding: '2rem 1.5rem' }}>
       <div style={{ marginBottom: 24 }}>

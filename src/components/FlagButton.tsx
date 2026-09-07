@@ -3,7 +3,7 @@
 import { useState, useTransition, useRef, useEffect } from 'react';
 import { flagEntry } from '../app/actions';
 
-const TURNSTILE_SITE_KEY = '0x4AAAAAAC6yXfM_xBBaAkKj';
+const TURNSTILE_SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? '0x4AAAAAAC6yXfM_xBBaAkKj';
 
 declare global {
   interface Window {
@@ -17,6 +17,7 @@ declare global {
         theme?: 'light' | 'dark' | 'auto';
       }) => string;
       remove: (widgetId: string) => void;
+      reset: (widgetId: string) => void;
     };
   }
 }
@@ -25,6 +26,7 @@ export default function FlagButton({ id }: { id: string }) {
   const [flagged, setFlagged] = useState(false);
   const [confirming, setConfirming] = useState(false);
   const [tsToken, setTsToken] = useState<string | null>(null);
+  const [flagError, setFlagError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
   const widgetContainerRef = useRef<HTMLDivElement>(null);
   const widgetIdRef = useRef<string | null>(null);
@@ -66,6 +68,7 @@ export default function FlagButton({ id }: { id: string }) {
     }
     setConfirming(false);
     setTsToken(null);
+    setFlagError(null);
   }
 
   if (flagged) {
@@ -76,14 +79,26 @@ export default function FlagButton({ id }: { id: string }) {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: 6, alignItems: 'flex-start' }}>
         <div ref={widgetContainerRef} />
+        {flagError && (
+          <span style={{ color: '#f87171', fontSize: 11 }}>{flagError}</span>
+        )}
         <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
           <button
             disabled={!tsToken || pending}
+            aria-label="Confirm flag this entry as incorrect"
             onClick={() => {
               if (!tsToken) return;
               startTransition(async () => {
-                await flagEntry(id, tsToken);
-                setFlagged(true);
+                const result = await flagEntry(id, tsToken);
+                if (result.ok) {
+                  setFlagged(true);
+                  return;
+                }
+                setFlagError("Couldn't flag, try again");
+                setTsToken(null);
+                if (widgetIdRef.current && window.turnstile) {
+                  window.turnstile.reset(widgetIdRef.current);
+                }
               });
             }}
             style={{
@@ -102,6 +117,7 @@ export default function FlagButton({ id }: { id: string }) {
           </button>
           <button
             onClick={handleCancel}
+            aria-label="Cancel flagging this entry"
             style={{
               padding: '3px 8px',
               background: 'transparent',
@@ -123,6 +139,7 @@ export default function FlagButton({ id }: { id: string }) {
     <button
       onClick={() => setConfirming(true)}
       title="Flag this entry as incorrect"
+      aria-label="Flag this entry as incorrect"
       style={{
         background: 'none', border: 'none', cursor: 'pointer',
         color: '#475569', fontSize: 12, padding: '2px 4px', borderRadius: 4,

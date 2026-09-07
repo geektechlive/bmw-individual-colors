@@ -1,10 +1,33 @@
 'use client';
 
-import { useActionState, useState, useMemo } from 'react';
-import { Country, State } from 'country-state-city';
+import { useActionState, useState, useMemo, useEffect } from 'react';
 import { updateEntry, deleteOwnEntry } from '../../actions';
 import { BMW_COLORS, getColorHex, isLightColor } from '../../../lib/colors';
 import type { BmwEntry } from '../../../types';
+
+type CountryOption = { isoCode: string; name: string };
+type StateOption = { isoCode: string; name: string };
+
+// Small static list so the initial render doesn't pull in the full
+// country-state-city dataset. The full list (needed for editing entries
+// outside these common countries) loads lazily via dynamic import below.
+const COMMON_COUNTRIES: CountryOption[] = [
+  { isoCode: 'US', name: 'United States' },
+  { isoCode: 'CA', name: 'Canada' },
+  { isoCode: 'GB', name: 'United Kingdom' },
+  { isoCode: 'AU', name: 'Australia' },
+  { isoCode: 'DE', name: 'Germany' },
+  { isoCode: 'FR', name: 'France' },
+  { isoCode: 'JP', name: 'Japan' },
+  { isoCode: 'CN', name: 'China' },
+  { isoCode: 'BR', name: 'Brazil' },
+  { isoCode: 'MX', name: 'Mexico' },
+  { isoCode: 'IN', name: 'India' },
+  { isoCode: 'IT', name: 'Italy' },
+  { isoCode: 'ES', name: 'Spain' },
+  { isoCode: 'NL', name: 'Netherlands' },
+  { isoCode: 'CH', name: 'Switzerland' },
+];
 
 const INTERIOR_OPTIONS = [
   'Black',
@@ -39,7 +62,6 @@ const FORUMS = [
 ];
 
 const COLOR_NAMES = Object.keys(BMW_COLORS).sort();
-const ALL_COUNTRIES = Country.getAllCountries();
 
 const COUNTRIES_WITH_STATES = new Set([
   'US', 'CA', 'AU', 'DE', 'GB', 'FR', 'JP', 'CN', 'BR', 'MX', 'IN', 'IT', 'ES', 'NL', 'CH', 'AT', 'BE', 'PL', 'CZ', 'SE', 'NO', 'DK', 'NZ',
@@ -96,14 +118,42 @@ export default function EditEntryForm({ entry, editToken, editExpiry }: Props) {
   const [colorValue, setColorValue] = useState(entry.ext_color);
   const [showColorDrop, setShowColorDrop] = useState(false);
 
-  // Location cascade — reverse-lookup ISO code from stored country name (case-insensitive fallback)
-  const foundCountry =
-    ALL_COUNTRIES.find((c) => c.name === entry.location_country) ??
-    ALL_COUNTRIES.find((c) => c.name.toLowerCase() === (entry.location_country ?? '').toLowerCase());
-  const initialCountryCode = foundCountry?.isoCode ?? 'US';
-  const countryNameMismatch = !foundCountry && !!entry.location_country;
-  const [countryCode, setCountryCode] = useState(initialCountryCode);
+  // Full country-state-city dataset — loaded lazily on mount to keep it out
+  // of the initial bundle; falls back to the small COMMON_COUNTRIES list
+  // until it resolves.
+  const [csc, setCsc] = useState<typeof import('country-state-city') | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    import('country-state-city').then((mod) => {
+      if (!cancelled) setCsc(mod);
+    });
+    return () => { cancelled = true; };
+  }, []);
+
+  const fullCountries = useMemo<CountryOption[] | null>(
+    () => (csc ? csc.Country.getAllCountries() : null),
+    [csc]
+  );
+  const allCountries: CountryOption[] = fullCountries ?? COMMON_COUNTRIES;
+
+  // Location cascade — reverse-lookup ISO code from stored country name (case-insensitive fallback).
+  // Resolution only runs once the full country list has loaded; entries whose
+  // country isn't in COMMON_COUNTRIES stay on the 'US' default until then.
+  const foundCountry = useMemo(() => {
+    if (!fullCountries) return undefined;
+    return (
+      fullCountries.find((c) => c.name === entry.location_country) ??
+      fullCountries.find((c) => c.name.toLowerCase() === (entry.location_country ?? '').toLowerCase())
+    );
+  }, [fullCountries, entry.location_country]);
+
+  const countryNameMismatch = !!fullCountries && !foundCountry && !!entry.location_country;
+  const [countryCode, setCountryCode] = useState('US');
   const [stateValue, setStateValue] = useState(entry.location_state ?? '');
+
+  useEffect(() => {
+    if (foundCountry) setCountryCode(foundCountry.isoCode);
+  }, [foundCountry]);
 
   // Forum
   const [forum, setForum] = useState(entry.source_forum ?? 'BimmerPost');
@@ -116,12 +166,12 @@ export default function EditEntryForm({ entry, editToken, editExpiry }: Props) {
     [colorSearch]
   );
 
-  const states = useMemo(
-    () => COUNTRIES_WITH_STATES.has(countryCode) ? State.getStatesOfCountry(countryCode) : [],
-    [countryCode]
+  const states: StateOption[] = useMemo(
+    () => (csc && COUNTRIES_WITH_STATES.has(countryCode) ? csc.State.getStatesOfCountry(countryCode) : []),
+    [csc, countryCode]
   );
 
-  const selectedCountry = ALL_COUNTRIES.find((c) => c.isoCode === countryCode);
+  const selectedCountry = allCountries.find((c) => c.isoCode === countryCode);
   const selectedColorHex = colorValue ? getColorHex(colorValue) : null;
 
   function handleColorSelect(name: string) {
@@ -251,7 +301,7 @@ export default function EditEntryForm({ entry, editToken, editExpiry }: Props) {
 
       {/* Individual Color — combobox */}
       <div style={fieldStyle}>
-        <label style={labelStyle}>Individual Color *</label>
+        <label style={labelStyle} htmlFor="ext_color_search">Individual Color *</label>
         <div style={{ position: 'relative' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             {selectedColorHex && (
@@ -264,6 +314,7 @@ export default function EditEntryForm({ entry, editToken, editExpiry }: Props) {
             )}
             <input
               type="text"
+              id="ext_color_search"
               placeholder="Type to search or enter a color name..."
               value={colorSearch}
               autoComplete="off"
@@ -320,7 +371,7 @@ export default function EditEntryForm({ entry, editToken, editExpiry }: Props) {
       </div>
 
       {/* Interior */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 16 }}>
         <div style={fieldStyle}>
           <label style={labelStyle} htmlFor="interior_color">Interior Color</label>
           <select id="interior_color" name="interior_color" style={inputStyle} defaultValue={entry.interior_color ?? ''}>
@@ -362,7 +413,7 @@ export default function EditEntryForm({ entry, editToken, editExpiry }: Props) {
       {/* Location */}
       <div style={fieldStyle}>
         <label style={labelStyle}>Location</label>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 12 }}>
           <div style={fieldStyle}>
             <label style={{ ...labelStyle, fontSize: 12 }} htmlFor="location_country">Country *</label>
             <select
@@ -373,7 +424,7 @@ export default function EditEntryForm({ entry, editToken, editExpiry }: Props) {
               onChange={(e) => { setCountryCode(e.target.value); setStateValue(''); }}
               style={inputStyle}
             >
-              {ALL_COUNTRIES.map((c) => (
+              {allCountries.map((c) => (
                 <option key={c.isoCode} value={c.isoCode}>{c.name}</option>
               ))}
             </select>
