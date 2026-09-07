@@ -1,6 +1,6 @@
 'use client';
 
-import type { MatrixData } from '../../lib/queries';
+import type { MatrixData } from '../../lib/analytics';
 
 interface Props {
   data: MatrixData;

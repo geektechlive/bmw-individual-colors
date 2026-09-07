@@ -276,3 +276,38 @@ export function isLightColor(hex: string): boolean {
   const b = parseInt(hex.slice(5, 7), 16);
   return (0.299 * r + 0.587 * g + 0.114 * b) / 255 > 0.5;
 }
+
+/**
+ * Alternate / regional names that BMW (and forum posters) use for a color that
+ * already exists in BMW_COLORS under a different canonical name.
+ * Key = alias as it appears in the wild, value = canonical BMW_COLORS key.
+ *
+ * Note: wheel designations ("826M", "1000M", ...) are NOT colors and never belong here.
+ */
+export const COLOR_ALIASES: Record<string, string> = {
+  'Enzian Blue': 'Gentian Blue',
+  'Verde British Racing': 'British Racing Green',
+  'Daytona Violet Metallic': 'Daytona Violet',
+};
+
+// Lowercase lookup tables built once at module scope — canonicalColorName runs
+// once per registry row per request, so per-call map construction would be hot.
+const ALIAS_LOOKUP: Record<string, string> = Object.fromEntries(
+  Object.entries(COLOR_ALIASES).map(([alias, canonical]) => [alias.toLowerCase(), canonical])
+);
+
+const CANONICAL_LOOKUP: Record<string, string> = Object.fromEntries(
+  Object.keys(BMW_COLORS).map((name) => [name.toLowerCase(), name])
+);
+
+/**
+ * Resolve a raw color string to its canonical BMW_COLORS name.
+ * Trims and collapses whitespace, matches aliases and known colors case-insensitively,
+ * and falls back to the cleaned input when the color is unknown.
+ */
+export function canonicalColorName(name: string): string {
+  const cleaned = (name ?? '').trim().replace(/\s+/g, ' ');
+  if (!cleaned) return cleaned;
+  const key = cleaned.toLowerCase();
+  return ALIAS_LOOKUP[key] ?? CANONICAL_LOOKUP[key] ?? cleaned;
+}

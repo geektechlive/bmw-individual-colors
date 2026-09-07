@@ -5,7 +5,7 @@ initOpenNextCloudflareForDev();
 
 const nextConfig: NextConfig = {
   experimental: {
-    optimizePackageImports: ["recharts", "react-simple-maps"],
+    optimizePackageImports: ["recharts"],
   },
 };
 

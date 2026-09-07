@@ -1,20 +1,46 @@
+import 'server-only';
+
 import { unstable_cache } from 'next/cache';
-import { createServerClient } from './supabase';
-import { BMW_COLORS, COLOR_FAMILY_MAP } from './colors';
-import type { BmwEntry, ColorCount, Stats } from '../types';
+import { createServerClient, createAdminClient } from './supabase';
+import { BMW_COLORS, canonicalColorName, colorToSlug } from './colors';
+import type { BmwEntry } from '../types';
+
+// PostgREST caps a single response at 1000 rows. Page explicitly so a growing
+// registry can never be silently truncated.
+const PAGE_SIZE = 1000;
 
 async function getEntriesUncached(): Promise<BmwEntry[]> {
   const supabase = createServerClient();
-  const { data, error } = await supabase
-    .from('bmwic_entries')
-    .select('*')
-    .order('created_at', { ascending: false });
+  const all: BmwEntry[] = [];
 
-  if (error) {
-    console.error('getEntries error:', error);
-    return [];
+  for (let from = 0; ; from += PAGE_SIZE) {
+    const { data, error } = await supabase
+      .from('bmwic_entries')
+      .select('*')
+      .is('deleted_at', null)
+      .order('created_at', { ascending: false })
+      // `id` is an arbitrary but stable tiebreaker. Without it, rows sharing a
+      // created_at (bulk forum imports do) have no guaranteed order between
+      // round trips and could be duplicated or skipped across page boundaries.
+      .order('id', { ascending: false })
+      .range(from, from + PAGE_SIZE - 1);
+
+    if (error) {
+      console.error('getEntries error:', error);
+      return [];
+    }
+
+    const page = (data ?? []) as BmwEntry[];
+    // Canonicalize alias color names in exactly one place so every downstream
+    // count, matrix and slug lookup sees merged colors. Immutable copy.
+    for (const row of page) {
+      all.push({ ...row, ext_color: canonicalColorName(row.ext_color) });
+    }
+
+    if (page.length < PAGE_SIZE) break;
   }
-  return data as BmwEntry[];
+
+  return all;
 }
 
 export const getEntries = unstable_cache(getEntriesUncached, ['entries'], {
@@ -22,215 +48,35 @@ export const getEntries = unstable_cache(getEntriesUncached, ['entries'], {
   tags: ['entries'],
 });
 
-export function computeStats(entries: BmwEntry[]): Stats {
-  return {
-    totalEntries: entries.length,
-    totalColors: new Set(entries.map((e) => e.ext_color)).size,
-    totalCountries: new Set(entries.map((e) => e.location_country).filter(Boolean)).size,
-  };
+/**
+ * All non-deleted entries whose canonical exterior color matches `colorName`.
+ * Filters in memory over getEntries() so the alias merge stays consistent and
+ * we reuse the already-cached full fetch instead of nesting another cache.
+ */
+export async function getEntriesByColor(colorName: string): Promise<BmwEntry[]> {
+  const target = canonicalColorName(colorName);
+  const entries = await getEntries();
+  return entries.filter((e) => e.ext_color === target);
 }
 
-export function computeColorCounts(entries: BmwEntry[]): ColorCount[] {
-  const map = new Map<string, number>();
-  for (const e of entries) {
-    map.set(e.ext_color, (map.get(e.ext_color) ?? 0) + 1);
-  }
-  return Array.from(map.entries())
-    .map(([color, count]) => ({
-      color,
-      count,
-      hex: BMW_COLORS[color] ?? '#888888',
-    }))
-    .sort((a, b) => b.count - a.count);
-}
+/**
+ * Map a URL slug back to a canonical color name.
+ * Prefers colors actually present in the registry, then falls back to the
+ * static BMW_COLORS catalog. Returns null when nothing matches.
+ */
+export async function resolveColorSlug(slug: string): Promise<string | null> {
+  const normalized = slug.toLowerCase();
 
-export interface MatrixRow {
-  color: string;
-  hex: string;
-  cells: Record<string, number>;
-  total: number;
-}
-
-export interface MatrixData {
-  columns: string[];
-  rows: MatrixRow[];
-  columnTotals: Record<string, number>;
-  grandTotal: number;
-}
-
-export function computeModelYearMatrix(entries: BmwEntry[]): MatrixData {
-  // Build column keys: "YYYY M3C AWD", etc.
-  const colSet = new Set<string>();
-  for (const e of entries) {
-    const model = `${e.body_style}${e.competition ? 'C' : ''}`;
-    const col = `${e.model_year} ${model} ${e.drivetrain}`;
-    colSet.add(col);
-  }
-  const columns = Array.from(colSet).sort();
-
-  // Build rows keyed by ext_color
-  const rowMap = new Map<string, MatrixRow>();
-  for (const e of entries) {
-    const model = `${e.body_style}${e.competition ? 'C' : ''}`;
-    const col = `${e.model_year} ${model} ${e.drivetrain}`;
-
-    if (!rowMap.has(e.ext_color)) {
-      rowMap.set(e.ext_color, {
-        color: e.ext_color,
-        hex: BMW_COLORS[e.ext_color] ?? '#888888',
-        cells: {},
-        total: 0,
-      });
-    }
-    const row = rowMap.get(e.ext_color)!;
-    row.cells[col] = (row.cells[col] ?? 0) + 1;
-    row.total += 1;
+  const entries = await getEntries();
+  for (const name of new Set(entries.map((e) => e.ext_color))) {
+    if (colorToSlug(name) === normalized) return name;
   }
 
-  const rows = Array.from(rowMap.values()).sort((a, b) => b.total - a.total);
-
-  const columnTotals: Record<string, number> = {};
-  for (const col of columns) {
-    columnTotals[col] = rows.reduce((s, r) => s + (r.cells[col] ?? 0), 0);
+  for (const name of Object.keys(BMW_COLORS)) {
+    if (colorToSlug(name) === normalized) return canonicalColorName(name);
   }
-  const grandTotal = rows.reduce((s, r) => s + r.total, 0);
 
-  return { columns, rows, columnTotals, grandTotal };
-}
-
-export function computeInteriorCounts(entries: BmwEntry[]): ColorCount[] {
-  const map = new Map<string, number>();
-  for (const e of entries) {
-    const ic = e.interior_color?.trim();
-    if (ic) {
-      map.set(ic, (map.get(ic) ?? 0) + 1);
-    }
-  }
-  return Array.from(map.entries())
-    .map(([color, count]) => ({ color, count, hex: '#888888' }))
-    .sort((a, b) => b.count - a.count);
-}
-
-export interface GrowthPoint {
-  month: string;
-  cumulative: number;
-}
-
-export function computeRegistryGrowth(entries: BmwEntry[]): GrowthPoint[] {
-  if (entries.length === 0) return [];
-  const sorted = [...entries].sort((a, b) =>
-    new Date(a.posted_at ?? a.created_at).getTime() - new Date(b.posted_at ?? b.created_at).getTime()
-  );
-  const map = new Map<string, number>();
-  for (const e of sorted) {
-    const d = new Date(e.posted_at ?? e.created_at);
-    const key = `${d.toLocaleString('en-US', { month: 'short' })} ${d.getFullYear()}`;
-    map.set(key, (map.get(key) ?? 0) + 1);
-  }
-  let cumulative = 0;
-  return Array.from(map.entries()).map(([month, count]) => {
-    cumulative += count;
-    return { month, cumulative };
-  });
-}
-
-export interface CompetitionPoint {
-  year: number;
-  M3_pct: number;
-  M4_pct: number;
-  total: number;
-}
-
-export function computeCompetitionAdoption(entries: BmwEntry[]): CompetitionPoint[] {
-  const yearMap = new Map<number, { M3_comp: number; M3_total: number; M4_comp: number; M4_total: number }>();
-  for (const e of entries) {
-    if (!yearMap.has(e.model_year)) yearMap.set(e.model_year, { M3_comp: 0, M3_total: 0, M4_comp: 0, M4_total: 0 });
-    const y = yearMap.get(e.model_year)!;
-    if (e.body_style === 'M3') { y.M3_total++; if (e.competition) y.M3_comp++; }
-    else { y.M4_total++; if (e.competition) y.M4_comp++; }
-  }
-  return Array.from(yearMap.entries())
-    .sort((a, b) => a[0] - b[0])
-    .map(([year, v]) => ({
-      year,
-      M3_pct: v.M3_total ? Math.round((v.M3_comp / v.M3_total) * 100) : 0,
-      M4_pct: v.M4_total ? Math.round((v.M4_comp / v.M4_total) * 100) : 0,
-      total: v.M3_total + v.M4_total,
-    }));
-}
-
-export interface FamilyYearPoint {
-  year: number;
-  Blues: number;
-  Greens: number;
-  'Reds & Oranges': number;
-  Yellows: number;
-  Purples: number;
-  'Greys & Blacks': number;
-  Other: number;
-}
-
-export function computeColorFamilyByYear(entries: BmwEntry[]): FamilyYearPoint[] {
-  const yearMap = new Map<number, Record<string, number>>();
-  for (const e of entries) {
-    if (!yearMap.has(e.model_year)) {
-      yearMap.set(e.model_year, { Blues: 0, Greens: 0, 'Reds & Oranges': 0, Yellows: 0, Purples: 0, 'Greys & Blacks': 0, Other: 0 });
-    }
-    const family = COLOR_FAMILY_MAP[e.ext_color] ?? 'Other';
-    yearMap.get(e.model_year)![family]++;
-  }
-  return Array.from(yearMap.entries())
-    .sort((a, b) => a[0] - b[0])
-    .map(([year, counts]) => ({ year, ...counts } as FamilyYearPoint));
-}
-
-export function computeWheelCounts(entries: BmwEntry[]): ColorCount[] {
-  const map = new Map<string, number>();
-  for (const e of entries) {
-    const w = e.wheels?.trim();
-    if (w) map.set(w, (map.get(w) ?? 0) + 1);
-  }
-  return Array.from(map.entries())
-    .map(([color, count]) => ({ color, count, hex: '#888888' }))
-    .sort((a, b) => b.count - a.count);
-}
-
-async function getEntriesByColorUncached(colorName: string): Promise<BmwEntry[]> {
-  const supabase = createServerClient();
-  const { data, error } = await supabase
-    .from('bmwic_entries')
-    .select('*')
-    .eq('ext_color', colorName)
-    .order('created_at', { ascending: false });
-  if (error) {
-    console.error('getEntriesByColor error:', error);
-    return [];
-  }
-  return data as BmwEntry[];
-}
-
-export function getEntriesByColor(colorName: string): Promise<BmwEntry[]> {
-  return unstable_cache(
-    () => getEntriesByColorUncached(colorName),
-    ['entries-by-color', colorName],
-    { revalidate: 300, tags: ['entries'] }
-  )();
-}
-
-export function computeRarityLabel(count: number): string {
-  if (count <= 2) return 'Unicorn';
-  if (count <= 8) return 'Rare';
-  if (count <= 20) return 'Uncommon';
-  return 'Common';
-}
-
-export function computeRarityColor(label: string): string {
-  switch (label) {
-    case 'Unicorn': return '#862086';
-    case 'Rare': return '#E8002D';
-    case 'Uncommon': return '#e8a020';
-    default: return '#64748b';
-  }
+  return null;
 }
 
 async function getLocationEntriesUncached(): Promise<BmwEntry[]> {
@@ -238,6 +84,7 @@ async function getLocationEntriesUncached(): Promise<BmwEntry[]> {
   const { data, error } = await supabase
     .from('bmwic_entries')
     .select('*')
+    .is('deleted_at', null)
     .not('location_lat', 'is', null)
     .not('location_lng', 'is', null);
 
@@ -245,7 +92,7 @@ async function getLocationEntriesUncached(): Promise<BmwEntry[]> {
     console.error('getLocationEntries error:', error);
     return [];
   }
-  return data as BmwEntry[];
+  return (data ?? []) as BmwEntry[];
 }
 
 export const getLocationEntries = unstable_cache(
@@ -253,3 +100,23 @@ export const getLocationEntries = unstable_cache(
   ['location-entries'],
   { revalidate: 300, tags: ['entries'] }
 );
+
+/**
+ * Soft-deleted entries, newest deletion first. Uses the admin client (which
+ * bypasses RLS) and is deliberately NOT cached — moderation views must always
+ * see the current state.
+ */
+export async function getDeletedEntries(): Promise<BmwEntry[]> {
+  const supabase = createAdminClient();
+  const { data, error } = await supabase
+    .from('bmwic_entries')
+    .select('*')
+    .not('deleted_at', 'is', null)
+    .order('deleted_at', { ascending: false });
+
+  if (error) {
+    console.error('getDeletedEntries error:', error);
+    return [];
+  }
+  return (data ?? []) as BmwEntry[];
+}

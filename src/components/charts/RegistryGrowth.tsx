@@ -9,7 +9,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from 'recharts';
-import type { GrowthPoint } from '../../lib/queries';
+import type { GrowthPoint } from '../../lib/analytics';
 
 interface Props {
   data: GrowthPoint[];

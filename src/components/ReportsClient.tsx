@@ -11,7 +11,7 @@ import {
   computeColorFamilyByYear,
   computeCompetitionAdoption,
   computeWheelCounts,
-} from '../lib/queries';
+} from '../lib/analytics';
 
 import ColorMatrix from './charts/ColorMatrix';
 import ColorInteriorMatrix from './charts/ColorInteriorMatrix';

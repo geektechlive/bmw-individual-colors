@@ -10,7 +10,7 @@ import {
   Legend,
   ResponsiveContainer,
 } from 'recharts';
-import type { FamilyYearPoint } from '../../lib/queries';
+import type { FamilyYearPoint } from '../../lib/analytics';
 
 interface Props {
   data: FamilyYearPoint[];

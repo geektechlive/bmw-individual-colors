@@ -25,6 +25,7 @@ export interface BmwEntry {
   last_edited_at: string | null;
   notes: string | null;
   user_submitted: boolean;
+  deleted_at: string | null;
 }
 
 export interface ColorCount {

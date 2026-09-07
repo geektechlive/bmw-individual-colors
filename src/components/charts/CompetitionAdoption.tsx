@@ -10,7 +10,7 @@ import {
   Legend,
   ResponsiveContainer,
 } from 'recharts';
-import type { CompetitionPoint } from '../../lib/queries';
+import type { CompetitionPoint } from '../../lib/analytics';
 
 interface Props {
   data: CompetitionPoint[];
