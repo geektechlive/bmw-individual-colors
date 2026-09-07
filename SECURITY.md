@@ -5,9 +5,14 @@
 All secrets are managed via environment variables and are never committed to this repository.
 
 **What is gitignored:**
-- `.env.local` — Supabase keys, Turnstile keys, `ADMIN_TOKEN`, Cloudflare API token
+- `.env.local` — Supabase keys, Turnstile keys, `ADMIN_TOKEN`, Cloudflare API token, `BIMMERPOST_USERNAME`/`BIMMERPOST_PASSWORD`
 - `.dev.vars` — Wrangler local dev mirror of `.env.local`
 - `.wrangler/` — Wrangler build cache
+
+`ADMIN_TOKEN` does double duty: it gates the `/admin` route and the delete/dismiss/restore
+actions, and it also signs the HMAC edit tokens used in `/edit/[id]` links (see
+`src/lib/edit-token.ts`). Rotating it invalidates any outstanding edit links (they have a
+1-hour TTL anyway).
 
 **What is safe to be public:**
 - `wrangler.toml` contains only `NEXT_PUBLIC_TURNSTILE_SITE_KEY`, which is the client-side Cloudflare Turnstile site key. This key is designed to be public — it is not a secret.
