@@ -16,11 +16,16 @@ export default defineConfig({
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
     },
+    {
+      name: 'mobile-safari',
+      use: { ...devices['iPhone 14'] },
+      testMatch: /mobile-nav|edit/,
+    },
   ],
   webServer: {
     command: 'node node_modules/next/dist/bin/next dev --port 3002',
     url: 'http://localhost:3002',
-    reuseExistingServer: true,
+    reuseExistingServer: !process.env.CI,
     timeout: 120000,
   },
 });

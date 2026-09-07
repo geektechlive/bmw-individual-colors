@@ -26,34 +26,34 @@ test.describe('Entries page', () => {
 test.describe('Submission queue banner', () => {
   test('shows banner when ?submitted=1 is in the URL', async ({ page }) => {
     await page.goto('/entries?submitted=1');
-    const banner = page.getByText(/in the queue/i);
+    const banner = page.getByTestId('submitted-banner');
     await expect(banner).toBeVisible();
   });
 
-  test('banner contains the 5-minute message', async ({ page }) => {
+  test('banner contains the updated appear-right-away message', async ({ page }) => {
     await page.goto('/entries?submitted=1');
     const text = await page.locator('body').innerText();
-    expect(text).toMatch(/5 minutes/i);
+    expect(text).toMatch(/appear in the table right away/i);
   });
 
   test('banner has a dismiss button', async ({ page }) => {
     await page.goto('/entries?submitted=1');
-    const dismissBtn = page.getByRole('button', { name: /dismiss|close|×|✕/i });
+    const dismissBtn = page.getByTestId('submitted-banner-dismiss');
     await expect(dismissBtn).toBeVisible();
   });
 
   test('banner disappears after clicking dismiss', async ({ page }) => {
     await page.goto('/entries?submitted=1');
-    const banner = page.getByText(/in the queue/i);
+    const banner = page.getByTestId('submitted-banner');
     await expect(banner).toBeVisible();
-    const dismissBtn = page.getByRole('button', { name: /dismiss|close|×|✕/i });
+    const dismissBtn = page.getByTestId('submitted-banner-dismiss');
     await dismissBtn.click();
     await expect(banner).not.toBeVisible();
   });
 
   test('banner is NOT shown on /entries without ?submitted=1', async ({ page }) => {
     await page.goto('/entries');
-    const banner = page.getByText(/in the queue/i);
+    const banner = page.getByTestId('submitted-banner');
     await expect(banner).not.toBeVisible();
   });
 });
