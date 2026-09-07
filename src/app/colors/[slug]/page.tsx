@@ -1,23 +1,73 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { getEntriesByColor, getEntries, computeRarityLabel, computeRarityColor } from '../../../lib/queries';
+import { getEntriesByColor, getEntries, resolveColorSlug } from '../../../lib/queries';
+import { computeRarityLabel, computeRarityColor } from '../../../lib/analytics';
 
 export const dynamic = 'force-dynamic';
-import { slugToColor, getColorHex, getColorFamily } from '../../../lib/colors';
+import { getColorHex, getColorFamily, COLOR_ALIASES, canonicalColorName, colorToSlug } from '../../../lib/colors';
 import FlagButton from '../../../components/FlagButton';
 import type { Metadata } from 'next';
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
-  const colorName = slugToColor(slug);
-  if (!colorName) return { title: 'Color Not Found' };
-  return { title: `${colorName} — BMW M Individual Colors Registry` };
+  const resolved = await resolveColorSlug(slug);
+  if (!resolved) return { title: 'Color Not Found' };
+  // resolveColorSlug already returns a canonical name (getEntries() canonicalizes
+  // ext_color at the source), but canonicalize defensively so an aliased request
+  // slug (e.g. /colors/enzian-blue) still points its canonical tag/OG image at
+  // the merged color's own slug (/colors/gentian-blue) rather than echoing the
+  // requested one back at itself.
+  const colorName = canonicalColorName(resolved);
+  const canonicalSlug = colorToSlug(colorName);
+
+  const colorEntries = await getEntriesByColor(colorName);
+  const totalBuilds = colorEntries.length;
+  const rarityLabel = computeRarityLabel(totalBuilds);
+
+  const years = colorEntries.map((e) => e.model_year);
+  const yearRange =
+    years.length > 0
+      ? Math.min(...years) === Math.max(...years)
+        ? `${Math.min(...years)}`
+        : `${Math.min(...years)}–${Math.max(...years)}`
+      : null;
+
+  const wheelCounts = new Map<string, number>();
+  for (const e of colorEntries) {
+    if (e.wheels) wheelCounts.set(e.wheels, (wheelCounts.get(e.wheels) ?? 0) + 1);
+  }
+  const topWheels = Array.from(wheelCounts.entries())
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 2)
+    .map(([wheel]) => wheel);
+
+  const description = [
+    `${rarityLabel} BMW M Individual color`,
+    yearRange ? `seen on MY${yearRange} builds` : null,
+    topWheels.length > 0 ? `most often paired with ${topWheels.join(' and ')} wheels` : null,
+  ]
+    .filter(Boolean)
+    .join(', ') + '.';
+
+  return {
+    title: `${colorName} — ${totalBuilds} build${totalBuilds === 1 ? '' : 's'}`,
+    description,
+    alternates: {
+      canonical: `/colors/${canonicalSlug}`,
+    },
+    openGraph: {
+      title: `${colorName} — BMW M Individual Colors Registry`,
+      description,
+      images: [`/colors/${canonicalSlug}/opengraph-image`],
+    },
+  };
 }
 
 export default async function ColorDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const colorName = slugToColor(slug);
-  if (!colorName) notFound();
+  const resolved = await resolveColorSlug(slug);
+  if (!resolved) notFound();
+  const colorName = canonicalColorName(resolved);
 
   const [colorEntries, allEntries] = await Promise.all([
     getEntriesByColor(colorName),
@@ -46,6 +96,11 @@ export default async function ColorDetailPage({ params }: { params: Promise<{ sl
   const rwdCount = colorEntries.filter(e => e.drivetrain === 'RWD').length;
   const awdCount = colorEntries.filter(e => e.drivetrain === 'AWD').length;
 
+  // Aliases: any alternate names that map to this canonical color.
+  const aliases = Object.entries(COLOR_ALIASES)
+    .filter(([, canonical]) => canonical === colorName)
+    .map(([alias]) => alias);
+
   return (
     <main style={{ maxWidth: 900, margin: '0 auto', padding: '2rem 1.5rem' }}>
       {/* Breadcrumb */}
@@ -70,16 +125,16 @@ export default async function ColorDetailPage({ params }: { params: Promise<{ sl
           <div style={{ fontSize: 14, color: '#64748b' }}>
             {family} · {pct}% of all registry builds
           </div>
-          {colorName === 'Gentian Blue' && (
+          {aliases.length > 0 && (
             <div style={{ fontSize: 12, color: '#64748b', marginTop: 4 }}>
-              Also known as: <span style={{ color: '#94a3b8' }}>Enzian Blue</span>
+              Also known as: <span style={{ color: '#94a3b8' }}>{aliases.join(', ')}</span>
             </div>
           )}
         </div>
       </div>
 
       {/* Stat tiles */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 24 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 12, marginBottom: 24 }}>
         {[
           { label: 'Total Builds', value: totalBuilds, color: '#1C69D4' },
           { label: 'M3 / M4', value: `${m3Count} / ${m4Count}`, color: '#862086' },
@@ -186,7 +241,7 @@ export default async function ColorDetailPage({ params }: { params: Promise<{ sl
                     </div>
                   )}
                   <div style={{ color: '#64748b', fontSize: 11, flexShrink: 0 }}>
-                    {new Date(e.posted_at ?? e.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
+                    {new Date(e.posted_at ?? e.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric', timeZone: 'UTC' })}
                   </div>
                   <FlagButton id={e.id} />
                 </div>

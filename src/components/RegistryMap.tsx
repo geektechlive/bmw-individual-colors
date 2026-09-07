@@ -6,7 +6,7 @@ import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
 
 import L from 'leaflet';
 import 'leaflet.markercluster';
-import { useEffect, useRef } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { getColorHex } from '../lib/colors';
 import type { BmwEntry } from '../types';
 
@@ -59,6 +59,11 @@ export default function RegistryMap({ entries }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
 
+  // A new `entries` array reference (e.g. from a parent re-render) shouldn't
+  // rebuild the whole Leaflet map — only rebuild when the actual set of
+  // entries changes, keyed on a stable signature of entry ids.
+  const entriesSignature = useMemo(() => entries.map((e) => e.id).join(','), [entries]);
+
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
 
@@ -94,12 +99,29 @@ export default function RegistryMap({ entries }: Props) {
       map.remove();
       mapRef.current = null;
     };
-  }, [entries]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [entriesSignature]);
 
   return (
-    <div
-      ref={containerRef}
-      style={{ height: 'calc(100vh - 140px)', width: '100%', borderRadius: 8 }}
-    />
+    <>
+      {/*
+        Real CSS (not a JS style object) so the `vh` declaration can act as a
+        genuine fallback: browsers without `dvh` support ignore that line and
+        keep the one above it, while browsers that understand `dvh` (which
+        accounts for mobile browser chrome) apply it as the later, more
+        specific rule.
+      */}
+      <style>{`
+        .registry-map-container {
+          height: calc(100vh - 140px);
+          height: calc(100dvh - 140px);
+        }
+      `}</style>
+      <div
+        ref={containerRef}
+        className="registry-map-container"
+        style={{ width: '100%', borderRadius: 8 }}
+      />
+    </>
   );
 }
