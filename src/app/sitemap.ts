@@ -2,6 +2,10 @@ import type { MetadataRoute } from 'next';
 import { getEntries } from '../lib/queries';
 import { colorToSlug, canonicalColorName } from '../lib/colors';
 
+// Rendered per request: Supabase credentials are Worker secrets, not build-time
+// env vars, so this route cannot be prerendered on Cloudflare Builds.
+export const dynamic = 'force-dynamic';
+
 const BASE_URL = 'https://mcolors.geektechlive.com';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
