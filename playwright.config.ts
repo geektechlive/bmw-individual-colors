@@ -17,8 +17,13 @@ export default defineConfig({
       use: { ...devices['Desktop Chrome'] },
     },
     {
-      name: 'mobile-safari',
-      use: { ...devices['iPhone 14'] },
+      // iPhone 14 viewport/touch profile on Chromium so it runs everywhere.
+      // Set PLAYWRIGHT_WEBKIT=1 (after `npx playwright install webkit`) for real WebKit.
+      name: 'mobile',
+      use: {
+        ...devices['iPhone 14'],
+        browserName: process.env.PLAYWRIGHT_WEBKIT ? 'webkit' : 'chromium',
+      },
       testMatch: /mobile-nav|edit/,
     },
   ],
