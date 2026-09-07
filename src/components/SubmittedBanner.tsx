@@ -14,6 +14,7 @@ export default function SubmittedBanner({ title, body }: Props) {
 
   return (
     <div
+      data-testid="submitted-banner"
       style={{
         background: 'rgba(202, 138, 4, 0.15)',
         border: '2px solid #ca8a04',
@@ -30,12 +31,13 @@ export default function SubmittedBanner({ title, body }: Props) {
           {title ?? 'Submission received'}
         </div>
         <div style={{ color: '#fde68a', fontSize: 13 }}>
-          {body ?? 'Your submission is in the queue and could take up to 5 minutes to appear. Please be patient.'}
+          {body ?? "It should appear in the table right away; if you don't see it, refresh in a moment."}
         </div>
       </div>
       <button
         onClick={() => setVisible(false)}
         aria-label="Dismiss"
+        data-testid="submitted-banner-dismiss"
         style={{
           background: 'none',
           border: 'none',

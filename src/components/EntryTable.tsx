@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { getColorHex, colorToSlug } from '../lib/colors';
 import FlagButton from './FlagButton';
@@ -15,7 +16,32 @@ type SortKey = keyof Pick<
   'ext_color' | 'model_year' | 'body_style' | 'drivetrain' | 'interior_color' | 'location_state' | 'forum_username'
 >;
 
+const PAGE_SIZE = 50;
+const NUMERIC_SORT_KEYS: SortKey[] = ['model_year'];
+
+function getPageNumbers(current: number, total: number): (number | 'ellipsis')[] {
+  if (total <= 7) {
+    return Array.from({ length: total }, (_, i) => i + 1);
+  }
+  const pages = new Set<number>([1, total, current]);
+  if (current - 1 >= 1) pages.add(current - 1);
+  if (current + 1 <= total) pages.add(current + 1);
+  const sortedPages = Array.from(pages).sort((a, b) => a - b);
+  const result: (number | 'ellipsis')[] = [];
+  let prev = 0;
+  for (const p of sortedPages) {
+    if (prev && p - prev > 1) result.push('ellipsis');
+    result.push(p);
+    prev = p;
+  }
+  return result;
+}
+
 export default function EntryTable({ entries }: Props) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
   const [filter, setFilter] = useState('');
   const [sortKey, setSortKey] = useState<SortKey>('model_year');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
@@ -26,6 +52,24 @@ export default function EntryTable({ entries }: Props) {
     competition: boolean | null;
   }>({ bodyStyle: [], drivetrain: [], transmission: [], competition: null });
 
+  const page = Math.max(1, parseInt(searchParams.get('page') ?? '1', 10) || 1);
+
+  const setPage = useCallback(
+    (next: number) => {
+      const params = new URLSearchParams(searchParams.toString());
+      if (next <= 1) {
+        params.delete('page');
+      } else {
+        params.set('page', String(next));
+      }
+      const qs = params.toString();
+      router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+    },
+    [router, pathname, searchParams]
+  );
+
+  const resetPage = useCallback(() => setPage(1), [setPage]);
+
   function toggleArrayFilter(key: 'bodyStyle' | 'drivetrain' | 'transmission', value: string) {
     setFilters((prev) => {
       const arr = prev[key];
@@ -34,6 +78,7 @@ export default function EntryTable({ entries }: Props) {
         [key]: arr.includes(value) ? arr.filter((v) => v !== value) : [...arr, value],
       };
     });
+    resetPage();
   }
 
   function toggleCompetition() {
@@ -42,6 +87,7 @@ export default function EntryTable({ entries }: Props) {
       if (prev.competition === true) return { ...prev, competition: false };
       return { ...prev, competition: null };
     });
+    resetPage();
   }
 
   const filtered = entries.filter((e) => {
@@ -67,14 +113,34 @@ export default function EntryTable({ entries }: Props) {
   });
 
   const sorted = [...filtered].sort((a, b) => {
-    const raw_a = a[sortKey];
-    const raw_b = b[sortKey];
-    const av = typeof raw_a === 'number' ? (raw_a ?? 0) : ((raw_a ?? '') as string);
-    const bv = typeof raw_b === 'number' ? (raw_b ?? 0) : ((raw_b ?? '') as string);
-    if (av < bv) return sortDir === 'asc' ? -1 : 1;
-    if (av > bv) return sortDir === 'asc' ? 1 : -1;
-    return 0;
+    const rawA = a[sortKey];
+    const rawB = b[sortKey];
+    let cmp: number;
+    if (NUMERIC_SORT_KEYS.includes(sortKey)) {
+      const av = typeof rawA === 'number' ? rawA : -Infinity;
+      const bv = typeof rawB === 'number' ? rawB : -Infinity;
+      cmp = av - bv;
+    } else {
+      const av = (rawA ?? '') as string;
+      const bv = (rawB ?? '') as string;
+      cmp = av.localeCompare(bv);
+    }
+    return sortDir === 'asc' ? cmp : -cmp;
   });
+
+  const totalCount = sorted.length;
+  const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
+  const currentPage = Math.min(page, totalPages);
+  const startIdx = totalCount === 0 ? 0 : (currentPage - 1) * PAGE_SIZE;
+  const endIdx = Math.min(startIdx + PAGE_SIZE, totalCount);
+  const pageEntries = sorted.slice(startIdx, endIdx);
+
+  useEffect(() => {
+    if (page > totalPages) {
+      setPage(totalPages);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [page, totalPages]);
 
   function handleSort(key: SortKey) {
     if (key === sortKey) {
@@ -83,13 +149,17 @@ export default function EntryTable({ entries }: Props) {
       setSortKey(key);
       setSortDir('asc');
     }
+    resetPage();
   }
 
   const arrow = (key: SortKey) =>
     sortKey === key ? (sortDir === 'asc' ? ' ↑' : ' ↓') : '';
 
+  const ariaSort = (key: SortKey): React.AriaAttributes['aria-sort'] =>
+    sortKey === key ? (sortDir === 'asc' ? 'ascending' : 'descending') : 'none';
+
   const thStyle: React.CSSProperties = {
-    padding: '10px 12px',
+    padding: 0,
     textAlign: 'left',
     color: '#b8c5d6',
     fontWeight: 600,
@@ -97,10 +167,29 @@ export default function EntryTable({ entries }: Props) {
     textTransform: 'uppercase',
     letterSpacing: '0.05em',
     border: '1px solid #2d3f55',
-    cursor: 'pointer',
     userSelect: 'none',
     whiteSpace: 'nowrap',
     background: '#1e2a3a',
+  };
+
+  const thPlainStyle: React.CSSProperties = {
+    ...thStyle,
+    padding: '10px 12px',
+  };
+
+  const thButtonStyle: React.CSSProperties = {
+    display: 'block',
+    width: '100%',
+    padding: '10px 12px',
+    margin: 0,
+    background: 'transparent',
+    border: 'none',
+    color: 'inherit',
+    font: 'inherit',
+    textTransform: 'inherit',
+    letterSpacing: 'inherit',
+    textAlign: 'left',
+    cursor: 'pointer',
   };
 
   const tdStyle: React.CSSProperties = {
@@ -139,6 +228,17 @@ export default function EntryTable({ entries }: Props) {
     alignSelf: 'center',
   };
 
+  const pageBtnStyle = (active: boolean): React.CSSProperties => ({
+    padding: '6px 12px',
+    borderRadius: 6,
+    fontSize: 13,
+    fontWeight: 600,
+    cursor: 'pointer',
+    border: active ? '1px solid #1C69D4' : '1px solid #2d3f55',
+    background: active ? 'rgba(28,105,212,0.2)' : '#1e2a3a',
+    color: active ? '#e2e8f0' : '#94a3b8',
+  });
+
   return (
     <div>
       {/* Filter chips */}
@@ -147,6 +247,7 @@ export default function EntryTable({ entries }: Props) {
         {['M3', 'M4'].map((v) => (
           <button
             key={v}
+            type="button"
             onClick={() => toggleArrayFilter('bodyStyle', v)}
             style={filters.bodyStyle.includes(v) ? chipActive : chipInactive}
           >
@@ -157,6 +258,7 @@ export default function EntryTable({ entries }: Props) {
         {['RWD', 'AWD'].map((v) => (
           <button
             key={v}
+            type="button"
             onClick={() => toggleArrayFilter('drivetrain', v)}
             style={filters.drivetrain.includes(v) ? chipActive : chipInactive}
           >
@@ -167,6 +269,7 @@ export default function EntryTable({ entries }: Props) {
         {['8AT', '6MT'].map((v) => (
           <button
             key={v}
+            type="button"
             onClick={() => toggleArrayFilter('transmission', v)}
             style={filters.transmission.includes(v) ? chipActive : chipInactive}
           >
@@ -174,6 +277,7 @@ export default function EntryTable({ entries }: Props) {
           </button>
         ))}
         <button
+          type="button"
           onClick={toggleCompetition}
           style={filters.competition === true ? chipActive : chipInactive}
         >
@@ -185,8 +289,12 @@ export default function EntryTable({ entries }: Props) {
         <input
           type="text"
           placeholder="Filter by color, interior, state, username..."
+          aria-label="Filter entries"
           value={filter}
-          onChange={(e) => setFilter(e.target.value)}
+          onChange={(e) => {
+            setFilter(e.target.value);
+            resetPage();
+          }}
           style={{
             width: '100%',
             maxWidth: 420,
@@ -201,7 +309,9 @@ export default function EntryTable({ entries }: Props) {
           }}
         />
         <span style={{ marginLeft: 12, color: '#64748b', fontSize: 13 }}>
-          {sorted.length} {sorted.length === 1 ? 'entry' : 'entries'}
+          {totalCount === 0
+            ? 'No entries'
+            : `Showing ${startIdx + 1}–${endIdx} of ${totalCount} ${totalCount === 1 ? 'entry' : 'entries'}`}
         </span>
       </div>
 
@@ -209,31 +319,45 @@ export default function EntryTable({ entries }: Props) {
         <table style={{ borderCollapse: 'collapse', width: '100%', fontSize: 13 }}>
           <thead>
             <tr style={{ borderBottom: '2px solid #1C69D4' }}>
-              <th style={thStyle} onClick={() => handleSort('ext_color')}>
-                Color{arrow('ext_color')}
+              <th style={thStyle} aria-sort={ariaSort('ext_color')}>
+                <button type="button" style={thButtonStyle} onClick={() => handleSort('ext_color')}>
+                  Color{arrow('ext_color')}
+                </button>
               </th>
-              <th style={thStyle} onClick={() => handleSort('model_year')}>
-                Year{arrow('model_year')}
+              <th style={thStyle} aria-sort={ariaSort('model_year')}>
+                <button type="button" style={thButtonStyle} onClick={() => handleSort('model_year')}>
+                  Year{arrow('model_year')}
+                </button>
               </th>
-              <th style={thStyle} onClick={() => handleSort('body_style')}>
-                Model{arrow('body_style')}
+              <th style={thStyle} aria-sort={ariaSort('body_style')}>
+                <button type="button" style={thButtonStyle} onClick={() => handleSort('body_style')}>
+                  Model{arrow('body_style')}
+                </button>
               </th>
-              <th style={thStyle} onClick={() => handleSort('drivetrain')}>
-                Drive{arrow('drivetrain')}
+              <th style={thStyle} aria-sort={ariaSort('drivetrain')}>
+                <button type="button" style={thButtonStyle} onClick={() => handleSort('drivetrain')}>
+                  Drive{arrow('drivetrain')}
+                </button>
               </th>
-              <th style={{ ...thStyle, cursor: 'default' }}>Trans</th>
-              <th style={thStyle} onClick={() => handleSort('interior_color')}>
-                Interior{arrow('interior_color')}
+              <th style={thPlainStyle}>Trans</th>
+              <th style={thStyle} aria-sort={ariaSort('interior_color')}>
+                <button type="button" style={thButtonStyle} onClick={() => handleSort('interior_color')}>
+                  Interior{arrow('interior_color')}
+                </button>
               </th>
-              <th style={{ ...thStyle, cursor: 'default' }}>Wheels</th>
-              <th style={thStyle} onClick={() => handleSort('location_state')}>
-                Location{arrow('location_state')}
+              <th style={thPlainStyle}>Wheels</th>
+              <th style={thStyle} aria-sort={ariaSort('location_state')}>
+                <button type="button" style={thButtonStyle} onClick={() => handleSort('location_state')}>
+                  Location{arrow('location_state')}
+                </button>
               </th>
-              <th style={thStyle} onClick={() => handleSort('forum_username')}>
-                Forum User{arrow('forum_username')}
+              <th style={thStyle} aria-sort={ariaSort('forum_username')}>
+                <button type="button" style={thButtonStyle} onClick={() => handleSort('forum_username')}>
+                  Forum User{arrow('forum_username')}
+                </button>
               </th>
-              <th style={{ ...thStyle, cursor: 'default', width: 36 }}></th>
-              <th style={{ ...thStyle, cursor: 'default', width: 48 }}></th>
+              <th style={{ ...thPlainStyle, width: 36 }}></th>
+              <th style={{ ...thPlainStyle, width: 48 }}></th>
             </tr>
           </thead>
           <tbody>
@@ -247,7 +371,7 @@ export default function EntryTable({ entries }: Props) {
                 </td>
               </tr>
             )}
-            {sorted.map((e, i) => {
+            {pageEntries.map((e, i) => {
               const hex = getColorHex(e.ext_color);
               const cityState = [e.location_city, e.location_state].filter(Boolean).join(', ');
               const model = `${e.body_style}${e.competition ? ' Comp' : ''}`;
@@ -339,6 +463,50 @@ export default function EntryTable({ entries }: Props) {
           </tbody>
         </table>
       </div>
+
+      {totalPages > 1 && (
+        <nav
+          aria-label="Pagination"
+          style={{ display: 'flex', gap: 6, marginTop: 16, alignItems: 'center', flexWrap: 'wrap' }}
+        >
+          <button
+            type="button"
+            onClick={() => setPage(currentPage - 1)}
+            disabled={currentPage === 1}
+            aria-label="Previous page"
+            style={{ ...pageBtnStyle(false), opacity: currentPage === 1 ? 0.5 : 1 }}
+          >
+            Prev
+          </button>
+          {getPageNumbers(currentPage, totalPages).map((p, idx) =>
+            p === 'ellipsis' ? (
+              <span key={`ellipsis-${idx}`} style={{ color: '#64748b', padding: '0 4px' }}>
+                …
+              </span>
+            ) : (
+              <button
+                key={p}
+                type="button"
+                onClick={() => setPage(p)}
+                aria-label={`Page ${p}`}
+                aria-current={p === currentPage ? 'page' : undefined}
+                style={pageBtnStyle(p === currentPage)}
+              >
+                {p}
+              </button>
+            )
+          )}
+          <button
+            type="button"
+            onClick={() => setPage(currentPage + 1)}
+            disabled={currentPage === totalPages}
+            aria-label="Next page"
+            style={{ ...pageBtnStyle(false), opacity: currentPage === totalPages ? 0.5 : 1 }}
+          >
+            Next
+          </button>
+        </nav>
+      )}
     </div>
   );
 }

@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { Suspense } from 'react';
 import { getEntries } from '../../lib/queries';
 
 export const dynamic = 'force-dynamic';
@@ -89,7 +90,9 @@ export default async function EntriesPage({
           overflow: 'hidden',
         }}
       >
-        <EntryTable entries={entries} />
+        <Suspense fallback={<div style={{ color: '#64748b', padding: '2rem', textAlign: 'center' }}>Loading entries…</div>}>
+          <EntryTable entries={entries} />
+        </Suspense>
       </div>
     </main>
   );
