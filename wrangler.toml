@@ -1,5 +1,5 @@
 name = "bmw-individual-colors"
-main = ".open-next/worker.js"
+main = "worker.ts"
 compatibility_date = "2026-08-01"
 compatibility_flags = ["nodejs_compat", "global_fetch_strictly_public"]
 minify = true
@@ -7,6 +7,11 @@ minify = true
 [observability]
 enabled = true
 head_sampling_rate = 1
+
+# Exposes the deployed version id; worker.ts puts it in edge-cache keys so a
+# deploy never serves pages rendered by the previous code. Free.
+[version_metadata]
+binding = "CF_VERSION_METADATA"
 
 [assets]
 directory = ".open-next/assets"

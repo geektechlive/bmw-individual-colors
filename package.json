@@ -10,7 +10,8 @@
     "start": "next start",
     "lint": "eslint",
     "test:e2e": "node node_modules/.bin/playwright test",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test:unit": "node --import tsx --test tests/unit/*.test.ts"
   },
   "dependencies": {
     "@opennextjs/cloudflare": "^1.19.0",

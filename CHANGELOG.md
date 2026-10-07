@@ -8,6 +8,12 @@ Run `npx tsx scripts/post-to-bimmerpost.ts` to publish pending items to the foru
 
 ## [Unreleased]
 
+- **Fixed:** never accept an empty token when ADMIN_TOKEN is unset
+
+- **Fixed:** 403 dotfile and wp-* bot probes before the Next server loads
+
+- **Fixed:** keep country-state-city out of the server bundle
+
 ### Registry Update — September 2026
 
 **What's new**

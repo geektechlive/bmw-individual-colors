@@ -53,6 +53,7 @@ npm run build      # standard Next.js build
 npm run build:cf   # Cloudflare Workers production build
 npm run lint       # ESLint
 npm run typecheck  # tsc --noEmit
+npm run test:unit  # edge-cache + bot-probe unit tests (node:test)
 ```
 
 ## Database maintenance scripts
@@ -69,6 +70,12 @@ npx tsx scripts/normalize-db.ts --apply
 ## Deployment
 
 Pushing to `main` triggers a Cloudflare Pages/Workers build automatically. Run `npm run build:cf` locally before pushing to catch production-build errors that the dev server won't surface.
+
+### Edge cache (Workers Free plan)
+
+The site runs on the Workers Free plan, which allows 10 ms of CPU per request, and a full Next.js render costs far more. `worker.ts` therefore answers public page requests from the free Workers Cache API before the Next server loads (`src/lib/edge-cache.ts`). Pages stay cached until the data changes: a Postgres trigger increments `bmwic_meta.data_version` on any write to `bmwic_entries` (site, scripts, or the Supabase dashboard), and the version is part of every cache key, as is the deployed Worker version. No purge step is needed. Responses carry `x-edge-cache: HIT|MISS|BYPASS`. The table and trigger are in `schema.sql`.
+
+Keep heavy packages out of server code: `country-state-city` once reached the server bundle through `src/lib/validation.ts` and pushed renders over the CPU limit. Server code uses `src/lib/countries.ts` (regenerate with `npx tsx scripts/gen-countries.ts`).
 
 ## Notes
 

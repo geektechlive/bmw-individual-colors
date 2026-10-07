@@ -1,6 +1,6 @@
 import 'server-only';
 
-import { unstable_cache } from 'next/cache';
+import { cache } from 'react';
 import { createServerClient, createAdminClient } from './supabase';
 import { BMW_COLORS, canonicalColorName, colorToSlug } from './colors';
 import type { BmwEntry } from '../types';
@@ -26,8 +26,11 @@ async function getEntriesUncached(): Promise<BmwEntry[]> {
       .range(from, from + PAGE_SIZE - 1);
 
     if (error) {
+      // Throw, never return []: the edge cache stores 200s, so an empty page
+      // rendered during a Supabase blip would be served until the next write.
+      // A thrown error renders as an uncached 500 instead.
       console.error('getEntries error:', error);
-      return [];
+      throw new Error(`getEntries failed: ${error.message}`);
     }
 
     const page = (data ?? []) as BmwEntry[];
@@ -43,10 +46,11 @@ async function getEntriesUncached(): Promise<BmwEntry[]> {
   return all;
 }
 
-export const getEntries = unstable_cache(getEntriesUncached, ['entries'], {
-  revalidate: 300,
-  tags: ['entries'],
-});
+// Deduped per request only (the color page reads entries three times in one
+// render). Cross-request caching is the edge cache in worker.ts, keyed on the
+// database's data_version: a data cache here would let a render that follows
+// an edit store pre-edit rows under the post-edit key.
+export const getEntries = cache(getEntriesUncached);
 
 /**
  * All non-deleted entries whose canonical exterior color matches `colorName`.
@@ -79,27 +83,14 @@ export async function resolveColorSlug(slug: string): Promise<string | null> {
   return null;
 }
 
-async function getLocationEntriesUncached(): Promise<BmwEntry[]> {
-  const supabase = createServerClient();
-  const { data, error } = await supabase
-    .from('bmwic_entries')
-    .select('*')
-    .is('deleted_at', null)
-    .not('location_lat', 'is', null)
-    .not('location_lng', 'is', null);
-
-  if (error) {
-    console.error('getLocationEntries error:', error);
-    return [];
-  }
-  return (data ?? []) as BmwEntry[];
+/**
+ * Entries that can be placed on the map. Derived from getEntries() so it shares
+ * its paging (no silent 1000-row PostgREST cap) and its alias-color merge.
+ */
+export async function getLocationEntries(): Promise<BmwEntry[]> {
+  const entries = await getEntries();
+  return entries.filter((e) => e.location_lat != null && e.location_lng != null);
 }
-
-export const getLocationEntries = unstable_cache(
-  getLocationEntriesUncached,
-  ['location-entries'],
-  { revalidate: 300, tags: ['entries'] }
-);
 
 /**
  * Soft-deleted entries, newest deletion first. Uses the admin client (which

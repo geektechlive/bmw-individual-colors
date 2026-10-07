@@ -1,11 +1,13 @@
 'use server';
 
 import { redirect } from 'next/navigation';
-import { revalidatePath, revalidateTag } from 'next/cache';
+import { cookies } from 'next/headers';
+import { revalidatePath } from 'next/cache';
 import { createAdminClient } from '../lib/supabase';
-import { EDIT_TOKEN_TTL_MS, generateEditToken, timingSafeEqual } from '../lib/edit-token';
+import { EDIT_TOKEN_TTL_MS, generateEditToken, isAdminToken, timingSafeEqual } from '../lib/edit-token';
 import { verifyTurnstile } from '../lib/turnstile';
 import { validateEntryInput, type EntryInput } from '../lib/validation';
+import { FRESH_COOKIE, FRESH_COOKIE_MAX_AGE_S } from '../lib/edge-cache';
 
 interface FormState {
   error?: string;
@@ -32,7 +34,18 @@ const NO_COORDS: Coords = { location_lat: null, location_lng: null };
  * (redirect throws, so nothing after it runs).
  */
 async function purgeEntryCaches(): Promise<void> {
-  revalidateTag('entries', {});
+  // The edge cache (worker.ts) invalidates itself: a Postgres trigger bumps
+  // bmwic_meta.data_version on every write. Workers re-read that version at
+  // most every few seconds, so the person who just made the change carries a
+  // short-lived cookie that bypasses the edge cache until every Worker has
+  // caught up — they never see their own edit missing.
+  (await cookies()).set(FRESH_COOKIE, '1', {
+    maxAge: FRESH_COOKIE_MAX_AGE_S,
+    httpOnly: true,
+    secure: true,
+    sameSite: 'lax',
+    path: '/',
+  });
   revalidatePath('/');
   revalidatePath('/entries');
   revalidatePath('/map');
@@ -300,7 +313,7 @@ export async function flagEntry(id: string, tsToken: string): Promise<{ ok: bool
 
 /** Admin soft delete — the row is retained and can be restored. */
 export async function deleteEntry(id: string, token: string): Promise<{ error?: string }> {
-  if (!timingSafeEqual(token, process.env.ADMIN_TOKEN ?? '')) {
+  if (!isAdminToken(token)) {
     return { error: 'Unauthorized' };
   }
   const supabase = createAdminClient();
@@ -315,7 +328,7 @@ export async function deleteEntry(id: string, token: string): Promise<{ error?: 
 
 /** Admin restore of a soft-deleted row. */
 export async function restoreEntry(id: string, token: string): Promise<{ error?: string }> {
-  if (!timingSafeEqual(token, process.env.ADMIN_TOKEN ?? '')) {
+  if (!isAdminToken(token)) {
     return { error: 'Unauthorized' };
   }
   const supabase = createAdminClient();
@@ -329,7 +342,7 @@ export async function restoreEntry(id: string, token: string): Promise<{ error?:
 }
 
 export async function dismissFlag(id: string, token: string): Promise<{ error?: string }> {
-  if (!timingSafeEqual(token, process.env.ADMIN_TOKEN ?? '')) {
+  if (!isAdminToken(token)) {
     return { error: 'Unauthorized' };
   }
   const supabase = createAdminClient();

@@ -93,3 +93,41 @@ create policy "public read" on bmwic_entries
 -- No public insert policy: the anon key is public, so an open insert policy is a spam
 -- vector. All inserts go through Server Actions using the service-role client
 -- (see src/app/actions.ts), which bypasses RLS entirely. Removed 2026-04-19.
+
+-- ---------------------------------------------------------------------------
+-- Edge-cache invalidation (worker.ts / src/lib/edge-cache.ts).
+-- Any write to bmwic_entries — site actions, scripts, or the Supabase
+-- dashboard — increments data_version; the Worker keys its page cache on it.
+-- Statement-level, so a zero-row UPDATE also bumps (harmless: one re-render).
+-- Flag clicks (increment_flag) bump it too, re-rendering each page once per
+-- data center; accepted because flags are rare and Turnstile-gated.
+-- ---------------------------------------------------------------------------
+create table if not exists public.bmwic_meta (
+  id int primary key check (id = 1),
+  data_version bigint not null default 1
+);
+insert into public.bmwic_meta (id, data_version) values (1, 1) on conflict (id) do nothing;
+
+alter table public.bmwic_meta enable row level security;
+revoke all on public.bmwic_meta from anon, authenticated;
+grant select on public.bmwic_meta to anon, authenticated;
+create policy "public read" on public.bmwic_meta for select to anon, authenticated using (true);
+
+create or replace function public.bmwic_bump_data_version()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $$
+begin
+  -- Row lock on the singleton serializes concurrent writers: every committed
+  -- change gets its own version, unlike now() which is shared per transaction.
+  update public.bmwic_meta set data_version = data_version + 1 where id = 1;
+  return null;
+end;
+$$;
+revoke all on function public.bmwic_bump_data_version() from public, anon, authenticated;
+
+create trigger bmwic_entries_bump_data_version
+  after insert or update or delete or truncate on public.bmwic_entries
+  for each statement execute function public.bmwic_bump_data_version();
