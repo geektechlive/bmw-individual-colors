@@ -10,6 +10,7 @@ import {
   createVersionSource,
   fetchDataVersion,
   handleWithEdgeCache,
+  renderFailureTracker,
   type EdgeCacheStore,
 } from './src/lib/edge-cache';
 
@@ -26,6 +27,7 @@ interface Env {
 
 interface ExecutionContext {
   waitUntil(promise: Promise<unknown>): void;
+  passThroughOnException(): void;
 }
 
 let getVersion: (() => Promise<string | null>) | null = null;
@@ -37,12 +39,16 @@ const worker = {
       () => fetchDataVersion(env.NEXT_PUBLIC_SUPABASE_URL, env.NEXT_PUBLIC_SUPABASE_ANON_KEY),
       cacheVersionFallback(cache)
     );
+    // OpenNext exposes this ctx to the app via getCloudflareContext(); queries.ts
+    // flags failed reads on it so a degraded render is never cached.
+    const tracker = renderFailureTracker(ctx);
     return handleWithEdgeCache(request, {
       cache,
       buildId: env.CF_VERSION_METADATA.id,
       getVersion,
-      origin: (req) => openNextWorker.fetch(req, env, ctx),
+      origin: (req) => openNextWorker.fetch(req, env, tracker.ctx),
       waitUntil: (promise) => ctx.waitUntil(promise),
+      renderFailed: tracker.failed,
     });
   },
 };

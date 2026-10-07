@@ -1,6 +1,8 @@
 import 'server-only';
 
 import { cache } from 'react';
+import { getCloudflareContext } from '@opennextjs/cloudflare';
+import { markRenderFailed } from './edge-cache';
 import { createServerClient, createAdminClient } from './supabase';
 import { BMW_COLORS, canonicalColorName, colorToSlug } from './colors';
 import type { BmwEntry } from '../types';
@@ -8,6 +10,14 @@ import type { BmwEntry } from '../types';
 // PostgREST caps a single response at 1000 rows. Page explicitly so a growing
 // registry can never be silently truncated.
 const PAGE_SIZE = 1000;
+
+function flagRenderFailed(): void {
+  try {
+    markRenderFailed(getCloudflareContext().ctx);
+  } catch {
+    // Outside the Workers runtime (next dev, scripts) there is no edge cache.
+  }
+}
 
 async function getEntriesUncached(): Promise<BmwEntry[]> {
   const supabase = createServerClient();
@@ -26,10 +36,11 @@ async function getEntriesUncached(): Promise<BmwEntry[]> {
       .range(from, from + PAGE_SIZE - 1);
 
     if (error) {
-      // Throw, never return []: the edge cache stores 200s, so an empty page
-      // rendered during a Supabase blip would be served until the next write.
-      // A thrown error renders as an uncached 500 instead.
+      // A degraded render must never be stored by the edge cache: Next has
+      // usually committed a 200 already (RSC responses always do), so the
+      // status code can't say so. Flag the request, then fail the render.
       console.error('getEntries error:', error);
+      flagRenderFailed();
       throw new Error(`getEntries failed: ${error.message}`);
     }
 

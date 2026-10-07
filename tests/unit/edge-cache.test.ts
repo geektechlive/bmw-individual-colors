@@ -5,6 +5,8 @@ import {
   createVersionSource,
   handleWithEdgeCache,
   isCacheableRequest,
+  markRenderFailed,
+  renderFailureTracker,
   type EdgeCacheDeps,
 } from '../../src/lib/edge-cache';
 import { isBlockedPath } from '../../src/lib/blocked-paths';
@@ -252,6 +254,48 @@ test('a HEAD miss is not stored (its response has no body)', async () => {
   await handleWithEdgeCache(req('/', { method: 'HEAD' }), h.deps);
   await h.settle();
   assert.equal(h.cache.store.size, 0);
+});
+
+test('a render that flagged a failed data read is served but never stored', async () => {
+  const h = harness();
+  let failed = false;
+  h.deps.renderFailed = () => failed;
+  h.deps.origin = async () => {
+    // The flag is raised mid-render, after headers are already committed.
+    const body = new ReadableStream({
+      start(controller) {
+        controller.enqueue(new TextEncoder().encode('partial'));
+        failed = true;
+        controller.close();
+      },
+    });
+    return new Response(body, { status: 200 });
+  };
+  const res = await handleWithEdgeCache(req('/reports'), h.deps);
+  assert.equal(await res.text(), 'partial');
+  await h.settle();
+  assert.equal(h.cache.store.size, 0);
+});
+
+test('renderFailureTracker: markRenderFailed on the wrapped ctx flips the flag; methods still work', () => {
+  let waited = 0;
+  const ctx = {
+    waitUntil(this: unknown) {
+      if (this !== ctx) throw new Error('illegal invocation');
+      waited += 1;
+    },
+  };
+  const tracker = renderFailureTracker(ctx);
+  (tracker.ctx as typeof ctx).waitUntil();
+  assert.equal(waited, 1);
+  assert.equal(tracker.failed(), false);
+  markRenderFailed(tracker.ctx);
+  assert.equal(tracker.failed(), true);
+});
+
+test('markRenderFailed tolerates a missing or foreign ctx', () => {
+  markRenderFailed(undefined);
+  markRenderFailed({});
 });
 
 // ---- createVersionSource ----------------------------------------------------

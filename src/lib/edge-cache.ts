@@ -59,6 +59,50 @@ export interface EdgeCacheDeps {
   /** The real app (OpenNext worker). */
   origin: (request: Request) => Promise<Response>;
   waitUntil: (promise: Promise<unknown>) => void;
+  /**
+   * True once the app flagged a failed data read during this request's render
+   * (see markRenderFailed). Checked only after the body has fully streamed,
+   * because the status line is committed before the render finishes.
+   */
+  renderFailed?: () => boolean;
+}
+
+const RENDER_FAILED = Symbol.for('mcolors.edge-cache.render-failed');
+
+/**
+ * Called by the data layer when a read fails mid-render. Next commits a 200
+ * (and RSC responses always say 200) before the page finishes, so the status
+ * code cannot tell the cache a render degraded; this flag can. `ctx` is the
+ * request's ExecutionContext as seen through getCloudflareContext().
+ */
+export function markRenderFailed(ctx: unknown): void {
+  if (ctx && typeof ctx === 'object') {
+    (ctx as Record<symbol, unknown>)[RENDER_FAILED] = true;
+  }
+}
+
+/**
+ * Wraps the Workers ExecutionContext handed to OpenNext so markRenderFailed
+ * can be observed per request. Methods are bound to the real ctx (host
+ * objects throw "illegal invocation" when called with a foreign `this`).
+ */
+export function renderFailureTracker<T extends object>(ctx: T): { ctx: T; failed: () => boolean } {
+  let failed = false;
+  const proxy = new Proxy(ctx, {
+    get(target, prop) {
+      if (prop === RENDER_FAILED) return failed;
+      const value = Reflect.get(target, prop, target);
+      return typeof value === 'function' ? value.bind(target) : value;
+    },
+    set(target, prop, value) {
+      if (prop === RENDER_FAILED) {
+        failed = value === true;
+        return true;
+      }
+      return Reflect.set(target, prop, value, target);
+    },
+  });
+  return { ctx: proxy, failed: () => failed };
 }
 
 function startsWithSegment(path: string, prefix: string): boolean {
@@ -156,7 +200,7 @@ export async function handleWithEdgeCache(request: Request, deps: EdgeCacheDeps)
 
   const response = await deps.origin(request);
   if (isStorable(request, response)) {
-    deps.waitUntil(deps.cache.put(key, toStoredResponse(response.clone())));
+    deps.waitUntil(storeWhenComplete(key, response.clone(), deps));
   }
   return withStatus(response, 'MISS');
 }
@@ -164,6 +208,14 @@ export async function handleWithEdgeCache(request: Request, deps: EdgeCacheDeps)
 export interface VersionFallback {
   get(): Promise<string | null>;
   set(version: string): Promise<void>;
+}
+
+/** Buffers the full body first, so a failure flagged late in the render still blocks the store. */
+async function storeWhenComplete(key: Request, copy: Response, deps: EdgeCacheDeps): Promise<void> {
+  const body = await copy.arrayBuffer();
+  if (deps.renderFailed?.()) return;
+  const complete = new Response(body, { status: copy.status, statusText: copy.statusText, headers: copy.headers });
+  await deps.cache.put(key, toStoredResponse(complete));
 }
 
 /**
