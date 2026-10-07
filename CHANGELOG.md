@@ -8,6 +8,8 @@ Run `npx tsx scripts/post-to-bimmerpost.ts` to publish pending items to the foru
 
 ## [Unreleased]
 
+- **Added:** edge-cache pages until the registry data changes
+
 - **Fixed:** never accept an empty token when ADMIN_TOKEN is unset
 
 - **Fixed:** 403 dotfile and wp-* bot probes before the Next server loads
