@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation';
 import { createAdminClient } from '../../lib/supabase';
 import { adminModerate } from '../actions';
-import { timingSafeEqual } from '../../lib/edit-token';
+import { isAdminToken } from '../../lib/edit-token';
 import { getDeletedEntries } from '../../lib/queries';
 import type { BmwEntry } from '../../types';
 
@@ -14,7 +14,7 @@ interface Props {
 export default async function AdminPage({ searchParams }: Props) {
   const { token, error } = await searchParams;
 
-  if (!token || !timingSafeEqual(token, process.env.ADMIN_TOKEN ?? '')) {
+  if (!isAdminToken(token)) {
     redirect('/');
   }
 

@@ -26,6 +26,17 @@ export function timingSafeEqual(a: string, b: string): boolean {
 }
 
 /**
+ * True only for a non-empty token matching a configured ADMIN_TOKEN. Comparing
+ * against `process.env.ADMIN_TOKEN ?? ''` directly would accept an empty token
+ * whenever the secret is missing (e.g. a misconfigured preview deploy).
+ */
+export function isAdminToken(token: string | null | undefined): boolean {
+  const secret = process.env.ADMIN_TOKEN;
+  if (!secret || !token) return false;
+  return timingSafeEqual(token, secret);
+}
+
+/**
  * HMAC-SHA256 over `${id}:${username.toLowerCase()}:${expiresAt}`, hex encoded.
  * Keyed by ADMIN_TOKEN; throws when that env var is not configured.
  */
