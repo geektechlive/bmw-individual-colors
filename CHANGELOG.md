@@ -8,6 +8,10 @@ Run `npx tsx scripts/post-to-bimmerpost.ts` to publish pending items to the foru
 
 ## [Unreleased]
 
+- **Fixed:** don't prefetch per-row edit links
+
+- **Fixed:** never edge-cache a render whose data read failed
+
 - **Added:** edge-cache pages until the registry data changes
 
 - **Fixed:** never accept an empty token when ADMIN_TOKEN is unset
