@@ -6,7 +6,7 @@
  * import from Server Actions, scripts, or tests.
  */
 
-import { Country } from 'country-state-city';
+import { COUNTRIES } from './countries';
 import { BMW_COLORS } from './colors';
 
 export interface EntryInput {
@@ -81,13 +81,12 @@ export function normalizeCountry(raw: string | null | undefined): string {
   if (US_ALIASES.has(lower)) return 'United States';
   if (UK_ALIASES.has(lower)) return 'United Kingdom';
 
-  const allCountries = Country.getAllCountries();
-  const byName = allCountries.find((c) => c.name.toLowerCase() === lower);
-  if (byName) return byName.name;
+  const byName = COUNTRIES.find(([, name]) => name.toLowerCase() === lower);
+  if (byName) return byName[1];
 
   if (cleaned.length === 2) {
-    const byIso = allCountries.find((c) => c.isoCode.toLowerCase() === lower);
-    if (byIso) return byIso.name;
+    const byIso = COUNTRIES.find(([iso]) => iso.toLowerCase() === lower);
+    if (byIso) return byIso[1];
   }
 
   return cleaned;
