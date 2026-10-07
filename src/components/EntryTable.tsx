@@ -449,8 +449,12 @@ export default function EntryTable({ entries }: Props) {
                     <FlagButton id={e.id} />
                   </td>
                   <td style={{ ...tdStyle, textAlign: 'center', padding: '6px 4px' }}>
+                    {/* No prefetch: /edit bypasses the edge cache, so prefetching one
+                        per visible row fired bursts of full renders that tripped the
+                        Workers Free CPU limit. Edits are rare; load on click. */}
                     <Link
                       href={`/edit/${e.id}`}
+                      prefetch={false}
                       style={{ color: '#1C69D4', fontSize: 15, textDecoration: 'none', padding: 8, display: 'inline-block', lineHeight: 1 }}
                       title="Edit this entry"
                     >
