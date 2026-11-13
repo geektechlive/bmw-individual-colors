@@ -8,6 +8,8 @@ Run `npx tsx scripts/post-to-bimmerpost.ts` to publish pending items to the foru
 
 ## [Unreleased]
 
+- **Docs:** adopt public ADRs and backfill 15 decisions; README/SECURITY match the code
+
 - **Added:** flag reasons and admin sign-in (Phase 3)
 
 - **Fixed:** upgrade Next 16.4.6, React 19.3.1, OpenNext 1.20.17, wrangler 4.161
