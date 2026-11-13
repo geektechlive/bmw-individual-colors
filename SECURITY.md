@@ -9,10 +9,14 @@ All secrets are managed via environment variables and are never committed to thi
 - `.dev.vars` — Wrangler local dev mirror of `.env.local`
 - `.wrangler/` — Wrangler build cache
 
-`ADMIN_TOKEN` does double duty: it gates the `/admin` route and the delete/dismiss/restore
-actions, and it also signs the HMAC edit tokens used in `/edit/[id]` links (see
-`src/lib/edit-token.ts`). Rotating it invalidates any outstanding edit links (they have a
-1-hour TTL anyway).
+Each secret has one job ([ADR 0011](docs/decisions/0011-admin-sign-in-and-separate-secrets.md)):
+`ADMIN_TOKEN` is only the credential typed at `/admin`; `ADMIN_SESSION_SECRET` signs the
+12-hour admin session cookie (rotating it, or `ADMIN_TOKEN`, signs everyone out);
+`EDIT_TOKEN_SECRET` signs `/edit/[id]` links (1-hour TTL). A missing secret makes its feature
+refuse rather than fall back to a known key. Security reviews of this project state their threat
+model first ([ADR 0013](docs/decisions/0013-security-reviews-use-an-explicit-threat-model.md)).
+
+`.env.local` also holds `ADMIN_SESSION_SECRET` and `EDIT_TOKEN_SECRET`.
 
 **What is safe to be public:**
 - `wrangler.toml` contains only `NEXT_PUBLIC_TURNSTILE_SITE_KEY`, which is the client-side Cloudflare Turnstile site key. This key is designed to be public — it is not a secret.
@@ -29,7 +33,8 @@ cp .env.local.example .env.local
 You will need:
 - A [Supabase](https://supabase.com) project with a table matching the `BmwEntry` schema in `src/types/index.ts`
 - A [Cloudflare Turnstile](https://dash.cloudflare.com/?to=/:account/turnstile) site/secret key pair
-- An `ADMIN_TOKEN` of your choosing (any strong random string)
+- An `ADMIN_TOKEN`, `ADMIN_SESSION_SECRET` and `EDIT_TOKEN_SECRET` (long random strings, e.g.
+  `openssl rand -base64 32` each)
 
 ## Reporting a vulnerability
 

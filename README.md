@@ -4,6 +4,8 @@ A community registry of BMW Individual paint colors submitted by owners. Browse 
 
 Live at [mcolors.geektechlive.com](https://mcolors.geektechlive.com).
 
+Why things are the way they are: see the decision records in [`docs/decisions/`](docs/decisions/README.md).
+
 ## Stack
 
 - **Next.js 16** (App Router, Server Components) deployed to **Cloudflare Workers** via `@opennextjs/cloudflare`
@@ -73,7 +75,7 @@ Pushing to `main` triggers a Cloudflare Pages/Workers build automatically. Run `
 
 ### Edge cache (Workers Free plan)
 
-The site runs on the Workers Free plan, which allows 10 ms of CPU per request, and a full Next.js render costs far more. `worker.ts` therefore answers public page requests from the free Workers Cache API before the Next server loads (`src/lib/edge-cache.ts`). Pages stay cached until the data changes: a Postgres trigger increments `bmwic_meta.data_version` on any write to `bmwic_entries` (site, scripts, or the Supabase dashboard), and the version is part of every cache key, as is the deployed Worker version. No purge step is needed. Responses carry `x-edge-cache: HIT|MISS|BYPASS`. The table and trigger are in `schema.sql`.
+The site runs on the Workers Free plan, which allows 10 ms of CPU per request, and a full Next.js render costs far more. `worker.ts` therefore answers public page requests from the free Workers Cache API before the Next server loads (`src/lib/edge-cache.ts`). Pages stay cached until the data changes: Postgres triggers increment `bmwic_meta.data_version` on writes to `bmwic_entries` (site, scripts, or the Supabase dashboard), and the version is part of every cache key, as is the deployed Worker version. No purge step is needed. Responses carry `x-edge-cache: HIT|MISS|BYPASS`; color social cards are cached in free-tier KV and carry `x-og-cache`. The table and triggers are in `schema.sql`. Details and the reasoning: [ADR 0003](docs/decisions/0003-stay-on-the-workers-free-plan.md), [0004](docs/decisions/0004-edge-cache-keyed-on-data-version.md), [0006](docs/decisions/0006-social-cards-keep-the-live-count-in-kv.md), [0007](docs/decisions/0007-the-version-read-blocks.md).
 
 Keep heavy packages out of server code: `country-state-city` once reached the server bundle through `src/lib/validation.ts` and pushed renders over the CPU limit. Server code uses `src/lib/countries.ts` (regenerate with `npx tsx scripts/gen-countries.ts`).
 
@@ -149,14 +151,16 @@ as coverage grows, so don't rely on a hardcoded number.
 
 ## Moderation: flags, soft delete, and restore
 
-Community members can flag an entry via the 🚩 button, which increments `flag_count`. Admins
-review flagged entries at `/admin?token=ADMIN_TOKEN` and can dismiss the flag (resets the
-count) or delete the entry.
+Community members can report an entry with the 🚩 button. A report needs a reason (wrong color,
+wrong details, duplicate, not a real build, or other with a note) and is stored in
+`bmwic_flags` ([ADR 0010](docs/decisions/0010-flags-need-a-reason.md)). The admin signs in at
+`/admin` with the admin token ([ADR 0011](docs/decisions/0011-admin-sign-in-and-separate-secrets.md)),
+reads each report's reason and note, and either dismisses the reports or deletes the entry.
 
-Deletes are soft: `deleteEntry` sets `deleted_at` rather than removing the row, so the "public
-read" RLS policy (`deleted_at is null`) hides it immediately without destroying the data. The
-admin page's "Recently deleted" section lists soft-deleted rows (fetched with the service-role
-client, which bypasses RLS) and offers a Restore action that clears `deleted_at`.
+Deletes are soft: Delete sets `deleted_at` rather than removing the row, so the "public read" RLS
+policy (`deleted_at is null`) hides it immediately without destroying the data
+([ADR 0008](docs/decisions/0008-username-edits-and-soft-delete.md)). The admin page's "Recently
+deleted" section lists soft-deleted rows and offers Restore, which clears `deleted_at`.
 
 ## Contributing
 
