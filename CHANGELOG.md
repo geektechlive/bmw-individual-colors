@@ -8,6 +8,8 @@ Run `npx tsx scripts/post-to-bimmerpost.ts` to publish pending items to the foru
 
 ## [Unreleased]
 
+- **Improved:** cut Worker CPU overruns on the free plan (HEAD fill, OG KV cache, static assets)
+
 - **Fixed:** don't prefetch per-row edit links
 
 - **Fixed:** never edge-cache a render whose data read failed
