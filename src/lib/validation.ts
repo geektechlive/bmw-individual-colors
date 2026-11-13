@@ -7,7 +7,7 @@
  */
 
 import { COUNTRIES } from './countries';
-import { BMW_COLORS } from './colors';
+import { BMW_COLORS, canonicalColorName } from './colors';
 
 export interface EntryInput {
   model_year: number;
@@ -171,14 +171,17 @@ function toTitleCase(s: string): string {
 
 /**
  * Snaps a cleaned color string to its canonical `BMW_COLORS` key via a
- * case-insensitive exact match. When there's no match, returns the cleaned
+ * case-insensitive exact match, resolving `COLOR_ALIASES` (e.g. "Enzian Blue"
+ * is stored as "Gentian Blue"). When there's no match, returns the cleaned
  * string as-is unless the input was entirely lower- or upper-case, in which
  * case it's Title Cased.
  */
 export function snapColorName(raw: string): string {
   const cleaned = raw.trim().replace(/\s+/g, ' ');
-  const match = Object.keys(BMW_COLORS).find((k) => k.toLowerCase() === cleaned.toLowerCase());
-  if (match) return match;
+  // Aliases are stored under their canonical name (#35), so one car can't be
+  // registered twice under two names and the unique index sees one string.
+  const canonical = canonicalColorName(cleaned);
+  if (canonical in BMW_COLORS) return canonical;
 
   const isAllLower = cleaned !== cleaned.toUpperCase() && cleaned === cleaned.toLowerCase();
   const isAllUpper = cleaned !== cleaned.toLowerCase() && cleaned === cleaned.toUpperCase();
@@ -294,4 +297,15 @@ export function validateEntryInput(formData: FormData): ValidationResult {
       source_forum,
     },
   };
+}
+
+/**
+ * User-facing message for a failed edit (#36). A unique-index conflict (23505)
+ * means the edit would duplicate another of the user's builds — say so,
+ * rather than suggesting a transient failure.
+ */
+export function updateErrorMessage(error: { code?: string }): string {
+  return error.code === '23505'
+    ? 'You already have an entry for this exact build.'
+    : 'Failed to save changes. Please try again.';
 }

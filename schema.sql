@@ -50,12 +50,14 @@ create table if not exists bmwic_entries (
 
 -- ── Indexes ──────────────────────────────────────────────────────────────────
 
--- Enforces one entry per (user, build spec) for web-submitted entries only —
--- forum-imported rows (user_submitted = false) are exempt since scrape data
--- can legitimately contain repeats we haven't deduped yet.
+-- Enforces one visible entry per (user, build spec) for web-submitted entries
+-- only — forum-imported rows (user_submitted = false) are exempt since scrape
+-- data can legitimately contain repeats we haven't deduped yet. Soft-deleted
+-- rows are excluded so a deleted entry can be resubmitted. (Matches the live
+-- index, verified with pg_get_indexdef 2026-11-13, #35.)
 create unique index if not exists bmwic_entries_user_submitted_unique
   on bmwic_entries (forum_username, ext_color, model_year, body_style, drivetrain)
-  where user_submitted = true;
+  where user_submitted = true and deleted_at is null;
 
 -- Partial index to make the admin "Recently deleted" query and cleanup jobs cheap.
 create index if not exists bmwic_entries_deleted_at_idx

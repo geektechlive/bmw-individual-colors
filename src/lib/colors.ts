@@ -6,13 +6,14 @@ export const BMW_COLORS: Record<string, string> = {
   "Atlantis Blue Metallic":    "#1a4b8c",
   "Black Blue":                "#0d1a2e",
   "Daytona Beach Blue":        "#1e5f8c",
-  "Enzian Blue":               "#1a2a5c",
   "Eridan Blue":               "#1e3d6e",
   "Frozen Portimao Blue":      "#1e3a8a",
   "Gentian Blue":              "#1c3a7a",
   "Marina Bay Blue":           "#1e5c8c",
   "Mauritius Blue":            "#1e4a8c",
   "Mexico Blue":               "#1e5c9c",
+  // Porsche M5C, ordered via BMW Individual (#16). Hex: colors.stuttcars.com structured data.
+  "Miami Blue":                "#1BBFE8",
   "Midnight Blue":             "#1a2a4a",
   "Marhon Blue":               "#1e4c7c",
   "Portimao Blue":             "#1e3a8c",
@@ -30,7 +31,6 @@ export const BMW_COLORS: Record<string, string> = {
   // Greens
   "Brewster Green":            "#1e3d20",
   "British Racing Green":      "#1a3c2f",
-  "Verde British Racing":      "#1a3c2f",
   "Isle of Man Green":         "#1a5c2a",
   "Jack Green":                "#1a5c2a",
   "Oxford Green II Metallic":  "#2a4a2a",
@@ -110,7 +110,6 @@ export const BMW_COLORS: Record<string, string> = {
   "Como Blue Metallic":        "#1a3a6a",
   "Copper":                    "#aa5c1e",
   "Dolomite Grey":             "#9a9a9a",
-  "Eridan Blue Metallic":      "#1e3d6e",
   "Gold Bronze":               "#aa7a2a",
   "Himalaya Grey":             "#8a8a8a",
   "Kyoto Green Metallic":      "#2a5a3a",
@@ -182,7 +181,7 @@ export function getColorHex(colorName: string): string {
 export const COLOR_FAMILY_MAP: Record<string, string> = {
   // Blues
   "Aegean Blue": "Blues", "Atlantis Blue Metallic": "Blues", "Black Blue": "Blues",
-  "Daytona Beach Blue": "Blues", "Enzian Blue": "Blues", "Eridan Blue": "Blues",
+  "Daytona Beach Blue": "Blues", "Eridan Blue": "Blues", "Miami Blue": "Blues",
   "Frozen Portimao Blue": "Blues", "Gentian Blue": "Blues",
   "Marina Bay Blue": "Blues", "Mauritius Blue": "Blues", "Mexico Blue": "Blues",
   "Midnight Blue": "Blues", "Marhon Blue": "Blues", "Portimao Blue": "Blues",
@@ -195,7 +194,7 @@ export const COLOR_FAMILY_MAP: Record<string, string> = {
   "Brewster Green": "Greens", "British Racing Green": "Greens",
   "Isle of Man Green": "Greens", "Jack Green": "Greens",
   "Oxford Green II Metallic": "Greens", "Verde Ermes": "Greens",
-  "Agave": "Greens", "Anglesey Green Metallic": "Greens", "Verde British Racing": "Greens",
+  "Agave": "Greens", "Anglesey Green Metallic": "Greens",
   "Goodwood Green Pearl": "Greens", "Irish Green": "Greens", "Lime Green": "Greens",
   // Reds & Oranges
   "Fire Orange": "Reds & Oranges", "Fire Orange III": "Reds & Oranges",

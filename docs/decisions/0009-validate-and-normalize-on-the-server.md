@@ -22,11 +22,12 @@ Suspicious rows are never deleted by scripts. They are left for the owner to rev
 - Charts and counts stay consistent without periodic cleanups.
 - When a new kind of drift appears, the normalizer in `validation.ts` and the matching rule in
   `normalize-db.ts` change together.
-- Known gap: color aliases are merged on read, not on write. Fixing that needs a migration of
-  existing alias rows first (Phase 4).
+- Color aliases (for example "Enzian Blue" → "Gentian Blue") are canonicalized on write as well
+  as on read since 2026-11-13. The five existing alias rows were migrated first, so the unique
+  index sees one name per car (#35). Alias names are not offered as separate colors.
 - Permanent, unless the data model changes.
 
 ## Evidence
 
-- 196d450, 327e9fe.
+- 196d450, 327e9fe; #35.
 - `src/lib/validation.ts`, `scripts/normalize-db.ts`.

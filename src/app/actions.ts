@@ -6,7 +6,7 @@ import { revalidatePath } from 'next/cache';
 import { createAdminClient } from '../lib/supabase';
 import { EDIT_TOKEN_TTL_MS, generateEditToken, isAdminToken, verifyEditToken } from '../lib/edit-token';
 import { verifyTurnstile } from '../lib/turnstile';
-import { validateEntryInput, type EntryInput } from '../lib/validation';
+import { updateErrorMessage, validateEntryInput, type EntryInput } from '../lib/validation';
 import { FRESH_COOKIE, FRESH_COOKIE_MAX_AGE_S } from '../lib/edge-cache';
 import { endAdminSession, flagReporterHash, hasAdminSession, isAdminLoginConfigured, startAdminSession } from '../lib/admin-auth';
 import { moderate } from '../lib/moderation';
@@ -301,7 +301,7 @@ export async function updateEntry(
 
   if (error) {
     console.error('Update error:', error);
-    return { error: 'Failed to save changes. Please try again.' };
+    return { error: updateErrorMessage(error) };
   }
 
   await purgeEntryCaches();
