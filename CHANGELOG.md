@@ -8,6 +8,8 @@ Run `npx tsx scripts/post-to-bimmerpost.ts` to publish pending items to the foru
 
 ## [Unreleased]
 
+- **Added:** Miami Blue in the color list; aliases stored under one name; clear duplicate-edit message (Phase 4)
+
 - **Docs:** adopt public ADRs and backfill 15 decisions; README/SECURITY match the code
 
 - **Added:** flag reasons and admin sign-in (Phase 3)
