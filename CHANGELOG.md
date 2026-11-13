@@ -8,6 +8,8 @@ Run `npx tsx scripts/post-to-bimmerpost.ts` to publish pending items to the foru
 
 ## [Unreleased]
 
+- **Fixed:** upgrade Next 16.4.6, React 19.3.1, OpenNext 1.20.17, wrangler 4.161
+
 - **Improved:** cut Worker CPU overruns on the free plan (HEAD fill, OG KV cache, static assets)
 
 - **Fixed:** don't prefetch per-row edit links
