@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { createAdminClient } from '../../../lib/supabase';
-import { generateEditToken, timingSafeEqual } from '../../../lib/edit-token';
+import { verifyEditToken } from '../../../lib/edit-token';
 import EditVerifyForm from './EditVerifyForm';
 import EditEntryForm from './EditEntryForm';
 import type { BmwEntry } from '../../../types';
@@ -38,8 +38,7 @@ export default async function EditPage({ params, searchParams }: Props) {
 
   let tokenValid = false;
   if (token && expiresAt > 0 && !isExpired) {
-    const expectedToken = await generateEditToken(id, entry.forum_username ?? '', expiresAt);
-    tokenValid = timingSafeEqual(token, expectedToken);
+    tokenValid = await verifyEditToken(token, id, entry.forum_username ?? '', expiresAt);
   }
 
   const needsVerification = !token || expiresAt <= 0 || isExpired || !tokenValid;

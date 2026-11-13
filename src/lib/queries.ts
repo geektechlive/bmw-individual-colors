@@ -5,6 +5,7 @@ import { getCloudflareContext } from '@opennextjs/cloudflare';
 import { markRenderFailed } from './edge-cache';
 import { createServerClient, createAdminClient } from './supabase';
 import { BMW_COLORS, canonicalColorName, colorToSlug } from './colors';
+import { groupOpenFlags, type FlaggedEntry, type OpenFlagRow } from './moderation';
 import type { BmwEntry } from '../types';
 
 // PostgREST caps a single response at 1000 rows. Page explicitly so a growing
@@ -104,21 +105,37 @@ export async function getLocationEntries(): Promise<BmwEntry[]> {
 }
 
 /**
- * Soft-deleted entries, newest deletion first. Uses the admin client (which
- * bypasses RLS) and is deliberately NOT cached — moderation views must always
- * see the current state.
+ * Everything /admin shows, or `ok: false` when any read failed, so the page
+ * can say "couldn't load" instead of a false "no flagged entries" (#31).
+ * Service-role reads; never cached.
  */
-export async function getDeletedEntries(): Promise<BmwEntry[]> {
+export async function getModerationQueue(): Promise<
+  { ok: true; flagged: FlaggedEntry[]; deleted: BmwEntry[] } | { ok: false }
+> {
   const supabase = createAdminClient();
-  const { data, error } = await supabase
-    .from('bmwic_entries')
-    .select('*')
-    .not('deleted_at', 'is', null)
-    .order('deleted_at', { ascending: false });
-
-  if (error) {
-    console.error('getDeletedEntries error:', error);
-    return [];
+  const [flags, deleted] = await Promise.all([
+    supabase
+      .from('bmwic_flags')
+      .select('id, reason, note, created_at, entry:bmwic_entries!inner(*)')
+      .is('resolved_at', null)
+      .is('entry.deleted_at', null)
+      .order('created_at', { ascending: false })
+      .limit(1000),
+    supabase
+      .from('bmwic_entries')
+      .select('*')
+      .not('deleted_at', 'is', null)
+      .order('deleted_at', { ascending: false })
+      .limit(200),
+  ]);
+  if (flags.error || deleted.error) {
+    console.error('getModerationQueue error:', flags.error ?? deleted.error);
+    return { ok: false };
   }
-  return (data ?? []) as BmwEntry[];
+  return {
+    ok: true,
+    flagged: groupOpenFlags((flags.data ?? []) as unknown as OpenFlagRow[]),
+    deleted: (deleted.data ?? []) as BmwEntry[],
+  };
 }
+

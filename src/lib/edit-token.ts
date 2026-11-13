@@ -1,29 +1,21 @@
 /**
- * Edit-token helpers for the self-service entry editor.
+ * Edit-token helpers for the self-service entry editor, plus the admin
+ * credential check used by the /admin login.
  *
- * NOTE: `ADMIN_TOKEN` doubles as the edit-token signing secret. It guards the
- * /admin route AND keys the HMAC used to sign per-entry edit links, so rotating
- * it invalidates every outstanding edit link (which is the desired behaviour).
+ * Edit links are signed with EDIT_TOKEN_SECRET (#32). They used to be keyed by
+ * ADMIN_TOKEN, so anyone holding the admin token could forge an edit link for
+ * any entry. Rotating EDIT_TOKEN_SECRET invalidates outstanding links (they
+ * live 1 hour; the owner just re-verifies their forum username).
  *
- * This module deliberately has no 'use server' directive: it is a plain library
- * so Server Components (e.g. the /edit/[id] page) can import the constants and
- * verify tokens without going through a Server Action boundary.
+ * No 'use server' directive: a plain library so Server Components (e.g. the
+ * /edit/[id] page) can verify tokens without a Server Action boundary.
  */
+import { hmacSha256Hex, timingSafeEqual } from './hmac';
+
+export { timingSafeEqual };
 
 /** How long a generated edit link stays valid. */
 export const EDIT_TOKEN_TTL_MS = 60 * 60 * 1000; // 1 hour
-
-/** Constant-time string comparison to prevent timing attacks on token checks. */
-export function timingSafeEqual(a: string, b: string): boolean {
-  const aBytes = new TextEncoder().encode(a);
-  const bBytes = new TextEncoder().encode(b);
-  let diff = aBytes.length ^ bBytes.length;
-  const len = Math.max(aBytes.length, bBytes.length);
-  for (let i = 0; i < len; i++) {
-    diff |= (aBytes[i] ?? 0) ^ (bBytes[i] ?? 0);
-  }
-  return diff === 0;
-}
 
 /**
  * True only for a non-empty token matching a configured ADMIN_TOKEN. Comparing
@@ -36,30 +28,45 @@ export function isAdminToken(token: string | null | undefined): boolean {
   return timingSafeEqual(token, secret);
 }
 
-/**
- * HMAC-SHA256 over `${id}:${username.toLowerCase()}:${expiresAt}`, hex encoded.
- * Keyed by ADMIN_TOKEN; throws when that env var is not configured.
- */
-export async function generateEditToken(
+/** HMAC-SHA256 over `${id}:${username.toLowerCase()}:${expiresAt}`, hex encoded. */
+export async function signEditToken(
+  secret: string,
   id: string,
   username: string,
   expiresAt: number
 ): Promise<string> {
-  const secret = process.env.ADMIN_TOKEN;
-  if (!secret) throw new Error('ADMIN_TOKEN environment variable is not configured.');
-  const key = await crypto.subtle.importKey(
-    'raw',
-    new TextEncoder().encode(secret),
-    { name: 'HMAC', hash: 'SHA-256' },
-    false,
-    ['sign']
-  );
-  const sig = await crypto.subtle.sign(
-    'HMAC',
-    key,
-    new TextEncoder().encode(`${id}:${username.toLowerCase()}:${expiresAt}`)
-  );
-  return Array.from(new Uint8Array(sig))
-    .map((b) => b.toString(16).padStart(2, '0'))
-    .join('');
+  if (!secret) throw new Error('EDIT_TOKEN_SECRET is not configured.');
+  return hmacSha256Hex(secret, `${id}:${username.toLowerCase()}:${expiresAt}`);
+}
+
+/** Pure check: right secret, right entry/user/expiry, and not yet expired. */
+export async function verifyEditTokenWith(
+  secret: string,
+  token: string,
+  id: string,
+  username: string,
+  expiresAt: number,
+  nowMs: number
+): Promise<boolean> {
+  if (!secret || !token || !Number.isFinite(expiresAt) || expiresAt <= nowMs) return false;
+  return timingSafeEqual(token, await signEditToken(secret, id, username, expiresAt));
+}
+
+function editTokenSecret(): string {
+  return process.env.EDIT_TOKEN_SECRET ?? '';
+}
+
+/** Mints an edit token with EDIT_TOKEN_SECRET; throws when it is not configured. */
+export function generateEditToken(id: string, username: string, expiresAt: number): Promise<string> {
+  return signEditToken(editTokenSecret(), id, username, expiresAt);
+}
+
+/** Verifies an edit token against EDIT_TOKEN_SECRET and the current time. */
+export function verifyEditToken(
+  token: string,
+  id: string,
+  username: string,
+  expiresAt: number
+): Promise<boolean> {
+  return verifyEditTokenWith(editTokenSecret(), token, id, username, expiresAt, Date.now());
 }

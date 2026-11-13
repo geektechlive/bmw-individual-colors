@@ -77,8 +77,10 @@ as $$
   update bmwic_entries set flag_count = flag_count + 1 where id = entry_id;
 $$;
 
-revoke execute on function increment_flag(uuid) from anon;
-revoke execute on function increment_flag(uuid) from authenticated;
+-- PUBLIC must be revoked too: Postgres grants EXECUTE to PUBLIC by default, so
+-- revoking only anon/authenticated left it callable via /rest/v1/rpc (#33).
+revoke all on function increment_flag(uuid) from public, anon, authenticated;
+grant execute on function increment_flag(uuid) to service_role;
 
 -- ── Row Level Security ─────────────────────────────────────────────────────────
 
@@ -146,3 +148,112 @@ create trigger bmwic_entries_bump_data_version_on_update
     last_edited_at, deleted_at
   on public.bmwic_entries
   for each statement execute function public.bmwic_bump_data_version();
+
+-- ---------------------------------------------------------------------------
+-- Flag reasons (#31). Each flag records WHY an entry looks wrong so the owner
+-- can act on it at /admin. Flags live outside bmwic_entries, so flagging never
+-- bumps bmwic_meta.data_version or touches the public edge cache (#26).
+-- Only the site's service-role client reaches this table and these functions.
+-- Applied live 2026-11-13; mirrored at the end of schema.sql.
+-- ---------------------------------------------------------------------------
+create table if not exists public.bmwic_flags (
+  id uuid primary key default gen_random_uuid(),
+  entry_id uuid not null references public.bmwic_entries(id) on delete cascade,
+  reason text not null
+    check (reason in ('wrong_color', 'wrong_details', 'duplicate', 'not_real', 'other')),
+  note text check (note is null or char_length(note) <= 280),
+  -- HMAC of the reporter's IP (never the raw IP): one open flag per reporter per entry.
+  reporter_hash text not null,
+  created_at timestamptz not null default now(),
+  resolved_at timestamptz,
+  constraint bmwic_flags_other_needs_note
+    check (reason <> 'other' or nullif(btrim(note), '') is not null)
+);
+
+create unique index if not exists bmwic_flags_one_open_per_reporter
+  on public.bmwic_flags (entry_id, reporter_hash) where resolved_at is null;
+create index if not exists bmwic_flags_open_by_entry
+  on public.bmwic_flags (entry_id, created_at) where resolved_at is null;
+
+alter table public.bmwic_flags enable row level security;
+revoke all on public.bmwic_flags from public, anon, authenticated;
+grant select, insert, update on public.bmwic_flags to service_role;
+
+-- Adds a flag atomically. The entry row is share-locked, so a concurrent
+-- soft-delete either happens first (-> not_found) or waits for this insert.
+-- Returns: ok | not_found | duplicate | too_many
+create or replace function public.bmwic_flag_entry(
+  p_entry_id uuid, p_reason text, p_note text, p_reporter_hash text
+) returns text
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  v_open int;
+begin
+  perform 1 from public.bmwic_entries
+    where id = p_entry_id and deleted_at is null
+    for share;
+  if not found then
+    return 'not_found';
+  end if;
+
+  select count(*) into v_open
+    from public.bmwic_flags
+    where entry_id = p_entry_id and resolved_at is null;
+  if v_open >= 20 then
+    return 'too_many';
+  end if;
+
+  insert into public.bmwic_flags (entry_id, reason, note, reporter_hash)
+    values (p_entry_id, p_reason, nullif(btrim(p_note), ''), p_reporter_hash);
+  return 'ok';
+exception
+  when unique_violation then
+    return 'duplicate';
+end;
+$$;
+
+-- Admin moderation in one transaction. Returns: ok | not_found | bad_op
+--   dismiss: resolve the entry's open flags (and clear the legacy count; flag-only, no cache bump)
+--   delete:  soft-delete the entry and resolve its open flags together
+--   restore: clear deleted_at (flags resolved at delete time stay resolved)
+create or replace function public.bmwic_moderate(p_entry_id uuid, p_op text)
+returns text
+language plpgsql
+security definer
+set search_path = ''
+as $$
+begin
+  if p_op = 'dismiss' then
+    update public.bmwic_flags set resolved_at = now()
+      where entry_id = p_entry_id and resolved_at is null;
+    update public.bmwic_entries set flag_count = 0
+      where id = p_entry_id and flag_count <> 0;
+    return 'ok';
+  elsif p_op = 'delete' then
+    update public.bmwic_entries set deleted_at = now()
+      where id = p_entry_id and deleted_at is null;
+    if not found then
+      return 'not_found';
+    end if;
+    update public.bmwic_flags set resolved_at = now()
+      where entry_id = p_entry_id and resolved_at is null;
+    return 'ok';
+  elsif p_op = 'restore' then
+    update public.bmwic_entries set deleted_at = null
+      where id = p_entry_id and deleted_at is not null;
+    if not found then
+      return 'not_found';
+    end if;
+    return 'ok';
+  end if;
+  return 'bad_op';
+end;
+$$;
+
+revoke all on function public.bmwic_flag_entry(uuid, text, text, text) from public, anon, authenticated;
+revoke all on function public.bmwic_moderate(uuid, text) from public, anon, authenticated;
+grant execute on function public.bmwic_flag_entry(uuid, text, text, text) to service_role;
+grant execute on function public.bmwic_moderate(uuid, text) to service_role;

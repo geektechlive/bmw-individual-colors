@@ -4,10 +4,13 @@ import { redirect } from 'next/navigation';
 import { cookies } from 'next/headers';
 import { revalidatePath } from 'next/cache';
 import { createAdminClient } from '../lib/supabase';
-import { EDIT_TOKEN_TTL_MS, generateEditToken, isAdminToken, timingSafeEqual } from '../lib/edit-token';
+import { EDIT_TOKEN_TTL_MS, generateEditToken, isAdminToken, verifyEditToken } from '../lib/edit-token';
 import { verifyTurnstile } from '../lib/turnstile';
 import { validateEntryInput, type EntryInput } from '../lib/validation';
 import { FRESH_COOKIE, FRESH_COOKIE_MAX_AGE_S } from '../lib/edge-cache';
+import { endAdminSession, flagReporterHash, hasAdminSession, isAdminLoginConfigured, startAdminSession } from '../lib/admin-auth';
+import { moderate } from '../lib/moderation';
+import { submitFlag, type FlagResult } from '../lib/flagging';
 
 interface FormState {
   error?: string;
@@ -213,7 +216,14 @@ export async function verifyForumUsername(
   }
 
   const expiresAt = Date.now() + EDIT_TOKEN_TTL_MS;
-  const editToken = await generateEditToken(id, entry.forum_username ?? '', expiresAt);
+  let editToken: string;
+  try {
+    editToken = await generateEditToken(id, entry.forum_username ?? '', expiresAt);
+  } catch (e) {
+    // EDIT_TOKEN_SECRET missing: fail closed with a message, not a 500.
+    console.error('verifyForumUsername: cannot sign edit token', e);
+    return { error: 'Editing is temporarily unavailable. Please try again later.' };
+  }
   redirect(`/edit/${id}?token=${editToken}&exp=${expiresAt}`);
 }
 
@@ -247,8 +257,7 @@ export async function updateEntry(
     return { error: 'Entry not found.' };
   }
 
-  const expectedToken = await generateEditToken(id, existing.forum_username ?? '', expiresAt);
-  if (!timingSafeEqual(editToken, expectedToken)) {
+  if (!(await verifyEditToken(editToken, id, existing.forum_username ?? '', expiresAt))) {
     return { error: 'Unauthorized.' };
   }
 
@@ -299,57 +308,34 @@ export async function updateEntry(
   redirect('/entries?updated=1');
 }
 
-export async function flagEntry(id: string, tsToken: string): Promise<{ ok: boolean }> {
-  if (!(await verifyTurnstile(tsToken))) return { ok: false };
-
+/**
+ * Public flag with a required reason (#31). Validation, Turnstile and the
+ * atomic insert live in src/lib/flagging.ts; flags never touch bmwic_entries,
+ * so they don't invalidate the public edge cache.
+ */
+export async function flagEntry(
+  id: string,
+  reason: string,
+  note: string,
+  tsToken: string
+): Promise<FlagResult> {
   const supabase = createAdminClient();
-  const { error } = await supabase.rpc('increment_flag', { entry_id: id });
-  if (error) {
-    console.error('Flag error:', error);
-    return { ok: false };
-  }
-  return { ok: true };
-}
-
-/** Admin soft delete — the row is retained and can be restored. */
-export async function deleteEntry(id: string, token: string): Promise<{ error?: string }> {
-  if (!isAdminToken(token)) {
-    return { error: 'Unauthorized' };
-  }
-  const supabase = createAdminClient();
-  const { error } = await supabase
-    .from('bmwic_entries')
-    .update({ deleted_at: new Date().toISOString() })
-    .eq('id', id);
-  if (error) return { error: error.message };
-  await purgeEntryCaches();
-  return {};
-}
-
-/** Admin restore of a soft-deleted row. */
-export async function restoreEntry(id: string, token: string): Promise<{ error?: string }> {
-  if (!isAdminToken(token)) {
-    return { error: 'Unauthorized' };
-  }
-  const supabase = createAdminClient();
-  const { error } = await supabase
-    .from('bmwic_entries')
-    .update({ deleted_at: null })
-    .eq('id', id);
-  if (error) return { error: error.message };
-  await purgeEntryCaches();
-  return {};
-}
-
-export async function dismissFlag(id: string, token: string): Promise<{ error?: string }> {
-  if (!isAdminToken(token)) {
-    return { error: 'Unauthorized' };
-  }
-  const supabase = createAdminClient();
-  const { error } = await supabase.from('bmwic_entries').update({ flag_count: 0 }).eq('id', id);
-  if (error) return { error: error.message };
-  await purgeEntryCaches();
-  return {};
+  return submitFlag(
+    { id, reason, note, tsToken },
+    {
+      verifyTurnstile,
+      reporterHash: flagReporterHash,
+      rpc: async ({ entryId, reason: r, note: n, reporterHash }) => {
+        const { data, error } = await supabase.rpc('bmwic_flag_entry', {
+          p_entry_id: entryId,
+          p_reason: r,
+          p_note: n,
+          p_reporter_hash: reporterHash,
+        });
+        return { status: typeof data === 'string' ? data : null, error };
+      },
+    }
+  );
 }
 
 /** Owner-initiated soft delete, authorised by the signed edit token. */
@@ -382,8 +368,7 @@ export async function deleteOwnEntry(
     return { error: 'Entry not found.' };
   }
 
-  const expectedToken = await generateEditToken(id, existing.forum_username ?? '', expiresAt);
-  if (!timingSafeEqual(editToken, expectedToken)) {
+  if (!(await verifyEditToken(editToken, id, existing.forum_username ?? '', expiresAt))) {
     return { error: 'Unauthorized.' };
   }
 
@@ -401,21 +386,51 @@ export async function deleteOwnEntry(
 }
 
 /**
- * Single admin form action used by /admin. Reads op/id/token from hidden
- * inputs so the page never has to build closures (Next rejects inline server
- * actions that capture non-serializable values such as helper functions).
+ * Single admin form action used by /admin (#32). Authorized only by the signed
+ * session cookie; reads op/id from hidden inputs (Next rejects inline server
+ * actions that capture non-serializable values). No token is ever accepted
+ * as an argument or put in a URL. Each op is one atomic DB function.
  */
 export async function adminModerate(formData: FormData): Promise<void> {
-  const op = String(formData.get('op') ?? '');
-  const id = String(formData.get('id') ?? '').trim();
-  const token = String(formData.get('token') ?? '');
+  const supabase = createAdminClient();
+  const result = await moderate(
+    { op: formData.get('op'), id: String(formData.get('id') ?? '').trim() },
+    {
+      isAuthorized: hasAdminSession,
+      rpc: async (entryId, op) => {
+        const { data, error } = await supabase.rpc('bmwic_moderate', { p_entry_id: entryId, p_op: op });
+        return { status: typeof data === 'string' ? data : null, error };
+      },
+    }
+  );
+  // Delete/restore change public pages: the DB trigger invalidates the edge
+  // cache; the fresh cookie makes the admin see it immediately.
+  if (result.ok && result.op !== 'dismiss') await purgeEntryCaches();
+  redirect(result.ok ? '/admin' : `/admin?${new URLSearchParams({ error: result.error })}`);
+}
 
-  let result: { error?: string } = { error: 'Unknown action.' };
-  if (op === 'dismiss') result = await dismissFlag(id, token);
-  else if (op === 'delete') result = await deleteEntry(id, token);
-  else if (op === 'restore') result = await restoreEntry(id, token);
+interface AdminLoginState {
+  error?: string;
+}
 
-  const params = new URLSearchParams({ token });
-  if (result.error) params.set('error', result.error);
-  redirect(`/admin?${params.toString()}`);
+/**
+ * /admin sign-in (#32). Every attempt needs a fresh Turnstile token, then a
+ * constant-time match against ADMIN_TOKEN. Success sets the signed session
+ * cookie (HttpOnly, Secure, SameSite=Strict, 12 h).
+ */
+export async function adminLogin(_prev: AdminLoginState, formData: FormData): Promise<AdminLoginState> {
+  if (!isAdminLoginConfigured()) return { error: 'Admin sign-in is not configured.' };
+  if (!(await verifyTurnstile(formData.get('cf-turnstile-response') as string | null))) {
+    return { error: 'The verification check failed. Please try again.' };
+  }
+  if (!isAdminToken(formData.get('admin_token') as string | null)) {
+    return { error: 'That admin token is not correct.' };
+  }
+  await startAdminSession();
+  redirect('/admin');
+}
+
+export async function adminLogout(): Promise<void> {
+  await endAdminSession();
+  redirect('/');
 }

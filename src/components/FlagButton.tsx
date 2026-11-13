@@ -2,6 +2,7 @@
 
 import { useState, useTransition, useRef, useEffect } from 'react';
 import { flagEntry } from '../app/actions';
+import { FLAG_NOTE_MAX, FLAG_REASONS, FLAG_REASON_LABELS, type FlagReason } from '../lib/flag-validation';
 
 const TURNSTILE_SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? '0x4AAAAAAC6yXfM_xBBaAkKj';
 
@@ -27,6 +28,11 @@ export default function FlagButton({ id }: { id: string }) {
   const [confirming, setConfirming] = useState(false);
   const [tsToken, setTsToken] = useState<string | null>(null);
   const [flagError, setFlagError] = useState<string | null>(null);
+  // A flag must say what is wrong (#31); "Other" also needs a short note.
+  const [reason, setReason] = useState<FlagReason | ''>('');
+  const [note, setNote] = useState('');
+  const noteRequired = reason === 'other';
+  const canSubmit = Boolean(tsToken) && reason !== '' && (!noteRequired || note.trim() !== '');
   const [pending, startTransition] = useTransition();
   const widgetContainerRef = useRef<HTMLDivElement>(null);
   const widgetIdRef = useRef<string | null>(null);
@@ -69,32 +75,72 @@ export default function FlagButton({ id }: { id: string }) {
     setConfirming(false);
     setTsToken(null);
     setFlagError(null);
+    setReason('');
+    setNote('');
   }
 
   if (flagged) {
-    return <span style={{ color: '#64748b', fontSize: 11 }}>Flagged</span>;
+    return <span style={{ color: '#64748b', fontSize: 11 }}>Reported, thanks</span>;
   }
 
   if (confirming) {
+    const fieldStyle: React.CSSProperties = {
+      background: '#0f1923',
+      color: '#e2e8f0',
+      border: '1px solid #2d3f55',
+      borderRadius: 4,
+      fontSize: 12,
+      padding: '4px 6px',
+      width: '100%',
+      maxWidth: 260,
+    };
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: 6, alignItems: 'flex-start' }}>
+        <label style={{ color: '#94a3b8', fontSize: 11 }} htmlFor={`flag-reason-${id}`}>
+          What&apos;s wrong with this entry?
+        </label>
+        <select
+          id={`flag-reason-${id}`}
+          value={reason}
+          onChange={(e) => setReason(e.target.value as FlagReason | '')}
+          style={fieldStyle}
+          required
+        >
+          <option value="" disabled>
+            Choose a reason…
+          </option>
+          {FLAG_REASONS.map((r) => (
+            <option key={r} value={r}>
+              {FLAG_REASON_LABELS[r]}
+            </option>
+          ))}
+        </select>
+        <textarea
+          aria-label={noteRequired ? 'Describe the problem (required)' : 'Add details (optional)'}
+          placeholder={noteRequired ? 'Describe the problem (required)' : 'Add details (optional)'}
+          value={note}
+          maxLength={FLAG_NOTE_MAX}
+          onChange={(e) => setNote(e.target.value)}
+          rows={2}
+          style={{ ...fieldStyle, resize: 'vertical' }}
+        />
         <div ref={widgetContainerRef} />
         {flagError && (
           <span style={{ color: '#f87171', fontSize: 11 }}>{flagError}</span>
         )}
         <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
           <button
-            disabled={!tsToken || pending}
-            aria-label="Confirm flag this entry as incorrect"
+            disabled={!canSubmit || pending}
+            aria-label="Send report about this entry"
             onClick={() => {
-              if (!tsToken) return;
+              if (!canSubmit || !tsToken) return;
               startTransition(async () => {
-                const result = await flagEntry(id, tsToken);
+                const result = await flagEntry(id, reason, note, tsToken);
                 if (result.ok) {
                   setFlagged(true);
                   return;
                 }
-                setFlagError("Couldn't flag, try again");
+                setFlagError(result.error);
                 setTsToken(null);
                 if (widgetIdRef.current && window.turnstile) {
                   window.turnstile.reset(widgetIdRef.current);
@@ -109,11 +155,11 @@ export default function FlagButton({ id }: { id: string }) {
               borderRadius: 4,
               fontSize: 11,
               fontWeight: 600,
-              cursor: tsToken && !pending ? 'pointer' : 'not-allowed',
-              opacity: tsToken && !pending ? 1 : 0.5,
+              cursor: canSubmit && !pending ? 'pointer' : 'not-allowed',
+              opacity: canSubmit && !pending ? 1 : 0.5,
             }}
           >
-            {pending ? '...' : 'Flag'}
+            {pending ? '...' : 'Send report'}
           </button>
           <button
             onClick={handleCancel}
