@@ -9,7 +9,7 @@ import {
   renderFailureTracker,
   type EdgeCacheDeps,
 } from '../../src/lib/edge-cache';
-import { isBlockedPath } from '../../src/lib/blocked-paths';
+import { isBlockedPath, isMissingStaticAsset } from '../../src/lib/blocked-paths';
 
 const SITE = 'https://mcolors.geektechlive.com';
 const V1 = { build: 'b1', data: '1' };
@@ -249,11 +249,31 @@ test('HEAD is answered from a GET-populated cache entry without a body', async (
   assert.equal(h.originCalls, 1);
 });
 
-test('a HEAD miss is not stored (its response has no body)', async () => {
+test('a HEAD miss renders the page as GET, stores it, and answers without a body (#22)', async () => {
+  const h = harness();
+  const seen: string[] = [];
+  h.deps.origin = async (r) => {
+    seen.push(r.method);
+    return new Response(`page ${new URL(r.url).pathname}`, { status: 200, headers: { 'content-type': 'text/html' } });
+  };
+  const head = await handleWithEdgeCache(req('/', { method: 'HEAD' }), h.deps);
+  await h.settle();
+  assert.deepEqual(seen, ['GET']);
+  assert.equal(head.headers.get('x-edge-cache'), 'MISS');
+  assert.equal(head.body, null);
+  assert.equal(h.cache.store.size, 1);
+});
+
+test('a HEAD after a HEAD is a HIT, and a later GET gets the full body (#22)', async () => {
   const h = harness();
   await handleWithEdgeCache(req('/', { method: 'HEAD' }), h.deps);
   await h.settle();
-  assert.equal(h.cache.store.size, 0);
+  const second = await handleWithEdgeCache(req('/', { method: 'HEAD' }), h.deps);
+  assert.equal(second.headers.get('x-edge-cache'), 'HIT');
+  const get = await handleWithEdgeCache(req('/'), h.deps);
+  assert.equal(get.headers.get('x-edge-cache'), 'HIT');
+  assert.equal(await get.text(), 'page /');
+  assert.equal(h.originCalls, 1);
 });
 
 test('a render that flagged a failed data read is served but never stored', async () => {
@@ -320,6 +340,50 @@ test('the data version is memoized for the TTL, then re-read', async () => {
   assert.equal(await source(), '1');
   now = 10_000;
   assert.equal(await source(), '2');
+});
+
+test('after the memo expires, a request waits for the current version, never answering with the old one (#23)', async () => {
+  let now = 0;
+  let version = '1';
+  const source = createVersionSource(async () => version, lkgStore(), { ttlMs: 10_000, now: () => now });
+  assert.equal(await source(), '1');
+  version = '2';
+  now = 10_000;
+  assert.equal(await source(), '2');
+});
+
+test('a failed last-known-good save never downgrades a fresh read to an older version (#23 review)', async () => {
+  const saved: string | null = '6';
+  const lkg = {
+    get: async () => saved,
+    set: async () => {
+      throw new Error('cache put failed');
+    },
+  };
+  const source = createVersionSource(async () => '7', lkg, { now: () => 0 });
+  assert.equal(await source(), '7');
+  assert.equal(await source(), '7', 'the fresh value is memoized, not the stale fallback');
+});
+
+test('concurrent requests in one isolate share a single in-flight version read (#23)', async () => {
+  let reads = 0;
+  let release: (v: string) => void = () => {};
+  const source = createVersionSource(
+    async () => {
+      reads += 1;
+      return new Promise<string>((resolve) => {
+        release = resolve;
+      });
+    },
+    lkgStore(),
+    { now: () => 0 }
+  );
+  const a = source();
+  const b = source();
+  await Promise.resolve();
+  release('3');
+  assert.deepEqual(await Promise.all([a, b]), ['3', '3']);
+  assert.equal(reads, 1);
 });
 
 test('a successful read is saved as last-known-good', async () => {
@@ -390,5 +454,32 @@ test('bot probes for dotfiles anywhere in the path are blocked', () => {
 test('real pages and .well-known are not blocked', () => {
   for (const p of ['/', '/reports', '/colors/frozen-deep-grey', '/.well-known/security.txt', '/robots.txt', '/sitemap.xml']) {
     assert.equal(isBlockedPath(p), false, p);
+  }
+});
+
+test('percent-encoded probes are blocked after decoding (#25)', () => {
+  for (const p of ['/%2eenv', '/%2Egit/config', '/app/%2eenv', '/wp%2Dadmin/', '/x%2ephp']) {
+    assert.equal(isBlockedPath(p), true, p);
+  }
+});
+
+test('malformed percent-encoding is blocked rather than rendered (#25)', () => {
+  assert.equal(isBlockedPath('/%E0%A4%A'), true);
+});
+
+test('encoded but legitimate paths are not blocked (#25)', () => {
+  assert.equal(isBlockedPath('/colors/frozen%20deep%20grey'), false);
+});
+
+// ---- isMissingStaticAsset -----------------------------------------------------
+
+test('/_next/static requests that reach the Worker are missing files (#25)', () => {
+  assert.equal(isMissingStaticAsset('/_next/static/chunks/main.js'), true);
+  assert.equal(isMissingStaticAsset('/_next/static/'), true);
+});
+
+test('runtime /_next endpoints and pages are not treated as missing assets (#25)', () => {
+  for (const p of ['/_next/image', '/_next/data/x.json', '/', '/colors/x', '/_next/staticx']) {
+    assert.equal(isMissingStaticAsset(p), false, p);
   }
 });

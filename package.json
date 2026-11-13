@@ -11,7 +11,8 @@
     "lint": "eslint",
     "test:e2e": "node node_modules/.bin/playwright test",
     "typecheck": "tsc --noEmit",
-    "test:unit": "node --import tsx --test tests/unit/*.test.ts"
+    "test:unit": "node --import tsx --test --test-timeout=10000 tests/unit/*.test.ts",
+    "verify": "npm run lint && npm run typecheck && npm run test:unit && npm run build:cf"
   },
   "dependencies": {
     "@opennextjs/cloudflare": "^1.19.0",

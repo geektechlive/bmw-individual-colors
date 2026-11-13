@@ -31,7 +31,8 @@ const BYPASS_PREFIXES = ['/edit', '/admin', '/api', '/_next'];
 // forum/social shares append and no page reads. Neither changes the output, so
 // neither forces a bypass, and neither is part of the key.
 const IGNORED_QUERY_PARAMS = new Set(['_rsc', 'fbclid', 'gclid', 'msclkid', 'mc_cid', 'mc_eid']);
-const VERSION_FETCH_TIMEOUT_MS = 1_500;
+// Wall time, not CPU. Only a cold isolate with no last-known-good blocks on it (#23).
+const VERSION_FETCH_TIMEOUT_MS = 4_000;
 const STORABLE_STATUSES = new Set([200, 404]);
 // Next.js varies RSC responses on these; HTML and flight data for one URL must never share a key.
 const RSC_VARY_HEADERS = [
@@ -109,7 +110,7 @@ function startsWithSegment(path: string, prefix: string): boolean {
   return path === prefix || path.startsWith(`${prefix}/`);
 }
 
-function hasFreshCookie(request: Request): boolean {
+export function hasFreshCookie(request: Request): boolean {
   const cookie = request.headers.get('cookie') ?? '';
   return cookie.split(';').some((part) => part.trim().startsWith(`${FRESH_COOKIE}=`));
 }
@@ -198,11 +199,15 @@ export async function handleWithEdgeCache(request: Request, deps: EdgeCacheDeps)
     return withStatus(served, 'HIT', BROWSER_CACHE_CONTROL);
   }
 
-  const response = await deps.origin(request);
-  if (isStorable(request, response)) {
+  // A HEAD miss renders as GET so the result can be stored; otherwise uptime
+  // monitors (HEAD every few minutes) re-render the page forever (#22).
+  const isHead = request.method === 'HEAD';
+  const renderRequest = isHead ? new Request(request, { method: 'GET' }) : request;
+  const response = await deps.origin(renderRequest);
+  if (isStorable(renderRequest, response)) {
     deps.waitUntil(storeWhenComplete(key, response.clone(), deps));
   }
-  return withStatus(response, 'MISS');
+  return withStatus(isHead ? new Response(null, response) : response, 'MISS');
 }
 
 export interface VersionFallback {
@@ -224,6 +229,10 @@ async function storeWhenComplete(key: Request, copy: Response, deps: EdgeCacheDe
  * serving (a live render would need Supabase anyway). With no fallback
  * either, the caller gets null and bypasses (not memoized, so the next request
  * retries).
+ *
+ * The read blocks deliberately: waiting costs wall time, not CPU, and answering
+ * with an older version would serve pre-edit pages to everyone. Concurrent
+ * requests in one isolate share a single in-flight read (#23).
  */
 export function createVersionSource(
   read: () => Promise<string>,
@@ -233,13 +242,19 @@ export function createVersionSource(
   const ttlMs = options.ttlMs ?? VERSION_TTL_MS;
   const now = options.now ?? Date.now;
   let memo: { value: string; at: number } | null = null;
+  let inFlight: Promise<string | null> | null = null;
 
-  return async () => {
-    if (memo && now() - memo.at < ttlMs) return memo.value;
+  async function readOrFallBack(): Promise<string | null> {
     try {
       const value = await read();
-      if (memo?.value !== value) await fallback.set(value);
+      const changed = memo?.value !== value;
       memo = { value, at: now() };
+      // A failed save must never turn a fresh read into the older fallback.
+      if (changed) {
+        await fallback.set(value).catch((error) => {
+          console.error('edge-cache: could not save last-known-good version', error);
+        });
+      }
       return value;
     } catch (error) {
       console.error('edge-cache: data version unavailable', error);
@@ -249,6 +264,14 @@ export function createVersionSource(
       if (lastKnown !== null) memo = { value: lastKnown, at: now() };
       return lastKnown;
     }
+  }
+
+  return () => {
+    if (memo && now() - memo.at < ttlMs) return Promise.resolve(memo.value);
+    inFlight ??= readOrFallBack().finally(() => {
+      inFlight = null;
+    });
+    return inFlight;
   };
 }
 

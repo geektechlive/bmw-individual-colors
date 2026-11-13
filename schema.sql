@@ -98,9 +98,12 @@ create policy "public read" on bmwic_entries
 -- Edge-cache invalidation (worker.ts / src/lib/edge-cache.ts).
 -- Any write to bmwic_entries — site actions, scripts, or the Supabase
 -- dashboard — increments data_version; the Worker keys its page cache on it.
--- Statement-level, so a zero-row UPDATE also bumps (harmless: one re-render).
--- Flag clicks (increment_flag) bump it too, re-rendering each page once per
--- data center; accepted because flags are rare and Turnstile-gated.
+-- Statement-level, so a zero-row content UPDATE also bumps (one re-render).
+-- Updates that touch only flag_count (increment_flag, dismissFlag) do NOT
+-- bump (#26): flag_count is moderation-only and never rendered publicly, and
+-- each bump re-renders every page in every data center. increment_flag is
+-- also callable straight through PostgREST, so it is not Turnstile-gated.
+-- When adding a column that public pages render, add it to the UPDATE OF list.
 -- ---------------------------------------------------------------------------
 create table if not exists public.bmwic_meta (
   id int primary key check (id = 1),
@@ -128,6 +131,18 @@ end;
 $$;
 revoke all on function public.bmwic_bump_data_version() from public, anon, authenticated;
 
+drop trigger if exists bmwic_entries_bump_data_version on public.bmwic_entries;
 create trigger bmwic_entries_bump_data_version
-  after insert or update or delete or truncate on public.bmwic_entries
+  after insert or delete or truncate on public.bmwic_entries
+  for each statement execute function public.bmwic_bump_data_version();
+
+-- Every column except flag_count (#26).
+drop trigger if exists bmwic_entries_bump_data_version_on_update on public.bmwic_entries;
+create trigger bmwic_entries_bump_data_version_on_update
+  after update of id, created_at, model_year, body_style, competition, drivetrain, transmission,
+    ext_color, interior_color, interior_type, wheels, location_city, location_state,
+    location_country, location_lat, location_lng, forum_username, notes, source_forum,
+    posted_at, user_submitted, interior_seats, interior_leather, edit_count,
+    last_edited_at, deleted_at
+  on public.bmwic_entries
   for each statement execute function public.bmwic_bump_data_version();

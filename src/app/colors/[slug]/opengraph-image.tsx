@@ -1,4 +1,5 @@
 import { ImageResponse } from 'next/og';
+import { notFound } from 'next/navigation';
 import { getEntriesByColor, resolveColorSlug } from '../../../lib/queries';
 import { computeRarityLabel } from '../../../lib/analytics';
 import { getColorHex, canonicalColorName } from '../../../lib/colors';
@@ -10,7 +11,10 @@ export const contentType = 'image/png';
 export default async function Image({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const resolved = await resolveColorSlug(slug);
-  const colorName = resolved ? canonicalColorName(resolved) : slug;
+  // Unknown slugs 404 like the color page does, instead of rendering a ~2 s
+  // card for arbitrary text (which would also mint unlimited cache keys, #24).
+  if (!resolved) notFound();
+  const colorName = canonicalColorName(resolved);
   const hex = getColorHex(colorName);
   const entries = await getEntriesByColor(colorName);
   const totalBuilds = entries.length;

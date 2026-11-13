@@ -1,0 +1,6 @@
+User-Agent: *
+Allow: /
+Disallow: /admin
+Disallow: /edit/
+
+Sitemap: https://mcolors.geektechlive.com/sitemap.xml

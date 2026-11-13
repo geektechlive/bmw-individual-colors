@@ -25,6 +25,13 @@ export const metadata: Metadata = {
     template: '%s | BMW M Individual Colors Registry',
   },
   description: SITE_DESCRIPTION,
+  // Plain files in public/ are served as static assets before the Worker runs.
+  // As app/ metadata routes they rendered through Next (~0.5 s CPU) and their
+  // ?<hash> URLs bypassed the edge cache (#25).
+  icons: {
+    icon: [{ url: '/favicon.ico', sizes: 'any' }, { url: '/icon.png', type: 'image/png' }],
+    apple: '/apple-touch-icon.png',
+  },
   openGraph: {
     type: 'website',
     siteName: 'BMW M Individual Colors Registry',

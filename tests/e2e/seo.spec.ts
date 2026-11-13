@@ -15,6 +15,18 @@ test.describe('SEO routes', () => {
     expect(body).toMatch(/Disallow:\s*\/admin/i);
   });
 
+  test('icons are static files linked without a cache-busting query (#25)', async ({ page, request, baseURL }) => {
+    await page.goto('/');
+    const hrefs = await page.locator('link[rel="icon"], link[rel="apple-touch-icon"]').evaluateAll((els) =>
+      els.map((el) => el.getAttribute('href') ?? '')
+    );
+    expect(hrefs).toEqual(expect.arrayContaining(['/favicon.ico', '/icon.png', '/apple-touch-icon.png']));
+    for (const href of hrefs) {
+      expect(href).not.toContain('?');
+      expect((await request.get(`${baseURL}${href}`)).status()).toBe(200);
+    }
+  });
+
   test('/colors/twilight-purple has og:title meta and canonical link', async ({ page }) => {
     await page.goto('/colors/twilight-purple');
     const ogTitle = page.locator('meta[property="og:title"]');

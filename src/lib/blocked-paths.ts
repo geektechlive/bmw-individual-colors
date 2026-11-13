@@ -18,11 +18,33 @@ function hasDotSegment(path: string): boolean {
     .some((segment) => segment.startsWith('.') && segment !== '.well-known');
 }
 
+// Decoded first, so /%2eenv cannot slip past as an unknown path and render a
+// Next 404 (#25). Malformed encoding is never a real page: block it.
+function decodePath(rawPath: string): string | null {
+  try {
+    return decodeURIComponent(rawPath);
+  } catch {
+    return null;
+  }
+}
+
 export function isBlockedPath(rawPath: string): boolean {
-  const path = rawPath.toLowerCase();
+  const decoded = decodePath(rawPath);
+  if (decoded === null) return true;
+  const path = decoded.toLowerCase();
   return (
     hasDotSegment(path) ||
     path.endsWith('.php') ||
     BLOCKED_SUBSTRINGS.some((p) => path.includes(p))
   );
+}
+
+/**
+ * True for /_next/static/* requests. Workers Static Assets answer every file
+ * that exists before the Worker runs, so one that reaches the Worker is a
+ * missing file (old build chunk, scanner) and gets a plain 404 instead of a
+ * rendered Next 404 (#25). Runtime endpoints like /_next/image are untouched.
+ */
+export function isMissingStaticAsset(path: string): boolean {
+  return path.startsWith('/_next/static/');
 }

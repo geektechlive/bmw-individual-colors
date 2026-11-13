@@ -17,6 +17,12 @@ binding = "CF_VERSION_METADATA"
 directory = ".open-next/assets"
 binding = "ASSETS"
 
+# Free-tier KV: rendered color social cards, keyed og:<build>:<slug>:<data_version>
+# (src/lib/og-cache.ts, #24). ~15 writes/week vs the 1,000/day free limit.
+[[kv_namespaces]]
+binding = "OG_CACHE"
+id = "0ddb51c7fb9548d893630ab4849d6550"
+
 [[services]]
 binding = "WORKER_SELF_REFERENCE"
 service = "bmw-individual-colors"
