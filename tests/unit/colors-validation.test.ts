@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { BMW_COLORS, COLOR_ALIASES, COLOR_FAMILY_MAP, colorToSlug, getColorFamily, getColorHex, slugToColor } from '../../src/lib/colors';
+import { BMW_COLORS, COLOR_ALIASES, COLOR_FAMILY_MAP, aliasRedirectSlug, colorToSlug, getColorFamily, getColorHex, slugToColor } from '../../src/lib/colors';
 import { snapColorName, normalizeTransmission, normalizeWheels, updateErrorMessage } from '../../src/lib/validation';
 
 // ---- #36 duplicate on edit -----------------------------------------------------------------
@@ -48,6 +48,21 @@ test('the duplicate "Eridan Blue Metallic" key is gone; "Eridan Blue" remains (#
 test('unknown colors are still accepted as typed (custom Individual colors)', () => {
   assert.equal(snapColorName('  Some   New Color '), 'Some New Color');
   assert.equal(snapColorName('ALL CAPS COLOR'), 'All Caps Color');
+});
+
+// ---- #37 alias URLs redirect -------------------------------------------------------------
+
+test('alias color slugs point to their canonical color page (#37)', () => {
+  assert.equal(aliasRedirectSlug('enzian-blue'), 'gentian-blue');
+  assert.equal(aliasRedirectSlug('verde-british-racing'), 'british-racing-green');
+  assert.equal(aliasRedirectSlug('daytona-violet-metallic'), 'daytona-violet');
+  assert.equal(aliasRedirectSlug('ENZIAN-BLUE'), 'gentian-blue');
+});
+
+test('real color slugs and unknown slugs are not redirected (#37)', () => {
+  assert.equal(aliasRedirectSlug('gentian-blue'), null);
+  assert.equal(aliasRedirectSlug('miami-blue'), null);
+  assert.equal(aliasRedirectSlug('not-a-color'), null);
 });
 
 // ---- slug round-trip and families for every color --------------------------------------

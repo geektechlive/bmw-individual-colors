@@ -299,6 +299,19 @@ const CANONICAL_LOOKUP: Record<string, string> = Object.fromEntries(
   Object.keys(BMW_COLORS).map((name) => [name.toLowerCase(), name])
 );
 
+const ALIAS_SLUG_REDIRECTS: Record<string, string> = Object.fromEntries(
+  Object.entries(COLOR_ALIASES).map(([alias, canonical]) => [colorToSlug(alias), colorToSlug(canonical)])
+);
+
+/**
+ * The canonical slug an alias slug should redirect to (e.g. "enzian-blue" →
+ * "gentian-blue"), or null. Alias names aren't listed colors (#35), so their old
+ * URLs redirect permanently instead of 404ing (#37).
+ */
+export function aliasRedirectSlug(slug: string): string | null {
+  return ALIAS_SLUG_REDIRECTS[slug.toLowerCase()] ?? null;
+}
+
 /**
  * Resolve a raw color string to its canonical BMW_COLORS name.
  * Trims and collapses whitespace, matches aliases and known colors case-insensitively,

@@ -1,10 +1,10 @@
-import { notFound } from 'next/navigation';
+import { notFound, permanentRedirect } from 'next/navigation';
 import Link from 'next/link';
 import { getEntriesByColor, getEntries, resolveColorSlug } from '../../../lib/queries';
 import { computeRarityLabel, computeRarityColor } from '../../../lib/analytics';
 
 export const dynamic = 'force-dynamic';
-import { getColorHex, getColorFamily, COLOR_ALIASES, canonicalColorName, colorToSlug } from '../../../lib/colors';
+import { getColorHex, getColorFamily, COLOR_ALIASES, aliasRedirectSlug, canonicalColorName, colorToSlug } from '../../../lib/colors';
 import FlagButton from '../../../components/FlagButton';
 import type { Metadata } from 'next';
 
@@ -65,6 +65,9 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
 export default async function ColorDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
+  // Alias names aren't listed colors (#35): send old links to the canonical page (#37).
+  const aliasTarget = aliasRedirectSlug(slug);
+  if (aliasTarget) permanentRedirect(`/colors/${aliasTarget}`);
   const resolved = await resolveColorSlug(slug);
   if (!resolved) notFound();
   const colorName = canonicalColorName(resolved);
