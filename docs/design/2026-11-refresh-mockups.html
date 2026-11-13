@@ -1,0 +1,752 @@
+<!doctype html>
+<!-- Design refresh mockups, 2026-11-13. The "Mix" section is the chosen direction (ADR 0016).
+     Open directly in a browser. Data is a snapshot of the live registry on that date. -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>mcolors Design Directions</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=Barlow+Condensed:ital,wght@0,600;0,700;1,700&family=Barlow:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap">
+<style>
+/* Layout: one long review sheet. A shared finish study, then Direction A (Build Sheet) and Direction B (Paint Booth), each a framed browser-width screen. */
+:root {
+  color-scheme: dark;
+  /* Ground and ink. Contrast vs --bg noted (WCAG). */
+  --bg: #0b0d10;
+  --panel: #12151a;
+  --panel-2: #181c22;
+  --rule: #262b33;            /* MARK-ONLY */
+  --ink: #eceef1;             /* 16.5:1 */
+  --ink-2: #a9b0ba;           /* 8.9:1 */
+  --ink-3: #848c97;           /* 5.7:1 */
+  /* M stripe, MARK-ONLY */
+  --m-blue: #1c69d4;
+  --m-violet: #6f2da8;
+  --m-red: #e8002d;
+  --focus: #6aa6ff;
+  /* Type */
+  --f-sheet: "Archivo", "Helvetica Neue", Arial, sans-serif;
+  --f-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --f-booth: "Barlow Condensed", "Arial Narrow", sans-serif;
+  --f-booth-body: "Barlow", "Helvetica Neue", Arial, sans-serif;
+  /* Scale */
+  --t-11: 0.6875rem; --t-13: 0.8125rem; --t-15: 0.9375rem; --t-18: 1.125rem;
+  --t-24: 1.5rem; --t-36: 2.25rem; --t-56: clamp(2.25rem, 6vw, 3.5rem);
+  --r: 4px;
+  --ease: cubic-bezier(.2,.7,.2,1);
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--ink);
+  font-family: var(--f-sheet); font-size: var(--t-15); line-height: 1.55;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 0 64px;
+}
+a { color: inherit; }
+:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.wrap { max-width: 1160px; margin: 0 auto; }
+.mono { font-family: var(--f-mono); }
+.label { font-family: var(--f-mono); font-size: var(--t-11); letter-spacing: .12em; text-transform: uppercase; color: var(--ink-3); }
+
+/* ---------- review chrome ---------- */
+.stripe { display: flex; height: 4px; margin: 0 calc(-1 * max(16px, env(safe-area-inset-left, 0px))); }
+.stripe i { flex: 1; } .stripe i:nth-child(1){background:var(--m-blue)} .stripe i:nth-child(2){background:var(--m-violet)} .stripe i:nth-child(3){background:var(--m-red)}
+.intro { padding-block: 48px 24px; display: grid; gap: 14px; }
+.intro h1 { font-size: var(--t-36); font-weight: 800; font-stretch: 112%; letter-spacing: -.01em; margin: 0; text-wrap: balance; line-height: 1.1; }
+.intro p { margin: 0; max-width: 64ch; color: var(--ink-2); }
+.toc { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
+.toc a { font-family: var(--f-mono); font-size: var(--t-13); text-decoration: none; padding: 6px 10px; border: 1px solid var(--rule); border-radius: var(--r); color: var(--ink-2); }
+.toc a:hover { color: var(--ink); border-color: var(--ink-3); }
+section.block { padding-block: 40px; border-top: 1px solid var(--rule); display: grid; gap: 20px; }
+.block-head { display: grid; gap: 6px; }
+.block-head h2 { margin: 0; font-size: var(--t-24); font-weight: 750; font-stretch: 108%; }
+.block-head p { margin: 0; color: var(--ink-2); max-width: 70ch; }
+.note { font-size: var(--t-13); color: var(--ink-3); max-width: 75ch; }
+
+/* ---------- PAINT: the shared swatch system ---------- */
+/* --p is the paint hex. Pure CSS: no images, no server cost. */
+.paint { --p: #555; position: relative; overflow: hidden; isolation: isolate; background-color: var(--p); }
+.paint::before, .paint::after { content: ""; position: absolute; inset: 0; pointer-events: none; }
+.paint.solid {
+  background:
+    linear-gradient(172deg, rgb(255 255 255 / .26) 0 26%, rgb(255 255 255 / .04) 27% 40%, transparent 41%),
+    linear-gradient(180deg, color-mix(in oklab, var(--p), white 6%), var(--p) 55%, color-mix(in oklab, var(--p), black 38%));
+}
+.paint.metallic {
+  background:
+    radial-gradient(90% 60% at 28% 18%, rgb(255 255 255 / .55), rgb(255 255 255 / .08) 38%, transparent 60%),
+    linear-gradient(155deg, color-mix(in oklab, var(--p), white 22%) 0%, var(--p) 42%, color-mix(in oklab, var(--p), black 55%) 100%);
+}
+.paint.metallic::after {
+  /* flake: fine turbulence, overlaid */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.4' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 1.6 -0.55'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  mix-blend-mode: overlay; opacity: .55;
+}
+.paint.pearl {
+  background:
+    radial-gradient(80% 55% at 30% 15%, rgb(255 255 255 / .45), transparent 55%),
+    linear-gradient(120deg, color-mix(in oklab, var(--p), oklch(.82 .09 200) 28%) 0%, var(--p) 45%, color-mix(in oklab, var(--p), oklch(.6 .14 330) 30%) 85%, color-mix(in oklab, var(--p), black 40%) 100%);
+}
+.paint.frozen {
+  background: linear-gradient(165deg, color-mix(in oklab, var(--p), white 7%), var(--p) 60%, color-mix(in oklab, var(--p), black 22%));
+}
+.paint.frozen::after {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.5'/%3E%3C/svg%3E");
+  mix-blend-mode: soft-light; opacity: .35;
+}
+.chip { width: 22px; height: 22px; border-radius: 50%; box-shadow: inset 0 0 0 1px rgb(255 255 255 / .12); flex: none; }
+
+/* finish study */
+.finish-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); gap: 16px; }
+.finish { display: grid; gap: 12px; padding: 14px; background: var(--panel); border: 1px solid var(--rule); border-radius: var(--r); }
+.finish .panel { aspect-ratio: 4 / 3; border-radius: 3px 3px 40% 40% / 3px 3px 14% 14%; max-width: 100%; }
+.finish .row { display: flex; align-items: center; gap: 10px; }
+.finish h3 { margin: 0; font-size: var(--t-15); font-weight: 650; }
+.finish p { margin: 0; font-size: var(--t-13); color: var(--ink-2); }
+.today { display: flex; align-items: center; gap: 10px; font-size: var(--t-13); color: var(--ink-3); }
+.today .flat { width: 22px; height: 22px; border-radius: 50%; }
+
+/* screen frame */
+.screen { border: 1px solid var(--rule); border-radius: 8px; overflow: hidden; background: var(--bg); }
+.screen-bar { display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: var(--panel); border-bottom: 1px solid var(--rule); font-family: var(--f-mono); font-size: var(--t-11); color: var(--ink-3); }
+.screen-bar b { width: 9px; height: 9px; border-radius: 50%; background: var(--rule); }
+.screen-bar span { margin-left: 8px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+
+/* ================= DIRECTION A: BUILD SHEET ================= */
+.A { font-family: var(--f-sheet); }
+.A-nav { display: flex; align-items: center; gap: 18px; padding: 12px 20px; border-bottom: 1px solid var(--rule); flex-wrap: wrap; }
+.A-logo { display: flex; align-items: center; gap: 10px; font-weight: 800; font-stretch: 118%; font-size: var(--t-15); letter-spacing: .02em; text-transform: uppercase; }
+.A-logo .bars { display: flex; gap: 2px; } .A-logo .bars i { width: 4px; height: 18px; transform: skewX(-18deg); }
+.A-logo .bars i:nth-child(1){background:var(--m-blue)} .A-logo .bars i:nth-child(2){background:var(--m-violet)} .A-logo .bars i:nth-child(3){background:var(--m-red)}
+.A-links { display: flex; gap: 16px; margin-left: auto; font-family: var(--f-mono); font-size: var(--t-13); color: var(--ink-2); flex-wrap: wrap; }
+.A-links a { text-decoration: none; } .A-links a[aria-current] { color: var(--ink); box-shadow: 0 2px 0 var(--m-blue); }
+.A-links .cta { color: var(--ink); border: 1px solid var(--ink-3); padding: 2px 10px; border-radius: var(--r); }
+
+.A-hero { padding: 36px 20px 20px; display: grid; gap: 18px; }
+.A-hero .eyebrow { display: flex; gap: 16px; flex-wrap: wrap; }
+.A-hero h3 { margin: 0; font-size: var(--t-56); line-height: .98; font-weight: 850; font-stretch: 122%; letter-spacing: -.02em; text-transform: uppercase; text-wrap: balance; max-width: 15ch; }
+.A-hero p { margin: 0; color: var(--ink-2); max-width: 58ch; }
+.wall { display: flex; height: 150px; gap: 2px; border-radius: var(--r); overflow: hidden; }
+.wall button { all: unset; position: relative; overflow: hidden; isolation: isolate; cursor: pointer; flex-basis: 0; min-width: 4px; height: 100%; transition: transform .25s var(--ease), filter .25s var(--ease); transform-origin: bottom; }
+.wall button:hover, .wall button:focus-visible { transform: scaleY(1.06); filter: brightness(1.12); }
+.wall button:focus-visible { outline: 2px solid var(--focus); outline-offset: -2px; }
+.wall-read { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; font-family: var(--f-mono); font-size: var(--t-13); color: var(--ink-2); min-height: 1.6em; }
+.wall-read b { color: var(--ink); font-weight: 500; }
+.A-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-top: 1px solid var(--rule); }
+.A-stats div { padding: 16px 20px; border-right: 1px solid var(--rule); display: grid; gap: 2px; }
+.A-stats div:last-child { border-right: 0; }
+.A-stats strong { font-size: var(--t-36); font-weight: 800; font-stretch: 110%; font-variant-numeric: tabular-nums; line-height: 1; }
+
+/* A: color page, tinted by --paint */
+.A-color { --paint: #5a3a7a; --paint-ink: #b9a0d6; padding: 0 0 24px; }
+.A-color-hero { position: relative; padding: 28px 20px 24px; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); gap: 24px; align-items: center;
+  background: radial-gradient(120% 140% at 85% 0%, color-mix(in oklab, var(--paint), transparent 55%), transparent 60%), var(--bg);
+  border-bottom: 1px solid color-mix(in oklab, var(--paint), var(--rule) 40%); transition: background .4s var(--ease); }
+.crumb { font-family: var(--f-mono); font-size: var(--t-13); color: var(--ink-3); }
+.crumb a { color: var(--paint-ink); text-decoration: none; }
+.A-color-hero h3 { margin: 6px 0 10px; font-size: var(--t-36); font-weight: 850; font-stretch: 118%; text-transform: uppercase; line-height: 1; letter-spacing: -.01em; }
+.tag { display: inline-flex; flex-wrap: wrap; gap: 0; border: 1px solid color-mix(in oklab, var(--paint-ink), transparent 55%); border-radius: var(--r); font-family: var(--f-mono); font-size: var(--t-11); text-transform: uppercase; letter-spacing: .08em; }
+.tag span { padding: 5px 9px; border-right: 1px solid color-mix(in oklab, var(--paint-ink), transparent 70%); color: var(--ink-2); }
+.tag span:last-child { border-right: 0; } .tag span:first-child { color: var(--paint-ink); }
+.door { aspect-ratio: 16 / 9; max-width: 100%; border-radius: 6px 40% 8px 8px / 6px 30% 8px 8px; box-shadow: 0 30px 60px -30px color-mix(in oklab, var(--paint), black 30%); }
+.A-tiles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0; border-bottom: 1px solid var(--rule); }
+.A-tiles div { padding: 16px 20px; border-right: 1px solid var(--rule); display: grid; gap: 4px; }
+.A-tiles div:last-child { border-right: 0; }
+.A-tiles strong { font-size: var(--t-24); font-weight: 800; font-stretch: 110%; font-variant-numeric: tabular-nums; }
+.A-tiles .pill { justify-self: start; font-family: var(--f-mono); font-size: var(--t-11); text-transform: uppercase; letter-spacing: .1em; padding: 3px 8px; border-radius: 999px; color: var(--bg); background: var(--paint-ink); }
+.A-charts { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 24px; padding: 20px; }
+.A-charts h4 { margin: 0 0 12px; font-family: var(--f-mono); font-size: var(--t-11); letter-spacing: .12em; text-transform: uppercase; color: var(--ink-3); font-weight: 500; }
+.bars { display: grid; gap: 6px; }
+.bar { display: grid; grid-template-columns: 3.2em minmax(0, 1fr) 2em; gap: 10px; align-items: center; font-family: var(--f-mono); font-size: var(--t-13); color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.bar i { display: block; height: 10px; border-radius: 2px; background: var(--paint-ink); transition: background .4s var(--ease), width .5s var(--ease); }
+.split { display: flex; height: 34px; border-radius: var(--r); overflow: hidden; font-family: var(--f-mono); font-size: var(--t-13); }
+.split div { display: flex; align-items: center; padding: 0 10px; color: var(--bg); font-weight: 700; }
+.split div:first-child { background: var(--paint-ink); } .split div:last-child { background: color-mix(in oklab, var(--paint-ink), var(--bg) 55%); color: var(--ink); }
+.missing { font-family: var(--f-mono); font-size: var(--t-13); color: var(--ink-3); padding: 0 20px; }
+
+/* ================= DIRECTION B: PAINT BOOTH ================= */
+.B { font-family: var(--f-booth-body); background:
+  radial-gradient(60% 50% at 50% -10%, rgb(255 255 255 / .07), transparent 70%), #08090b; }
+.B-nav { display: flex; align-items: center; gap: 18px; padding: 14px 20px; flex-wrap: wrap; }
+.B-logo { font-family: var(--f-booth); font-style: italic; font-weight: 700; font-size: var(--t-24); text-transform: uppercase; letter-spacing: .01em; line-height: 1; }
+.B-logo em { font-style: italic; background: linear-gradient(90deg, var(--m-blue), var(--m-violet) 50%, var(--m-red)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.B-links { display: flex; gap: 18px; margin-left: auto; font-family: var(--f-booth); font-weight: 600; font-size: var(--t-15); text-transform: uppercase; letter-spacing: .06em; color: var(--ink-2); flex-wrap: wrap; }
+.B-links a { text-decoration: none; }
+.B-hero { position: relative; padding: 24px 20px 32px; display: grid; gap: 14px; justify-items: center; text-align: center; }
+.B-hero h3 { margin: 0; font-family: var(--f-booth); font-style: italic; font-weight: 700; font-size: clamp(2.5rem, 8vw, 4.75rem); line-height: .9; text-transform: uppercase; text-wrap: balance; }
+.B-hero p { margin: 0; color: var(--ink-2); max-width: 52ch; }
+.lamp { width: min(560px, 90%); height: 6px; border-radius: 6px; background: linear-gradient(90deg, transparent, rgb(255 255 255 / .8), transparent); box-shadow: 0 0 40px 8px rgb(255 255 255 / .15); }
+.fan { position: relative; height: 230px; width: min(640px, 100%); margin-top: 8px; }
+.fan .card { position: absolute; left: 50%; bottom: 0; width: 64px; height: 210px; margin-left: -32px; transform-origin: 50% 100%; border-radius: 6px 6px 3px 3px; box-shadow: 0 6px 18px rgb(0 0 0 / .5); transition: transform .5s var(--ease); }
+.fan .card span { position: absolute; left: 6px; right: 6px; bottom: 8px; font-family: var(--f-booth); font-size: var(--t-11); text-transform: uppercase; letter-spacing: .04em; line-height: 1.1; color: #fff; text-shadow: 0 1px 2px rgb(0 0 0 / .7); z-index: 2; writing-mode: vertical-rl; transform: rotate(180deg); max-height: 150px; }
+.fan .card:hover { transform: rotate(var(--rot)) translateY(-14px); }
+.B-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 170px), 1fr)); gap: 14px; padding: 8px 20px 24px; }
+.B-tile { display: grid; gap: 0; border-radius: 6px; overflow: hidden; background: var(--panel); text-decoration: none; transition: transform .25s var(--ease), box-shadow .25s var(--ease); }
+.B-tile:hover, .B-tile:focus-visible { transform: translateY(-3px); box-shadow: 0 14px 30px -12px var(--p); }
+.B-tile .paint { height: 110px; }
+.B-tile .meta { padding: 10px 12px; display: grid; gap: 2px; }
+.B-tile .meta b { font-family: var(--f-booth); font-weight: 600; font-size: var(--t-18); text-transform: uppercase; line-height: 1.05; }
+.B-tile .meta small { font-size: var(--t-13); color: var(--ink-3); }
+.B-sec { padding: 0 20px; display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.B-sec h4 { margin: 0; font-family: var(--f-booth); font-weight: 700; font-style: italic; font-size: var(--t-24); text-transform: uppercase; }
+.B-filters { display: flex; gap: 6px; flex-wrap: wrap; }
+.B-filters span { font-family: var(--f-booth); font-weight: 600; text-transform: uppercase; font-size: var(--t-13); letter-spacing: .06em; padding: 4px 10px; border-radius: 999px; border: 1px solid var(--rule); color: var(--ink-2); }
+.B-filters span[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+
+/* verdict table */
+.cmp { overflow-x: auto; }
+.cmp table { border-collapse: collapse; width: 100%; min-width: 560px; font-size: var(--t-13); }
+.cmp th, .cmp td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--rule); vertical-align: top; }
+.cmp th { font-family: var(--f-mono); font-size: var(--t-11); letter-spacing: .1em; text-transform: uppercase; color: var(--ink-3); font-weight: 500; }
+.cmp td:first-child { color: var(--ink-2); white-space: nowrap; }
+
+/* ================= MIX ================= */
+.X { font-family: var(--f-sheet); background: var(--bg); }
+.X-pad { padding: 20px; display: grid; gap: 16px; }
+.X-name { font-family: var(--f-booth); font-style: italic; font-weight: 700; text-transform: uppercase; letter-spacing: .01em; line-height: 1; }
+.X-big { font-size: clamp(2.25rem, 5vw, 3.25rem); margin: 6px 0 12px; }
+.X-hero { position: relative; padding: 32px 20px 20px; display: grid; gap: 14px;
+  background: radial-gradient(55% 60% at 50% 62%, rgb(255 255 255 / .07), transparent 70%); }
+.X-hero h3 { margin: 0; font-size: var(--t-56); line-height: 1; font-weight: 800; font-stretch: 115%; letter-spacing: -.02em; text-wrap: balance; }
+.X-hero p { margin: 0; color: var(--ink-2); max-width: 58ch; }
+.X-lamp { justify-self: center; width: min(520px, 80%); height: 4px; border-radius: 4px; margin-top: 10px;
+  background: linear-gradient(90deg, transparent, rgb(255 255 255 / .85), transparent); box-shadow: 0 0 36px 6px rgb(255 255 255 / .14); }
+.X-wall { position: relative; height: 170px; }
+.X-wall::after { content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 3;
+  background: radial-gradient(70% 55% at 50% 0%, rgb(255 255 255 / .26), transparent 70%); }
+.X-latest { padding: 20px; display: grid; gap: 10px; border-top: 1px solid var(--rule); }
+.X-latest h4 { margin: 0; font-weight: 500; }
+.X-table { overflow-x: auto; }
+.X-table table { border-collapse: collapse; width: 100%; min-width: 600px; }
+.X-table th { text-align: left; font-family: var(--f-mono); font-size: var(--t-11); letter-spacing: .1em; text-transform: uppercase; color: var(--ink-3); font-weight: 500; padding: 8px 10px; border-bottom: 1px solid var(--rule); }
+.X-table td { padding: 10px; border-bottom: 1px solid var(--rule); font-size: var(--t-13); color: var(--ink-2); vertical-align: middle; }
+.X-table td.mono { font-family: var(--f-mono); font-variant-numeric: tabular-nums; }
+.X-paintcell { display: flex; align-items: center; gap: 10px; color: var(--ink); }
+.X-paintcell a { text-decoration: none; font-size: var(--t-18); }
+.X-paintcell a:hover { text-decoration: underline; text-underline-offset: 3px; }
+.X-colors-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+.X-h { margin: 0; font-size: var(--t-24); font-weight: 800; font-stretch: 112%; }
+.X-chips { display: flex; gap: 6px; flex-wrap: wrap; }
+.X-chips button { font-family: var(--f-mono); font-size: var(--t-11); letter-spacing: .08em; text-transform: uppercase; padding: 6px 10px; border-radius: var(--r); border: 1px solid var(--rule); background: transparent; color: var(--ink-2); cursor: pointer; }
+.X-chips button[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.X-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 180px), 1fr)); gap: 14px; }
+.X-tile { display: grid; border-radius: 6px; overflow: hidden; background: var(--panel); border: 1px solid var(--rule); text-decoration: none; transition: transform .25s var(--ease), box-shadow .25s var(--ease); }
+.X-tile:hover, .X-tile:focus-visible { transform: translateY(-3px); box-shadow: 0 14px 30px -12px var(--p); }
+.X-tile .paint { height: 120px; }
+.X-tile .paint::before { background: radial-gradient(80% 50% at 50% 0%, rgb(255 255 255 / .22), transparent 70%); z-index: 1; }
+.X-tile .meta { padding: 10px 12px 12px; display: grid; gap: 4px; }
+.X-tile .meta b { font-size: var(--t-18); }
+.X-tile .meta small { font-family: var(--f-mono); font-size: var(--t-11); color: var(--ink-3); font-variant-numeric: tabular-nums; }
+#xColor { --paint: #1e4c8c; --paint-ink: #8fb0e0; }
+.X-booth { display: grid; gap: 14px; }
+.X-booth .door { box-shadow: 0 30px 60px -30px color-mix(in oklab, var(--paint), black 30%), 0 -20px 50px -30px rgb(255 255 255 / .25); }
+.X-og { position: relative; aspect-ratio: 1200 / 630; max-width: 100%; border-radius: 8px; overflow: hidden; border: 1px solid var(--rule);
+  background: radial-gradient(50% 70% at 72% 0%, rgb(255 255 255 / .1), transparent 70%), #08090b;
+  display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: center; }
+.X-og-text { padding: 6%; display: grid; gap: 12px; align-content: center; min-width: 0; }
+.X-og-text strong { font-size: clamp(1.25rem, 4vw, 2.75rem); font-weight: 800; font-stretch: 115%; line-height: 1.05; letter-spacing: -.01em; }
+.X-og-text .mono { font-size: clamp(.6875rem, 1.4vw, .875rem); color: var(--ink-2); }
+.X-og-fan { position: relative; height: 100%; }
+.X-og-fan .card { position: absolute; left: 50%; bottom: -6%; width: 13%; height: 78%; margin-left: -6.5%; transform-origin: 50% 100%; border-radius: 5px 5px 2px 2px; box-shadow: 0 6px 18px rgb(0 0 0 / .5); }
+
+/* ---- Mix, studio pass ----
+   Lighting follows automotive studio photography: an overhead softbox reflects
+   in the clear coat as a bright band, then a hard horizon line where the panel
+   starts reflecting the dark floor. Matte (frozen) paint gets no horizon. */
+.paint.studio:not(.frozen)::before {
+  z-index: 1;
+  background:
+    linear-gradient(100deg, transparent 14%, rgb(255 255 255 / .16) 15% 21%, transparent 22% 30%, rgb(255 255 255 / .08) 31% 33%, transparent 34%) 0 0 / 100% 46% no-repeat,
+    linear-gradient(180deg, rgb(255 255 255 / .30) 0%, rgb(255 255 255 / .10) 28%, rgb(255 255 255 / .03) 45%, rgb(0 0 0 / .20) 47%, rgb(0 0 0 / .08) 64%, transparent 85%);
+}
+.paint.studio.frozen::before { z-index: 1; background: radial-gradient(90% 60% at 50% 0%, rgb(255 255 255 / .10), transparent 70%); }
+
+/* Wall: strips drawn flat, then lit as one panel so the reflection runs across all of them */
+.X-wall { height: 230px; border-radius: 6px; }
+.X-wall .paint { background: linear-gradient(180deg, color-mix(in oklab, var(--p), white 10%), var(--p) 55%, color-mix(in oklab, var(--p), black 40%)); }
+.X-wall::after {
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / .34) 0%, rgb(255 255 255 / .12) 26%, rgb(255 255 255 / .04) 47%, rgb(0 0 0 / .22) 49%, rgb(0 0 0 / .08) 68%, transparent 88%),
+    radial-gradient(60% 40% at 50% 0%, rgb(255 255 255 / .22), transparent 70%);
+}
+.X-wall::before {
+  content: ""; position: absolute; inset: 0; z-index: 4; pointer-events: none;
+  background: linear-gradient(100deg, transparent 42%, rgb(255 255 255 / .28) 50%, transparent 58%) 0 0 / 260% 100% no-repeat;
+  background-position: 130% 0; animation: sweep 2.2s cubic-bezier(.45,0,.2,1) .4s 1 both;
+}
+@keyframes sweep { from { background-position: 130% 0; } to { background-position: -30% 0; } }
+.X-ticks { position: relative; height: 28px; margin-top: -6px; }
+.X-ticks span { position: absolute; top: 0; padding-left: 6px; border-left: 1px solid var(--ink-3); height: 100%; display: flex; align-items: flex-end;
+  font-family: var(--f-mono); font-size: var(--t-11); letter-spacing: .1em; text-transform: uppercase; color: var(--ink-3); white-space: nowrap; }
+
+/* Hero: headline left, three plain facts right */
+.X-hero { grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); column-gap: 40px; align-items: end; padding-top: 48px;
+  background: radial-gradient(60% 55% at 50% 72%, rgb(255 255 255 / .08), transparent 70%); }
+.X-hero > .label, .X-hero > h3, .X-hero > p { grid-column: 1; }
+.X-hero > .X-lamp, .X-hero > .X-wall, .X-hero > .X-ticks, .X-hero > .wall-read { grid-column: 1 / -1; }
+.X-hero h3 { font-size: clamp(2.75rem, 7vw, 5.25rem); font-weight: 800; font-stretch: 125%; letter-spacing: -.035em; line-height: .95; }
+.X-facts { grid-column: 2; grid-row: 1 / span 3; align-self: end; display: grid; border-top: 1px solid var(--rule); }
+.X-facts div { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 12px; padding: 12px 0; border-bottom: 1px solid var(--rule); }
+.X-facts .label { grid-column: 1 / -1; }
+.X-facts b { font-family: var(--f-booth); font-style: italic; font-weight: 700; font-size: var(--t-24); text-transform: uppercase; line-height: 1; }
+.X-facts .mono { font-size: var(--t-13); color: var(--ink-2); align-self: end; font-variant-numeric: tabular-nums; }
+.X-lamp { margin-top: 28px; }
+
+/* Color page: a spray-out card under the lamp, standing on a dark studio floor */
+.X-cove { position: relative; display: grid; justify-items: center; gap: 0; padding: 8px 0 120px; overflow: hidden; perspective: 900px; min-height: 340px;
+  background: radial-gradient(70% 45% at 50% 100%, rgb(255 255 255 / .06), transparent 70%); }
+.X-cove .X-lamp { margin: 0 0 26px; width: 70%; }
+.spray { width: min(210px, 62%); aspect-ratio: 4 / 5.6; border-radius: 3px; transform: rotateY(-16deg) rotateX(2deg);
+  box-shadow: 0 40px 50px -30px rgb(0 0 0 / .9), -18px 0 40px -24px color-mix(in oklab, var(--paint), transparent 30%);
+  -webkit-box-reflect: below 3px linear-gradient(transparent 62%, rgb(0 0 0 / .22)); }
+.spray-hide { position: absolute; left: 0; right: 0; bottom: 0; height: 22%; z-index: 2;
+  background:
+    linear-gradient(color-mix(in oklab, var(--p), transparent 12%), color-mix(in oklab, var(--p), transparent 12%)),
+    repeating-conic-gradient(#f2f2f2 0 25%, #111 0 50%) 0 0 / 16px 16px; }
+.spray-label { position: absolute; left: 10px; right: 10px; bottom: calc(22% + 8px); z-index: 3; display: grid; gap: 2px;
+  font-family: var(--f-mono); font-size: var(--t-11); letter-spacing: .1em; text-transform: uppercase; color: rgb(255 255 255 / .82); text-shadow: 0 1px 2px rgb(0 0 0 / .5); }
+.X-color-hero { grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); padding-block: 36px 0; align-items: end; }
+.X-color-hero > div:first-child { padding-bottom: 40px; }
+.X-lede { margin: 16px 0 0; max-width: 40ch; color: var(--ink-2); font-size: var(--t-18); line-height: 1.45; }
+
+/* Film grain over the whole page, very faint */
+body::after { content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 50; opacity: .035;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+
+@media (max-width: 720px) {
+  .X-hero { grid-template-columns: minmax(0, 1fr); }
+  .X-facts { grid-column: 1; grid-row: auto; }
+  .X-wall { height: 150px; }
+  .X-color-hero { grid-template-columns: minmax(0, 1fr); }
+  .X-og { grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); }
+
+  .A-color-hero { grid-template-columns: minmax(0, 1fr); }
+  .A-stats strong { font-size: var(--t-24); }
+  .A-stats div, .A-tiles div { padding: 12px; }
+  .wall { height: 110px; }
+  .fan { height: 190px; } .fan .card { height: 170px; width: 52px; margin-left: -26px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition: none !important; animation: none !important; }
+}
+</style>
+
+<div class="wrap">
+  <div class="stripe" aria-hidden="true"><i></i><i></i><i></i></div>
+
+  <header class="intro">
+    <span class="label">mcolors · design refresh · mockups v1 · 2026-11-13</span>
+    <h1>Two design directions for mcolors</h1>
+    <p>Both directions use the same paint swatches, so those come first. Then you'll see Direction A (Build Sheet), Direction B (Paint Booth) and a table comparing them. The last section mixes the two. The numbers are from the live registry today: 255 builds, 70 paints and 11 countries.</p>
+    <nav class="toc" aria-label="Sections">
+      <a href="#finishes">Finish study</a>
+      <a href="#dir-a">A · Build Sheet</a>
+      <a href="#dir-b">B · Paint Booth</a>
+      <a href="#compare">A and B compared</a>
+      <a href="#mix">The mix</a>
+    </nav>
+  </header>
+
+  <!-- ===== FINISH STUDY ===== -->
+  <section class="block" id="finishes">
+    <div class="block-head">
+      <span class="label">Shared by both directions</span>
+      <h2>Paint swatches by finish</h2>
+      <p>Each swatch is drawn in CSS from the paint's hex value and its finish. There are no images, so it adds nothing to load time or server work. The same swatch works as a 22px dot in the entries table and as a large panel on a color page.</p>
+    </div>
+    <div class="finish-grid" id="finishGrid"></div>
+    <p class="note">In this mockup the finish comes from the paint's name. If the name says Metallic, Pearl or Frozen, it gets that finish, and everything else is drawn as solid. Plenty of metallic paints don't say so in their name, so the real version needs a <span class="mono">finish</span> field in <span class="mono">colors.ts</span>, filled in by hand.</p>
+    <p class="note">The hex values are the ones the site uses now. They're close to each paint, but they aren't BMW's official values.</p>
+  </section>
+
+  <!-- ===== DIRECTION A ===== -->
+  <section class="block" id="dir-a">
+    <div class="block-head">
+      <span class="label">Direction A</span>
+      <h2>Build Sheet</h2>
+      <p>This direction looks like a spec sheet, with a graphite background, wide display type and monospaced numbers. Each car's specs are laid out the way a window sticker lists them, and the M stripe separates sections.</p>
+      <p>The home page starts with one strip per paint, sorted by color. The more builds a paint has, the wider its strip. <strong>Click a strip</strong> to load that paint into the color page below.</p>
+    </div>
+
+    <div class="screen">
+      <div class="screen-bar"><b></b><b></b><b></b><span>mcolors.geektechlive.com</span></div>
+      <div class="A">
+        <div class="stripe" aria-hidden="true" style="margin:0"><i></i><i></i><i></i></div>
+        <nav class="A-nav" aria-label="Mockup navigation">
+          <span class="A-logo"><span class="bars" aria-hidden="true"><i></i><i></i><i></i></span>M Individual Registry</span>
+          <span class="A-links"><a href="#dir-a" aria-current="page">Home</a><a href="#dir-a">Colors</a><a href="#dir-a">Entries</a><a href="#dir-a">Reports</a><a href="#dir-a">Map</a><a href="#dir-a" class="cta">Add your car</a></span>
+        </nav>
+        <div class="A-hero">
+          <div class="eyebrow"><span class="label">G80 M3 · G82 M4 · BMW Individual paint</span><span class="label">Updated today</span></div>
+          <h3>How rare is your color?</h3>
+          <p>Owners of G80 M3s and G82 M4s in BMW Individual paint list their cars here. Find your color to see how many others have it, and add yours if it's missing.</p>
+          <div class="wall" id="wall" role="list" aria-label="Top 40 registered paints, sorted by color"></div>
+          <div class="wall-read" aria-live="polite"><span id="wallRead"><b>Point at or tap a strip for its name and build count</b> · 40 of 70 paints, the ones with the most builds</span><span>sorted by color · wider = more builds</span></div>
+        </div>
+        <div class="A-stats">
+          <div><span class="label">Builds</span><strong>255</strong></div>
+          <div><span class="label">Paints</span><strong>70</strong></div>
+          <div><span class="label">Countries</span><strong>11</strong></div>
+        </div>
+
+        <div class="stripe" aria-hidden="true" style="margin:0;height:2px;opacity:.6"><i></i><i></i><i></i></div>
+
+        <div class="A-color" id="aColor">
+          <div class="A-color-hero">
+            <div>
+              <div class="crumb"><a href="#dir-a">Colors</a> / <span id="cFamily">Purple</span></div>
+              <h3 id="cName">Twilight Purple</h3>
+              <div class="tag" id="cTag"><span>MY 2022–2027</span><span>23 M3s · 3 M4s</span><span>8AT</span><span>AWD 15 · RWD 11</span></div>
+            </div>
+            <div class="door paint solid" id="cDoor" style="--p:#5a3a7a"></div>
+          </div>
+          <div class="A-tiles">
+            <div><span class="label">Builds</span><strong id="cCount">26</strong></div>
+            <div><span class="label">Rank</span><strong id="cRank">#1 of 70</strong></div>
+            <div><span class="label">Rarity</span><span class="pill" id="cRarity">Very common</span></div>
+          </div>
+          <div class="A-charts" id="cCharts">
+            <div>
+              <h4>Builds by model year</h4>
+              <div class="bars">
+                <div class="bar"><span>2022</span><i style="width:100%"></i><span>9</span></div>
+                <div class="bar"><span>2023</span><i style="width:33%"></i><span>3</span></div>
+                <div class="bar"><span>2024</span><i style="width:22%"></i><span>2</span></div>
+                <div class="bar"><span>2025</span><i style="width:11%"></i><span>1</span></div>
+                <div class="bar"><span>2026</span><i style="width:33%"></i><span>3</span></div>
+                <div class="bar"><span>2027</span><i style="width:89%"></i><span>8</span></div>
+              </div>
+            </div>
+            <div>
+              <h4>Drivetrain</h4>
+              <div class="split"><div style="flex:15">AWD 15</div><div style="flex:11">RWD 11</div></div>
+              <p class="note" style="margin-top:14px">Accents on this page use the paint color. Twilight Purple is too dark to read as text on this background (about 2.1:1 contrast), so text and bars use a lighter version of it that reaches 4.5:1. The swatch keeps the paint's own hex value.</p>
+            </div>
+          </div>
+          <p class="missing" id="cMissing" hidden>This mockup only has year and drivetrain data for Twilight Purple. The real page shows them for every paint.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== DIRECTION B ===== -->
+  <section class="block" id="dir-b">
+    <div class="block-head">
+      <span class="label">Direction B</span>
+      <h2>Paint Booth</h2>
+      <p>This direction looks like a dark showroom with one overhead light. It uses condensed italic type and gives the paint most of the space. The home page opens with a fan of paint cards for the 12 most-registered colors. The colors page uses large tiles that you can sort and filter.</p>
+    </div>
+
+    <div class="screen">
+      <div class="screen-bar"><b></b><b></b><b></b><span>mcolors.geektechlive.com</span></div>
+      <div class="B">
+        <nav class="B-nav" aria-label="Mockup navigation">
+          <span class="B-logo"><em>M</em> Individual Colors</span>
+          <span class="B-links"><a href="#dir-b">Colors</a><a href="#dir-b">Entries</a><a href="#dir-b">Reports</a><a href="#dir-b">Map</a><a href="#dir-b">Add your car</a></span>
+        </nav>
+        <div class="B-hero">
+          <div class="lamp" aria-hidden="true"></div>
+          <div class="fan" id="fan" aria-hidden="true"></div>
+          <h3>255 builds in 70 Individual colors</h3>
+          <p>G80 M3s and G82 M4s in BMW Individual paint, each one added by its owner.</p>
+        </div>
+        <div class="B-sec">
+          <h4>All colors</h4>
+          <div class="B-filters"><span aria-pressed="true">Most builds</span><span>By hue</span><span>Rarest</span><span>Metallic</span><span>Frozen</span></div>
+        </div>
+        <div class="B-grid" id="bGrid"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== COMPARE ===== -->
+  <section class="block" id="compare">
+    <div class="block-head">
+      <span class="label">Comparison</span>
+      <h2>A and B compared</h2>
+    </div>
+    <div class="cmp">
+      <table>
+        <thead><tr><th></th><th>A · Build Sheet</th><th>B · Paint Booth</th></tr></thead>
+        <tbody>
+          <tr><td>Feel</td><td>Technical and data-heavy, like a spec sheet</td><td>Dramatic, with the paint taking most of the space</td></tr>
+          <tr><td>Type</td><td>Archivo (wide) plus JetBrains Mono</td><td>Barlow Condensed italic plus Barlow</td></tr>
+          <tr><td>Home opener</td><td>One strip per paint, sorted by hue and sized by builds</td><td>A fan of cards for the 12 most-registered paints</td></tr>
+          <tr><td>Best at</td><td>Tables, reports and the map (most of the site)</td><td>Colors grid, color pages and share cards</td></tr>
+          <tr><td>Risk</td><td>Can feel cold</td><td>Large paint samples can crowd the tables and charts</td></tr>
+          <tr><td>Looks most like</td><td>Observatory's color tokens and contrast rules</td><td>Mbuilder's editorial look</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="note">The last section shows one way to combine them. This mockup loads its fonts from Google Fonts, but the site would host them itself through next/font.</p>
+  </section>
+
+  <!-- ===== MIX ===== -->
+  <section class="block" id="mix">
+    <div class="block-head">
+      <span class="label">A + B</span>
+      <h2>The mix</h2>
+      <p>I split the two by what each page is for. Most of the site is tables, charts and the map, where people read numbers, so A's type and layout cover the whole site. B's lit-paint look is for the places where the paint itself is the point. That means the paint names, the home page strips, the colors page, the swatch on each color page and the image people see when a link is shared.</p>
+      <p>Two display fonts would look messy, so B's condensed italic only sets paint names, like the name printed on a paint chip.</p>
+    </div>
+
+    <div class="cmp">
+      <table>
+        <thead><tr><th>Part of the site</th><th>Taken from</th><th>Why</th></tr></thead>
+        <tbody>
+          <tr><td>Type, layout, numbers</td><td>A</td><td>Tables and charts are most of the site, and A's mono numbers line up in columns.</td></tr>
+          <tr><td>Paint names</td><td>B</td><td>Only paint names use the condensed italic, so it always means a paint.</td></tr>
+          <tr><td>Home page opener</td><td>A, lit like B</td><td>A's strips show 40 paints, sized by build count. B's fan only showed 12. B's overhead light goes across the strips.</td></tr>
+          <tr><td>Colors page</td><td>B's tiles, A's details</td><td>Big lit tiles make paint easy to browse. Counts and rarity stay in A's mono style.</td></tr>
+          <tr><td>Color page</td><td>A, with B's light on the swatch</td><td>The tinted page, spec tag and charts come from A. The large swatch sits under B's lamp.</td></tr>
+          <tr><td>Fan of paint cards</td><td>B, moved</td><td>It becomes the image for shared links to the home page. A fan is only for looking at, so it suits that image, and the numbers go in the text beside it.</td></tr>
+          <tr><td>Left out</td><td></td><td>B's centered hero and gradient logo, and A's stacked uppercase headline.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <span class="label">Home page</span>
+    <div class="screen">
+      <div class="screen-bar"><b></b><b></b><b></b><span>mcolors.geektechlive.com</span></div>
+      <div class="X">
+        <div class="stripe" aria-hidden="true" style="margin:0"><i></i><i></i><i></i></div>
+        <nav class="A-nav" aria-label="Mockup navigation">
+          <span class="A-logo"><span class="bars" aria-hidden="true"><i></i><i></i><i></i></span>M Individual Registry</span>
+          <span class="A-links"><a href="#mix" aria-current="page">Home</a><a href="#mix">Colors</a><a href="#mix">Entries</a><a href="#mix">Reports</a><a href="#mix">Map</a><a href="#mix" class="cta">Add your car</a></span>
+        </nav>
+        <div class="X-hero">
+          <span class="label">G80 M3 · G82 M4 · BMW Individual paint</span>
+          <h3>How rare is your color?</h3>
+          <p>Owners of G80 M3s and G82 M4s in BMW Individual paint list their cars here. Find your color to see how many others have it, and add yours if it's missing.</p>
+          <div class="X-facts">
+            <div><span class="label">Most registered</span><b>Twilight Purple</b><span class="mono">26 builds</span></div>
+            <div><span class="label">Newest</span><b>Dakar Yellow II</b><span class="mono">Oct 16</span></div>
+            <div><span class="label">Rarest</span><b>30 paints</b><span class="mono">1 or 2 builds each</span></div>
+          </div>
+          <div class="X-lamp" aria-hidden="true"></div>
+          <div class="wall X-wall" id="xWall" role="list" aria-label="Top 40 registered paints, sorted by color"></div>
+          <div class="X-ticks" id="xTicks" aria-hidden="true"></div>
+          <div class="wall-read" aria-live="polite"><span id="xWallRead"><b>Point at or tap a strip for its name and build count</b> · 40 of 70 paints, the ones with the most builds</span><span>sorted by color · wider = more builds</span></div>
+        </div>
+        <div class="A-stats">
+          <div><span class="label">Builds</span><strong>255</strong></div>
+          <div><span class="label">Paints</span><strong>70</strong></div>
+          <div><span class="label">Countries</span><strong>11</strong></div>
+        </div>
+        <div class="X-latest">
+          <h4 class="label">Latest builds</h4>
+          <div class="X-table">
+            <table>
+              <thead><tr><th>Paint</th><th>Car</th><th>Spec</th><th>Location</th><th>Added</th></tr></thead>
+              <tbody id="xLatest"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <span class="label">Colors page</span>
+    <div class="screen">
+      <div class="screen-bar"><b></b><b></b><b></b><span>mcolors.geektechlive.com/colors</span></div>
+      <div class="X X-pad">
+        <div class="X-colors-head">
+          <h3 class="X-h">All colors</h3>
+          <div class="X-chips" role="group" aria-label="Sort and filter"><button type="button" aria-pressed="true">Most builds</button><button type="button" aria-pressed="false">By color</button><button type="button" aria-pressed="false">Rarest</button><button type="button" aria-pressed="false">Metallic</button><button type="button" aria-pressed="false">Frozen</button></div>
+        </div>
+        <div class="X-grid" id="xGrid"></div>
+      </div>
+    </div>
+
+    <span class="label">Color page</span>
+    <div class="screen">
+      <div class="screen-bar"><b></b><b></b><b></b><span>mcolors.geektechlive.com/colors/san-marino-blue</span></div>
+      <div class="X A-color" id="xColor">
+        <div class="A-color-hero X-color-hero">
+          <div>
+            <div class="crumb"><a href="#mix">Colors</a> / Blue</div>
+            <h3 class="X-name X-big">San Marino Blue</h3>
+            <div class="tag"><span>MY 2022–2027</span><span>13 M3s · 3 M4s</span><span>8AT 15 · 6MT 1</span><span>AWD 11 · RWD 5</span></div>
+            <p class="X-lede">16 builds are registered in San Marino Blue. Only Twilight Purple has more.</p>
+          </div>
+          <div class="X-cove">
+            <div class="X-lamp" aria-hidden="true"></div>
+            <div class="spray paint solid studio" style="--p:#1e4c8c" role="img" aria-label="San Marino Blue spray-out card">
+              <div class="spray-label"><span>San Marino Blue</span><span>BMW Individual</span></div>
+              <div class="spray-hide"></div>
+            </div>
+          </div>
+        </div>
+        <div class="A-tiles">
+          <div><span class="label">Builds</span><strong>16</strong></div>
+          <div><span class="label">Rank</span><strong>#2 of 70</strong></div>
+          <div><span class="label">Rarity</span><span class="pill">Very common</span></div>
+        </div>
+        <div class="A-charts">
+          <div>
+            <h4>Builds by model year</h4>
+            <div class="bars">
+              <div class="bar"><span>2022</span><i style="width:100%"></i><span>9</span></div>
+              <div class="bar"><span>2023</span><i style="width:44%"></i><span>4</span></div>
+              <div class="bar"><span>2027</span><i style="width:33%"></i><span>3</span></div>
+            </div>
+          </div>
+          <div>
+            <h4>Drivetrain</h4>
+            <div class="split"><div style="flex:11">AWD 11</div><div style="flex:5">RWD 5</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <span class="label">Image for shared links (1200 × 630)</span>
+    <div class="X-og">
+      <div class="X-og-text">
+        <span class="A-logo"><span class="bars" aria-hidden="true"><i></i><i></i><i></i></span>M Individual Registry</span>
+        <strong>How rare is your color?</strong>
+        <span class="mono">255 builds · 70 paints · mcolors.geektechlive.com</span>
+      </div>
+      <div class="X-og-fan" id="xFan" aria-hidden="true"></div>
+    </div>
+    <p class="note">The site would rebuild this image when the counts change, not for every visitor. Drawing it per visitor costs too much server time on the free plan.</p>
+  </section>
+</div>
+
+<script>
+// Live registry data, 2026-11-13: top 40 paints by builds (of 70). Hex values from src/lib/colors.ts.
+const PAINTS = [
+  ["Twilight Purple","#5a3a7a",26],["San Marino Blue","#1e4c8c",16],["Laguna Seca Blue","#1e5a9c",12],["Voodoo Blue","#1b3a6b",12],
+  ["British Racing Green","#1a3c2f",11],["Frozen Dark Grey","#4a4a4a",11],["Grigio Telesto","#7a7a8a",7],["Marina Bay Blue","#1e5c8c",6],
+  ["Techno Violet Metallic","#4a2a7a",6],["Tanzanite Blue","#1e3a7c",6],["Frozen Deep Grey","#3a3a3a",5],["Mexico Blue","#1e5c9c",5],
+  ["Santorini Blue","#1c3d6e",5],["Imola Red","#a51c1c",5],["Violet Blue","#2a1a5c",5],["Wildberry","#7a1a4a",5],
+  ["Dravit Grey Metallic","#5c5c6a",5],["Fire Orange","#c45c1e",5],["Irish Green","#1a6a2a",4],["Sepia Metallic III","#7a5a3a",4],
+  ["Oxford Green II Metallic","#2a4a2a",4],["Daytona Violet","#4a1a6a",3],["Gentian Blue","#1c3a7a",3],["Riviera Blue","#1e6a9c",3],
+  ["Grey Black","#2a2a2a",3],["Dakar Yellow","#e8c840",3],["Frozen Black","#2a2a2a",3],["Fire Orange III","#c44c0e",3],
+  ["Tanzanite Blue II","#1a3070",3],["Aegean Blue","#1a3d6b",3],["Rosso Corsa","#c41c1c",3],["Borusan Turkish Blue","#1a4a8c",3],
+  ["Anglesey Green Metallic","#1e4a2a",3],["Velvet Blue","#1a2a5c",3],["Atlantis Blue Metallic","#1a4b8c",3],["Daytona Beach Blue","#1e5f8c",2],
+  ["Blue Bay Lagoon Metallic","#1a6a8c",2],["Santorini Blue II","#1a3560",2],["Frozen Portimao Blue","#1e3a8a",2],["Chalk","#d4cfc9",2]
+];
+const BG = [11,13,16];
+
+// Show the finish only when the name doesn't already say it, and never for solid.
+const finishNote = n => { const f = finishOf(n); return f === "solid" || n.toLowerCase().includes(f) ? "" : ` · ${f}`; };
+const finishOf = n => /frozen/i.test(n) ? "frozen" : /pearl/i.test(n) ? "pearl" : /metallic/i.test(n) ? "metallic" : "solid";
+const rgb = h => [1,3,5].map(i => parseInt(h.slice(i,i+2),16));
+const lum = c => { const l = c.map(v => { v/=255; return v <= .03928 ? v/12.92 : ((v+.055)/1.055)**2.4; }); return .2126*l[0]+.7152*l[1]+.0722*l[2]; };
+const contrast = (a,b) => { const x = lum(a), y = lum(b); return (Math.max(x,y)+.05)/(Math.min(x,y)+.05); };
+const hsl = h => { const [r,g,b] = rgb(h).map(v=>v/255); const mx=Math.max(r,g,b), mn=Math.min(r,g,b), d=mx-mn; let hh=0;
+  if (d) hh = mx===r ? ((g-b)/d)%6 : mx===g ? (b-r)/d+2 : (r-g)/d+4; hh = (hh*60+360)%360; const l=(mx+mn)/2; const s = d ? d/(1-Math.abs(2*l-1)) : 0; return [hh,s,l]; };
+// Accent that keeps the paint's hue but reaches 4.5:1 on the ground.
+function readableInk(hex){ const c = rgb(hex); for (let t=0; t<=1; t+=.02){ const m = c.map(v => Math.round(v + (255-v)*t)); if (contrast(m,BG) >= 4.5) return `rgb(${m.join(",")})`; } return "#fff"; }
+const family = h => { const [hh,s,l] = hsl(h); if (s < .12) return l > .7 ? "White" : "Grey"; if (hh < 20 || hh >= 340) return "Red"; if (hh < 45) return "Orange"; if (hh < 70) return "Yellow"; if (hh < 170) return "Green"; if (hh < 255) return "Blue"; return "Purple"; };
+const el = (tag, cls, attrs={}) => Object.assign(document.createElement(tag), cls ? {className: cls} : {}, attrs);
+
+// Finish study
+const STUDY = [
+  ["Solid","Imola Red","#a51c1c","A hard gloss reflection across the top, with no metal flake."],
+  ["Metallic","Techno Violet Metallic","#4a2a7a","A wide highlight that darkens toward the lower edge, with fine flake."],
+  ["Pearl","Goodwood Green Pearl","#1a3a2a","The color shifts from one edge to the other, the way pearl paint changes as you walk around the car."],
+  ["Frozen","Frozen Dark Grey","#4a4a4a","Matte, so there's no highlight. The color fades softly and has a faint grain."]
+];
+const fg = document.getElementById("finishGrid");
+STUDY.forEach(([fin,name,hex,desc]) => {
+  const f = el("div","finish");
+  const panel = el("div",`panel paint ${fin.toLowerCase()}`); panel.style.setProperty("--p",hex);
+  const row = el("div","row"); const chip = el("span",`chip paint ${fin.toLowerCase()}`); chip.style.setProperty("--p",hex);
+  const h = el("h3",""); h.textContent = `${fin} · ${name}`; row.append(chip,h);
+  const p = el("p",""); p.textContent = desc;
+  const today = el("div","today"); const flat = el("span","flat"); flat.style.background = hex; today.append(flat, Object.assign(el("span"),{textContent:"Today the site shows a flat dot"}));
+  f.append(panel,row,p,today); fg.append(f);
+});
+
+// Ranks
+const ranked = [...PAINTS].sort((a,b)=>b[2]-a[2]);
+// Tied paints share a rank.
+const rankOf = n => { const c = PAINTS.find(p=>p[0]===n)[2]; return PAINTS.filter(p=>p[2]>c).length + 1; };
+const rarity = n => n >= 15 ? "Very common" : n >= 6 ? "Common" : n >= 3 ? "Uncommon" : "Rare";
+
+// Paint wall, sorted by hue with greys at the end by lightness
+const byHue = [...PAINTS].sort((a,b)=>{ const A=hsl(a[1]), B=hsl(b[1]); const ga=A[1]<.12, gb=B[1]<.12; if (ga!==gb) return ga?1:-1; return ga ? A[2]-B[2] : A[0]-B[0]; });
+const wall = document.getElementById("wall"), read = document.getElementById("wallRead");
+byHue.forEach(([name,hex,n]) => {
+  const b = el("button",`paint ${finishOf(name)}`,{type:"button"}); b.style.setProperty("--p",hex); b.style.flexGrow = n;
+  b.setAttribute("role","listitem"); b.setAttribute("aria-label",`${name}, ${n} builds`);
+  const show = () => { read.innerHTML = ""; read.append(Object.assign(el("b"),{textContent:name}), ` · ${n} build${n>1?"s":""}` + finishNote(name)); };
+  b.addEventListener("mouseenter",show); b.addEventListener("focus",show);
+  b.addEventListener("click",()=>{ show(); tint(name,hex,n); document.getElementById("aColor").scrollIntoView({behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block:"start"}); });
+  wall.append(b);
+});
+
+// Tint the A color page
+function tint(name,hex,n){
+  const page = document.getElementById("aColor");
+  page.style.setProperty("--paint",hex); page.style.setProperty("--paint-ink",readableInk(hex));
+  document.getElementById("cName").textContent = name;
+  document.getElementById("cFamily").textContent = family(hex);
+  document.getElementById("cCount").textContent = n;
+  document.getElementById("cRank").textContent = `#${rankOf(name)} of 70`;
+  document.getElementById("cRarity").textContent = rarity(n);
+  const door = document.getElementById("cDoor"); door.className = `door paint ${finishOf(name)}`; door.style.setProperty("--p",hex);
+  const isTP = name === "Twilight Purple";
+  document.getElementById("cCharts").hidden = !isTP; document.getElementById("cTag").hidden = !isTP; document.getElementById("cMissing").hidden = isTP;
+}
+tint("Twilight Purple","#5a3a7a",26);
+
+// ===== MIX =====
+const xWall = document.getElementById("xWall"), xRead = document.getElementById("xWallRead");
+byHue.forEach(([pname,hex,n]) => {
+  const b = el("button",`paint ${finishOf(pname)}`,{type:"button"}); b.style.setProperty("--p",hex); b.style.flexGrow = n;
+  b.setAttribute("role","listitem"); b.setAttribute("aria-label",`${pname}, ${n} builds`);
+  const show = () => { xRead.innerHTML = ""; xRead.append(Object.assign(el("b"),{textContent:pname}), ` · ${n} build${n>1?"s":""}` + finishNote(pname)); };
+  b.addEventListener("mouseenter",show); b.addEventListener("focus",show); b.addEventListener("click",show);
+  xWall.append(b);
+});
+// Color-family ticks under the wall, placed at each family's real start
+(() => {
+  const ticks = document.getElementById("xTicks"); const total = byHue.reduce((s,p)=>s+p[2],0);
+  let run = 0, last = null;
+  byHue.forEach(([pname,hex,n]) => { const fam = family(hex);
+    if (fam !== last) { const share = byHue.filter(p=>family(p[1])===fam).reduce((s,p)=>s+p[2],0)/total;
+      const t = el("span"); t.style.left = `${(run/total)*100}%`; if (share >= .06) t.textContent = fam; ticks.append(t); last = fam; }
+    run += n; });
+})();
+document.getElementById("xColor").style.setProperty("--paint-ink", readableInk("#1e4c8c"));
+const LATEST = [
+  ["Dakar Yellow II","#e0bc30","2027 M3","RWD · 6MT","Maryland, US","Oct 16"],
+  ["Twilight Purple","#5a3a7a","2024 M3","RWD · 8AT","Ohio, US","Aug 20"],
+  ["Twilight Purple","#5a3a7a","2026 M3","RWD · 8AT","California, US","Jul 22"],
+  ["Aegean Blue","#1a3d6b","2021 M3","RWD · 8AT","South Carolina, US","Jul 21"],
+  ["Riviera Blue","#1e6a9c","2027 M3","RWD · 6MT","Wisconsin, US","Jul 11"],
+  ["Laguna Seca Blue","#1e5a9c","2027 M3","RWD · 6MT","Pennsylvania, US","Jul 4"]
+];
+const xLatest = document.getElementById("xLatest");
+LATEST.forEach(([pname,hex,car,spec,loc,added]) => {
+  const tr = el("tr");
+  const c0 = el("td"); const cell = el("div","X-paintcell"); const chip = el("span",`chip paint ${finishOf(pname)}`); chip.style.setProperty("--p",hex);
+  cell.append(chip, Object.assign(el("a","X-name",{href:"#mix"}),{textContent:pname})); c0.append(cell);
+  tr.append(c0, Object.assign(el("td","mono"),{textContent:car}), Object.assign(el("td","mono"),{textContent:spec}), Object.assign(el("td"),{textContent:loc}), Object.assign(el("td","mono"),{textContent:added}));
+  xLatest.append(tr);
+});
+const xGrid = document.getElementById("xGrid");
+ranked.slice(0,10).forEach(([pname,hex,n]) => { const a = el("a","X-tile",{href:"#mix"}); a.style.setProperty("--p",hex);
+  const p = el("div",`paint studio ${finishOf(pname)}`); p.style.setProperty("--p",hex);
+  const m = el("div","meta"); m.append(Object.assign(el("b","X-name"),{textContent:pname}), Object.assign(el("small"),{textContent:`${n} builds · ${rarity(n)}`}));
+  a.append(p,m); xGrid.append(a); });
+const xFan = document.getElementById("xFan");
+ranked.slice(0,12).forEach(([pname,hex],i) => { const rot = (i-5.5)*6; const c = el("div",`card paint studio ${finishOf(pname)}`);
+  c.style.setProperty("--p",hex); c.style.transform = `rotate(${rot}deg)`; c.style.zIndex = i; xFan.append(c); });
+
+// B fan deck: top 12
+const fan = document.getElementById("fan"); const topTwelve = ranked.slice(0,12); const spread = 7;
+topTwelve.forEach(([name,hex],i)=>{ const rot = (i-(topTwelve.length-1)/2)*spread; const c = el("div",`card paint ${finishOf(name)}`);
+  c.style.setProperty("--p",hex); c.style.setProperty("--rot",`${rot}deg`); c.style.transform = `rotate(${rot}deg)`; c.style.zIndex = i;
+  c.append(Object.assign(el("span"),{textContent:name})); fan.append(c); });
+
+// B grid: top 15
+const grid = document.getElementById("bGrid");
+ranked.slice(0,15).forEach(([name,hex,n])=>{ const a = el("a","B-tile",{href:"#dir-b"}); a.style.setProperty("--p",hex);
+  const p = el("div",`paint ${finishOf(name)}`); p.style.setProperty("--p",hex);
+  const m = el("div","meta"); m.append(Object.assign(el("b"),{textContent:name}), Object.assign(el("small"),{textContent:`${n} builds · ${rarity(n)}`}));
+  a.append(p,m); grid.append(a); });
+</script>

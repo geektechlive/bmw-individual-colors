@@ -8,6 +8,8 @@ Run `npx tsx scripts/post-to-bimmerpost.ts` to publish pending items to the foru
 
 ## [Unreleased]
 
+- **Docs:** design refresh spec, mockups and ADR 0016 (mix direction)
+
 - **Fixed:** old alias color URLs redirect to the canonical color page
 
 - **Added:** Miami Blue in the color list; aliases stored under one name; clear duplicate-edit message (Phase 4)
