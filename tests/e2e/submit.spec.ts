@@ -80,15 +80,27 @@ test.describe('Flag button', () => {
 });
 
 test.describe('Admin page', () => {
-  test('redirects to home without token', async ({ page }) => {
+  test('without a session shows the sign-in form, not the queue (#32)', async ({ page }) => {
     await page.goto('/admin');
-    await expect(page).not.toHaveURL('/admin');
+    await expect(page.getByRole('heading', { name: 'Admin sign-in' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: /Reported Entries/ })).toHaveCount(0);
   });
 
-  test('shows flagged entries page with valid token', async ({ page }) => {
+  test('a token in the URL no longer grants access (#32)', async ({ page }) => {
     const token = process.env.ADMIN_TOKEN ?? 'bmwic-admin-local';
     await page.goto(`/admin?token=${token}`);
-    const text = await page.locator('body').innerText();
-    expect(text).toMatch(/admin|flagged/i);
+    await expect(page.getByRole('heading', { name: 'Admin sign-in' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: /Reported Entries/ })).toHaveCount(0);
+  });
+
+  // Signing in needs Turnstile: run with the test keys (see CLAUDE.md "E2E").
+  test('signing in with the admin token shows the reported-entries queue (#32)', async ({ page }) => {
+    test.skip(!process.env.ADMIN_TOKEN, 'set ADMIN_TOKEN (and Turnstile test keys) to run');
+    await page.goto('/admin');
+    await page.waitForFunction(() => (document.querySelector('input[name="cf-turnstile-response"]') as HTMLInputElement | null)?.value);
+    await page.fill('#admin_token', process.env.ADMIN_TOKEN!);
+    await page.getByRole('button', { name: 'Sign in' }).click();
+    await expect(page.getByRole('heading', { name: /Reported Entries/ })).toBeVisible();
+    expect(page.url()).not.toContain('token');
   });
 });

@@ -62,25 +62,13 @@ create index if not exists bmwic_entries_deleted_at_idx
   on bmwic_entries (deleted_at)
   where deleted_at is not null;
 
--- ── RPC: increment_flag ────────────────────────────────────────────────────────
-
--- security definer so the function can update flag_count without granting anon/authenticated
--- direct UPDATE rights on the table; search_path is pinned to prevent search-path hijacking.
--- EXECUTE is revoked from anon/authenticated below — only the service-role client (used in
--- the flagEntry Server Action) calls this.
-create or replace function increment_flag(entry_id uuid)
-returns void
-language sql
-security definer
-set search_path = public
-as $$
-  update bmwic_entries set flag_count = flag_count + 1 where id = entry_id;
-$$;
-
--- PUBLIC must be revoked too: Postgres grants EXECUTE to PUBLIC by default, so
--- revoking only anon/authenticated left it callable via /rest/v1/rpc (#33).
-revoke all on function increment_flag(uuid) from public, anon, authenticated;
-grant execute on function increment_flag(uuid) to service_role;
+-- ── Flags ─────────────────────────────────────────────────────────────────────
+-- The old increment_flag RPC (count-only flags) was dropped 2026-11-13 (#33):
+-- it was executable by anon via the default PUBLIC grant. Flags now carry a
+-- reason and live in public.bmwic_flags (end of this file, #31).
+-- bmwic_entries.flag_count is legacy (all 0) and no longer written by the site.
+-- Every new SECURITY DEFINER function must `revoke all ... from public, anon,
+-- authenticated` explicitly: revoking only anon/authenticated leaves PUBLIC.
 
 -- ── Row Level Security ─────────────────────────────────────────────────────────
 
@@ -101,10 +89,10 @@ create policy "public read" on bmwic_entries
 -- Any write to bmwic_entries — site actions, scripts, or the Supabase
 -- dashboard — increments data_version; the Worker keys its page cache on it.
 -- Statement-level, so a zero-row content UPDATE also bumps (one re-render).
--- Updates that touch only flag_count (increment_flag, dismissFlag) do NOT
+-- Updates that touch only flag_count (legacy; bmwic_moderate's dismiss) do NOT
 -- bump (#26): flag_count is moderation-only and never rendered publicly, and
--- each bump re-renders every page in every data center. increment_flag is
--- also callable straight through PostgREST, so it is not Turnstile-gated.
+-- each bump re-renders every page in every data center. Flags themselves live
+-- in bmwic_flags, so they never touch this trigger at all.
 -- When adding a column that public pages render, add it to the UPDATE OF list.
 -- ---------------------------------------------------------------------------
 create table if not exists public.bmwic_meta (

@@ -27,10 +27,13 @@ export default defineConfig({
       testMatch: /mobile-nav|edit/,
     },
   ],
-  webServer: {
-    command: 'node node_modules/next/dist/bin/next dev --port 3002',
-    url: 'http://localhost:3002',
-    reuseExistingServer: !process.env.CI,
-    timeout: 120000,
-  },
+  // Against a deployed site (PLAYWRIGHT_BASE_URL) no local server is needed or started.
+  webServer: process.env.PLAYWRIGHT_BASE_URL
+    ? undefined
+    : {
+        command: 'node node_modules/next/dist/bin/next dev --port 3002',
+        url: 'http://localhost:3002',
+        reuseExistingServer: !process.env.CI,
+        timeout: 120000,
+      },
 });
