@@ -148,12 +148,11 @@ export default function EditEntryForm({ entry, editToken, editExpiry }: Props) {
   }, [fullCountries, entry.location_country]);
 
   const countryNameMismatch = !!fullCountries && !foundCountry && !!entry.location_country;
-  const [countryCode, setCountryCode] = useState('US');
+  // Derived, not synced in an effect: the user's pick wins, then the entry's
+  // resolved country once the full list loads, then the 'US' default.
+  const [chosenCountryCode, setCountryCode] = useState<string | null>(null);
+  const countryCode = chosenCountryCode ?? foundCountry?.isoCode ?? 'US';
   const [stateValue, setStateValue] = useState(entry.location_state ?? '');
-
-  useEffect(() => {
-    if (foundCountry) setCountryCode(foundCountry.isoCode);
-  }, [foundCountry]);
 
   // Forum
   const [forum, setForum] = useState(entry.source_forum ?? 'BimmerPost');

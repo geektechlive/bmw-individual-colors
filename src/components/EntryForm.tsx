@@ -260,14 +260,20 @@ export default function EntryForm() {
     (window as Window & TurnstileWindow).__entryFormTsError = () => setNeedsFreshToken(true);
   }, []);
 
-  // Reset the widget whenever the server comes back with an error or a
-  // duplicate warning — the token it already had was consumed server-side.
-  // setNeedsFreshToken(true) here is intentional — we're responding to an
-  // external state change (server response) and there's no dependency cycle risk.
+  // A server error or duplicate warning means the Turnstile token was consumed
+  // server-side, so submits stay disabled until the widget issues a new one.
+  // Adjusted during render when a new action result arrives (React's "store
+  // the previous value" pattern) rather than via setState inside an effect.
+  const [seenState, setSeenState] = useState(state);
+  if (state !== seenState) {
+    setSeenState(state);
+    if (state?.error || state?.duplicate) setNeedsFreshToken(true);
+  }
+
+  // Resetting the widget is a side effect on an external system, so it stays in an effect.
   useEffect(() => {
     if ((state?.error || state?.duplicate) && (window as Window & TurnstileWindow).turnstile) {
       (window as Window & TurnstileWindow).turnstile!.reset('.cf-turnstile');
-      setNeedsFreshToken(true);
     }
   }, [state?.error, state?.duplicate]);
 
