@@ -11,6 +11,7 @@ import { FRESH_COOKIE, FRESH_COOKIE_MAX_AGE_S } from '../lib/edge-cache';
 import { endAdminSession, flagReporterHash, hasAdminSession, isAdminLoginConfigured, startAdminSession } from '../lib/admin-auth';
 import { moderate } from '../lib/moderation';
 import { submitFlag, type FlagResult } from '../lib/flagging';
+import { logRejection, validationReason } from '../lib/submit-log';
 
 interface FormState {
   error?: string;
@@ -116,17 +117,21 @@ export async function submitEntry(
   formData: FormData
 ): Promise<FormState> {
   // ── Turnstile verification ────────────────────────────────────────────────
+  // Every early return logs why (#59): reason only, no form values.
   const token = formData.get('cf-turnstile-response') as string | null;
   if (!token) {
+    logRejection('submit', 'turnstile:missing');
     return { error: 'Please complete the bot verification.' };
   }
   if (!(await verifyTurnstile(token))) {
+    logRejection('submit', 'turnstile:failed');
     return { error: 'Bot verification failed. Please try again.' };
   }
 
   // ── Validation ────────────────────────────────────────────────────────────
   const parsed = validateEntryInput(formData);
   if (!parsed.ok) {
+    logRejection('submit', validationReason(parsed.error));
     return { error: parsed.error };
   }
   const value = parsed.value;
@@ -151,6 +156,7 @@ export async function submitEntry(
     .is('deleted_at', null)
     .limit(1);
   if (existing && existing.length > 0) {
+    logRejection('submit', 'duplicate');
     return {
       duplicate: true,
       duplicateInfo: `${value.model_year} ${value.body_style} ${value.drivetrain} in ${value.ext_color} is already registered under "${value.forum_username}".`,
@@ -169,12 +175,14 @@ export async function submitEntry(
   if (error) {
     // Unique constraint violation means a concurrent duplicate slipped through
     if (error.code === '23505') {
+      logRejection('submit', 'duplicate:index');
       return {
         duplicate: true,
         duplicateInfo: `This exact build is already registered under "${value.forum_username}".`,
       };
     }
     console.error('Insert error:', error);
+    logRejection('submit', 'save-failed');
     return { error: 'Failed to save your submission. Please try again.' };
   }
 
@@ -239,11 +247,13 @@ export async function updateEntry(
   const expParam = (formData.get('exp') as string)?.trim();
 
   if (!id || !editToken || !expParam) {
+    logRejection('update', 'edit:missing-fields');
     return { error: 'Missing required fields.' };
   }
 
   const expiresAt = parseInt(expParam, 10);
   if (!expiresAt || Date.now() > expiresAt) {
+    logRejection('update', 'edit:expired');
     return { error: 'Your edit session has expired. Please go back and verify your username again.' };
   }
 
@@ -257,10 +267,12 @@ export async function updateEntry(
     .single();
 
   if (!existing) {
+    logRejection('update', 'edit:not-found');
     return { error: 'Entry not found.' };
   }
 
   if (!(await verifyEditToken(editToken, id, existing.forum_username ?? '', expiresAt))) {
+    logRejection('update', 'edit:unauthorized');
     return { error: 'Unauthorized.' };
   }
 
@@ -274,6 +286,7 @@ export async function updateEntry(
 
   const parsed = validateEntryInput(fields);
   if (!parsed.ok) {
+    logRejection('update', validationReason(parsed.error));
     return { error: parsed.error };
   }
   const value = parsed.value;
@@ -304,6 +317,7 @@ export async function updateEntry(
 
   if (error) {
     console.error('Update error:', error);
+    logRejection('update', 'save-failed');
     return { error: updateErrorMessage(error) };
   }
 
@@ -351,11 +365,13 @@ export async function deleteOwnEntry(
   const expParam = (formData.get('exp') as string)?.trim();
 
   if (!id || !editToken || !expParam) {
+    logRejection('delete', 'edit:missing-fields');
     return { error: 'Missing required fields.' };
   }
 
   const expiresAt = parseInt(expParam, 10);
   if (!expiresAt || Date.now() > expiresAt) {
+    logRejection('delete', 'edit:expired');
     return { error: 'Your edit session has expired. Please go back and verify your username again.' };
   }
 
@@ -368,10 +384,12 @@ export async function deleteOwnEntry(
     .single();
 
   if (!existing) {
+    logRejection('delete', 'edit:not-found');
     return { error: 'Entry not found.' };
   }
 
   if (!(await verifyEditToken(editToken, id, existing.forum_username ?? '', expiresAt))) {
+    logRejection('delete', 'edit:unauthorized');
     return { error: 'Unauthorized.' };
   }
 

@@ -8,6 +8,8 @@ Run `npx tsx scripts/post-to-bimmerpost.ts` to publish pending items to the foru
 
 ## [Unreleased]
 
+- **Added:** log why a submission or edit is turned away (#59)
+
 - **Added:** share image leads with the hook, legible at chat sizes (#52)
 
 - **Added:** share image for links to the site, in the new design (#52)
