@@ -8,6 +8,8 @@ Run `npx tsx scripts/post-to-bimmerpost.ts` to publish pending items to the foru
 
 ## [Unreleased]
 
+- **Fixed:** map tiles use a CARTO basemaps key, so the world map is back (#54)
+
 - **Fixed:** version reads are per request, so a cancelled prefetch can't 500 the others
 
 - **Added:** entries as cards on phones, chart headings and summaries, loading states (#41, #42, #43)
