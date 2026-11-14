@@ -315,8 +315,8 @@ export default function EntryTable({ entries }: Props) {
               <th className={`${styles.th} ${styles.thPlain}`}>Wheels</th>
               {sortHeader('location_state', 'Location')}
               {sortHeader('forum_username', 'Forum User')}
-              <th className={`${styles.th} ${styles.thPlain} ${styles.thFlag}`}></th>
-              <th className={`${styles.th} ${styles.thPlain} ${styles.thEdit}`}></th>
+              <th className={`${styles.th} ${styles.thPlain} ${styles.thFlag}`}><span className="sr-only">Report</span></th>
+              <th className={`${styles.th} ${styles.thPlain} ${styles.thEdit}`}><span className="sr-only">Edit</span></th>
             </tr>
           </thead>
           <tbody>
@@ -405,7 +405,7 @@ export default function EntryTable({ entries }: Props) {
             aria-label="Previous page"
             className={pageBtnClass(false)}
           >
-            Prev
+            Previous
           </button>
           {getPageNumbers(currentPage, totalPages).map((p, idx) =>
             p === 'ellipsis' ? (

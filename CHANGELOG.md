@@ -8,6 +8,8 @@ Run `npx tsx scripts/post-to-bimmerpost.ts` to publish pending items to the foru
 
 ## [Unreleased]
 
+- **Fixed:** accessibility issues found by axe, and reduced motion in Safari (#41)
+
 - **Fixed:** map tiles use a CARTO basemaps key, so the world map is back (#54)
 
 - **Fixed:** version reads are per request, so a cancelled prefetch can't 500 the others

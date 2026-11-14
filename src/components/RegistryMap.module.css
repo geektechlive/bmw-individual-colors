@@ -91,3 +91,18 @@
   outline-offset: 2px;
   border-radius: var(--r);
 }
+
+/* Cluster badges (replaces markercluster's default yellow/orange/green): ink on panel-2,
+   a tested contrast pair, with an accent ring. Size comes from iconSize in RegistryMap.tsx. */
+.cluster {
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--panel-2);
+  border: 2px solid var(--accent);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 25%, transparent), var(--shadow-1);
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-size: var(--t-12);
+  font-weight: 700;
+}

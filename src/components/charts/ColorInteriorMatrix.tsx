@@ -62,7 +62,8 @@ export default function ColorInteriorMatrix({ entries }: Props) {
   }
 
   return (
-    <div className={styles.scroll}>
+    // Focusable so keyboard users can scroll it sideways (axe: scrollable-region-focusable).
+    <div className={styles.scroll} tabIndex={0} role="region" aria-label="Color by interior table">
       <table className={styles.table}>
         <thead>
           <tr className={styles.headRow}>

@@ -17,14 +17,17 @@ export default defineConfig({
       use: { ...devices['Desktop Chrome'] },
     },
     {
-      // iPhone 14 viewport/touch profile on Chromium so it runs everywhere.
-      // Set PLAYWRIGHT_WEBKIT=1 (after `npx playwright install webkit`) for real WebKit.
+      // iPhone 14 on real WebKit (Safari's engine). Needs `npx playwright install webkit`.
       name: 'mobile',
-      use: {
-        ...devices['iPhone 14'],
-        browserName: process.env.PLAYWRIGHT_WEBKIT ? 'webkit' : 'chromium',
-      },
+      use: { ...devices['iPhone 14'] },
       testMatch: /mobile-nav|edit/,
+    },
+    {
+      // Always-on WebKit for the design matrix and interactions (design spec, "How it is
+      // checked"): paint swatches, blend modes and -webkit-box-reflect render differently here.
+      name: 'webkit',
+      use: { ...devices['Desktop Safari'] },
+      testMatch: /design|interactions/,
     },
   ],
   // Against a deployed site (PLAYWRIGHT_BASE_URL) no local server is needed or started.

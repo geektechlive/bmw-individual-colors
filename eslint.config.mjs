@@ -9,7 +9,7 @@ import nextTs from "eslint-config-next/typescript";
 const HEX_COLOR = '/^#(?:[0-9a-fA-F]{3}){1,2}(?:[0-9a-fA-F]{2})?$/';
 const designLint = {
   files: ['src/**/*.{ts,tsx}'],
-  ignores: ['src/lib/colors.ts', 'src/lib/design-tokens.ts', 'src/app/**/opengraph-image.tsx'],
+  ignores: ['src/lib/colors.ts', 'src/app/design-check/fixtures.ts', 'src/lib/design-tokens.ts', 'src/app/**/opengraph-image.tsx'],
   rules: {
     'no-restricted-syntax': [
       'error',

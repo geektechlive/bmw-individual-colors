@@ -73,7 +73,21 @@ export default function RegistryMap({ entries }: Props) {
       maxZoom: 19,
     }).addTo(map);
 
-    const group = L.markerClusterGroup({ chunkedLoading: true });
+    // Token-styled cluster badges: the plugin's default yellow badge put light text on
+    // yellow (1.36:1, axe color-contrast). Ink on panel-2 is a tested pair; the ring grows
+    // with the count.
+    const group = L.markerClusterGroup({
+      chunkedLoading: true,
+      iconCreateFunction: (cluster) => {
+        const n = cluster.getChildCount();
+        const size = n < 10 ? 30 : n < 100 ? 38 : 46;
+        return L.divIcon({
+          html: `<span>${n}</span>`,
+          className: styles.cluster,
+          iconSize: L.point(size, size),
+        });
+      },
+    });
 
     entries.forEach((entry) => {
       if (entry.location_lat == null || entry.location_lng == null) return;

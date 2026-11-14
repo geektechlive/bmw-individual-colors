@@ -1,0 +1,74 @@
+/* Fixture layout for the design test matrix. Development only (see page.tsx). */
+.page {
+  display: grid;
+  gap: var(--s-5);
+}
+
+.group {
+  display: grid;
+  gap: var(--s-3);
+}
+
+.name {
+  margin: 0;
+  font-size: var(--t-24);
+  color: var(--ink);
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--s-4);
+}
+
+.cell {
+  display: block;
+}
+
+.chip {
+  width: 22px;
+}
+
+.tile {
+  width: 160px;
+}
+
+.panel {
+  width: 300px;
+}
+
+.pill {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: var(--r-pill);
+  font-family: var(--font-mono);
+  font-size: var(--t-11);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--bg);
+  background: var(--accent);
+}
+
+.tag {
+  display: inline-flex;
+  flex-wrap: wrap;
+  margin: 0;
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--r);
+  font-family: var(--font-mono);
+  font-size: var(--t-11);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.tag span {
+  padding: 5px 9px;
+  color: var(--ink-2);
+  border-right: 1px solid var(--rule);
+}
+
+.tag span:last-child {
+  border-right: 0;
+}

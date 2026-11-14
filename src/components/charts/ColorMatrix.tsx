@@ -17,7 +17,8 @@ export default function ColorMatrix({ data }: Props) {
   }
 
   return (
-    <div className={styles.scroll}>
+    // Focusable so keyboard users can scroll it sideways (axe: scrollable-region-focusable).
+    <div className={styles.scroll} tabIndex={0} role="region" aria-label="Color by year and drivetrain table">
       <table className={styles.table}>
         <thead className={styles.thead}>
           <tr className={styles.headRow}>
