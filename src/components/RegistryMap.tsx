@@ -11,6 +11,7 @@ import { getColorHex } from '../lib/colors';
 import { TOKENS } from '../lib/design-tokens';
 import { buildPopupHtml, escapeHtml, type PopupClasses } from '../lib/map-popup';
 import { paintSwatchClassNames } from './PaintSwatch';
+import { tileUrl, TILE_ATTRIBUTION } from '../lib/map-tiles';
 import styles from './RegistryMap.module.css';
 import type { BmwEntry } from '../types';
 
@@ -67,10 +68,8 @@ export default function RegistryMap({ entries }: Props) {
 
     mapRef.current = map;
 
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-      attribution:
-        '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
-      subdomains: 'abcd',
+    L.tileLayer(tileUrl(), {
+      attribution: TILE_ATTRIBUTION,
       maxZoom: 19,
     }).addTo(map);
 
