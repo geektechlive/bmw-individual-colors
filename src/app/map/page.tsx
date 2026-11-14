@@ -7,7 +7,7 @@ import styles from './page.module.css';
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-  title: 'Registry Map — BMW Individual Colors Registry',
+  title: 'Map',
 };
 
 export default async function MapPage() {
@@ -19,7 +19,7 @@ export default async function MapPage() {
         <Link href="/" className="link">
           ← Home
         </Link>
-        <h1 className={`title ${styles.heading}`}>Registry Map</h1>
+        <h1 className={`title ${styles.heading}`}>Registry map</h1>
         <span className={`faint ${styles.count}`}>{entries.length} builds with location data</span>
       </div>
 

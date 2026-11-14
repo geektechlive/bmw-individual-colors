@@ -34,7 +34,7 @@ export default function ErrorPage({
           Try again
         </button>
         <Link href="/" className="btn">
-          Back to Home
+          Back to home
         </Link>
       </div>
     </main>

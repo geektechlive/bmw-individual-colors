@@ -1,5 +1,8 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import styles from './not-found.module.css';
+
+export const metadata: Metadata = { title: 'Page not found' };
 
 export default function NotFound() {
   return (
@@ -17,7 +20,7 @@ export default function NotFound() {
         built.
       </p>
       <Link href="/" className="btn btn--primary">
-        Back to Home
+        Back to home
       </Link>
     </main>
   );

@@ -8,6 +8,8 @@ Run `npx tsx scripts/post-to-bimmerpost.ts` to publish pending items to the foru
 
 ## [Unreleased]
 
+- **Added:** one site name, look-alike paint names, form fixes, motion, grain and polish
+
 - **Fixed:** accessibility issues found by axe, and reduced motion in Safari (#41)
 
 - **Fixed:** map tiles use a CARTO basemaps key, so the world map is back (#54)

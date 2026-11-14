@@ -11,7 +11,7 @@ import styles from './page.module.css';
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-  title: 'Edit Entry — BMW Individual Colors Registry',
+  title: 'Edit your build',
 };
 
 interface Props {

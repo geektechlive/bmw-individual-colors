@@ -34,11 +34,43 @@ test.describe('Submit form page', () => {
     await expect(submitBtn).toBeDisabled();
   });
 
-  test('submit button enables after typing a forum username', async ({ page }) => {
+  test('submit button enables after a username AND the first Turnstile token (#57)', async ({ page }) => {
+    // Needs the Turnstile test keys (CLAUDE.md "E2E"): they issue a token headless.
     await page.goto('/submit');
     await page.fill('[name="forum_username"]', 'testuser');
+    await page.waitForFunction(() => (document.querySelector('input[name="cf-turnstile-response"]') as HTMLInputElement | null)?.value);
     const submitBtn = page.getByRole('button', { name: /submit build/i });
     await expect(submitBtn).toBeEnabled();
+  });
+
+  test('Enter in the color box keeps typed text when the mouse only hovers an option (#57)', async ({ page }) => {
+    await page.goto('/submit');
+    const input = page.locator('#ext_color_input');
+    await input.fill('blue');
+    // Scoped to the color listbox: the page's <select> options also have role "option".
+    await page.locator('#ext-color-listbox').getByRole('option').first().hover();
+    await input.press('Enter');
+    await expect(input).toHaveValue('blue');
+  });
+
+  test('Enter picks an option chosen with the arrow keys (#57)', async ({ page }) => {
+    await page.goto('/submit');
+    const input = page.locator('#ext_color_input');
+    await input.fill('twilight');
+    await input.press('ArrowDown');
+    await input.press('Enter');
+    await expect(input).toHaveValue('Twilight Purple');
+  });
+
+  test('transmission is disabled with a reason for Competition and editable for Base (#57)', async ({ page }) => {
+    await page.goto('/submit');
+    const transmission = page.locator('#transmission');
+    await page.selectOption('#variant', 'Competition');
+    await expect(transmission).toBeDisabled();
+    await expect(transmission).toHaveValue('8AT');
+    await expect(page.locator('#transmission-note')).toBeVisible();
+    await page.selectOption('#variant', 'Base (RWD)');
+    await expect(transmission).toBeEnabled();
   });
 
   test('Turnstile widget is rendered on submit page', async ({ page }) => {

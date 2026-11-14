@@ -125,6 +125,30 @@
   text-transform: uppercase;
   color: var(--ink-3);
   white-space: nowrap;
+  container-type: inline-size;
+}
+
+/* Each tick picks its own label from its own width: the full family name, the short form,
+   or nothing. Labels never overlap because each tick clips to its run. */
+.tickFull,
+.tickShort {
+  display: none;
+}
+
+@container (min-width: 52px) {
+  .tickShort {
+    display: inline;
+  }
+}
+
+@container (min-width: 128px) {
+  .tickShort {
+    display: none;
+  }
+
+  .tickFull {
+    display: inline;
+  }
 }
 
 /* ---------- Read-out ---------- */

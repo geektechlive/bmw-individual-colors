@@ -92,6 +92,57 @@
   border-radius: var(--r);
 }
 
+/* Leaflet's stock controls are white. Restyle them from tokens, scoped to this map.
+   Text and glyphs sit on opaque --panel-2. */
+.container :global(.leaflet-bar) {
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--r);
+  box-shadow: var(--shadow-1);
+  overflow: hidden;
+}
+
+.container :global(.leaflet-bar a) {
+  background-color: var(--panel-2);
+  color: var(--ink);
+  border-bottom: 1px solid var(--rule-strong);
+}
+
+.container :global(.leaflet-bar a:last-child) {
+  border-bottom: 0;
+}
+
+.container :global(.leaflet-bar a:hover) {
+  background-color: var(--panel-3);
+}
+
+.container :global(.leaflet-bar a.leaflet-disabled) {
+  background-color: var(--panel-2);
+  color: var(--ink-3);
+}
+
+/* Inset ring so the bar's overflow: hidden doesn't clip it. */
+.container :global(.leaflet-bar a:focus-visible) {
+  outline: 2px solid var(--focus);
+  outline-offset: -3px;
+}
+
+.container :global(.leaflet-control-attribution) {
+  background: var(--panel-2);
+  color: var(--ink-2);
+  border-top-left-radius: var(--r);
+  font-family: var(--font-text);
+}
+
+.container :global(.leaflet-control-attribution a) {
+  color: var(--accent-ink);
+}
+
+.container :global(.leaflet-control-attribution a:focus-visible) {
+  outline: 2px solid var(--focus);
+  outline-offset: 1px;
+  border-radius: var(--r);
+}
+
 /* Cluster badges (replaces markercluster's default yellow/orange/green): ink on panel-2,
    a tested contrast pair, with an accent ring. Size comes from iconSize in RegistryMap.tsx. */
 .cluster {

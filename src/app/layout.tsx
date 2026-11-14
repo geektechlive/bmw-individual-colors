@@ -99,7 +99,10 @@ export default function RootLayout({
                 <span />
                 <span />
               </span>
-              <span className={styles.logoText}>BMW M Individual Colors</span>
+              <span className={styles.logoText}>
+                <span className={styles.logoFull}>BMW M Individual Colors Registry</span>
+                <span className={styles.logoShort} aria-hidden="true">M Individual Colors</span>
+              </span>
             </Link>
             <NavLinks />
           </div>

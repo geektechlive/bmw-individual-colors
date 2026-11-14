@@ -1,5 +1,4 @@
 import Link from 'next/link';
-import type { Metadata } from 'next';
 import { getEntries } from '../lib/queries';
 import { computeStats, computeColorCounts } from '../lib/analytics';
 import { colorToSlug } from '../lib/colors';
@@ -16,10 +15,6 @@ import type { WallPaint, WallTick } from '../components/home/PaintWall';
 import styles from './page.module.css';
 
 export const dynamic = 'force-dynamic';
-
-export const metadata: Metadata = {
-  title: 'BMW M Individual Colors Registry',
-};
 
 const WALL_SIZE = 40;
 /** A family narrower than this share of the wall gets a tick but no name. */

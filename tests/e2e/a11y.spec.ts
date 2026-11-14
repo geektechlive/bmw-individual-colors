@@ -17,6 +17,17 @@ const KNOWN_ISSUES: Readonly<Record<string, readonly string[]>> = {};
 async function violationIds(page: Page, route: string): Promise<string[]> {
   await gotoLoaded(page, route);
   if (route === '/map') await expect(page.locator('.leaflet-container')).toBeVisible();
+  // Measure the settled page: mid-fade (the staggered entrance, #48) text is partly
+  // transparent and fails contrast for a moment. Infinite animations are skipped so this
+  // can't hang.
+  await page.evaluate(() =>
+    Promise.all(
+      document
+        .getAnimations()
+        .filter((a) => a.effect?.getTiming().iterations !== Infinity)
+        .map((a) => a.finished.catch(() => undefined)),
+    ),
+  );
   const results = await new AxeBuilder({ page }).analyze();
   return results.violations.map((v) => v.id);
 }

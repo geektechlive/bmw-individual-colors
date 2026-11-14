@@ -65,7 +65,7 @@ export default async function Image({ params }: { params: Promise<{ slug: string
             display: 'flex',
           }}
         >
-          {totalBuilds} build{totalBuilds === 1 ? '' : 's'} · {rarityLabel}
+          {totalBuilds} build{totalBuilds === 1 ? '' : 's'}{rarityLabel ? ` · ${rarityLabel}` : ''}
         </div>
         <div
           style={{

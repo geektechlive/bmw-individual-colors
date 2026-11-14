@@ -190,7 +190,9 @@ export function computeWheelCounts(entries: BmwEntry[]): ColorCount[] {
 }
 
 // Labels and cut-offs from the approved mockups (ADR 0016; owner confirmed 2026-11-14).
+// A paint with no builds has no rarity ('' = no label; callers must not show an empty pill).
 export function computeRarityLabel(count: number): string {
+  if (count <= 0) return '';
   if (count >= 15) return 'Very common';
   if (count >= 6) return 'Common';
   if (count >= 3) return 'Uncommon';

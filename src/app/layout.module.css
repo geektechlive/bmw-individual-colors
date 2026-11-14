@@ -70,3 +70,12 @@
   font-size: var(--t-13);
   background: var(--bg);
 }
+
+/* Full name where there is room; the short form on phones (#50). The full name stays in the
+   accessibility tree at every width, the short copy is decoration. */
+.logoShort { display: none; }
+
+@media (max-width: 719px) {
+  .logoFull { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  .logoShort { display: inline; }
+}

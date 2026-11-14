@@ -7,7 +7,7 @@ import styles from './page.module.css';
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-  title: 'Reports — BMW Individual Colors Registry',
+  title: 'Reports',
 };
 
 export default async function ReportsPage() {

@@ -25,6 +25,6 @@ test('1 or 2 builds is Rare', () => {
   assert.equal(computeRarityLabel(2), 'Rare');
 });
 
-test('no builds is still Rare, not an error', () => {
-  assert.equal(computeRarityLabel(0), 'Rare');
+test('a paint with no builds has no rarity label (#56)', () => {
+  assert.equal(computeRarityLabel(0), '');
 });

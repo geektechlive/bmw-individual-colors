@@ -5,6 +5,7 @@ import type { BmwEntry, ColorCount } from '../types';
 import type { FamilyYearPoint, GrowthPoint } from './analytics';
 
 export const NO_BUILDS = 'No builds match these filters.';
+export const NO_LEADER = 'No paint clearly leads. The top spot is tied or changes from year to year.';
 
 const builds = (n: number) => `${n} ${n === 1 ? 'build' : 'builds'}`;
 const percent = (part: number, whole: number) => Math.round((part / whole) * 100);
@@ -78,8 +79,14 @@ export function driveMixSummary(entries: readonly BmwEntry[]): string {
 export function trendSummary(entries: readonly BmwEntry[]): string {
   if (entries.length === 0) return NO_BUILDS;
   const years = [...new Set(entries.map((e) => e.model_year))].sort((a, b) => a - b);
-  const leaders = years.map((y) => tally(entries.filter((e) => e.model_year === y).map((e) => e.ext_color))[0][0]);
-  const [paint, wins] = tally(leaders)[0];
+  // A year only has a leader when one paint is strictly ahead; a tie crowns nobody.
+  const leaders = years.flatMap((y) => {
+    const [top, runnerUp] = tally(entries.filter((e) => e.model_year === y).map((e) => e.ext_color));
+    return !runnerUp || top[1] > runnerUp[1] ? [top[0]] : [];
+  });
+  const winTally = tally(leaders);
+  if (winTally.length === 0 || (winTally[1] && winTally[1][1] === winTally[0][1])) return NO_LEADER;
+  const [paint, wins] = winTally[0];
   if (years.length === 1) return `${paint} is the top paint in the only model year, ${years[0]}.`;
   if (wins === years.length) return `${paint} is the top paint in every model year.`;
   return `${paint} is the top paint in ${wins} of ${years.length} model years.`;
@@ -101,9 +108,12 @@ export function familySummary(rows: readonly FamilyYearPoint[]): string {
 
 /** "The most common pairing is Twilight Purple with Black interior, in 9 builds." */
 export function pairingSummary(entries: readonly BmwEntry[]): string {
-  const withInterior = entries.filter((e) => e.interior_color);
-  if (withInterior.length === 0) return NO_BUILDS;
-  const [pair, n] = tally(withInterior.map((e) => `${e.ext_color} with ${e.interior_color} interior`))[0];
+  const pairs = entries.flatMap((e) => {
+    const interior = e.interior_color?.trim();
+    return interior ? [`${e.ext_color} with ${interior} interior`] : [];
+  });
+  if (pairs.length === 0) return NO_BUILDS;
+  const [pair, n] = tally(pairs)[0];
   return `The most common pairing is ${pair}, in ${builds(n)}.`;
 }
 

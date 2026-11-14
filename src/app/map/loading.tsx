@@ -9,7 +9,7 @@ export default function MapLoading() {
         <Link href="/" className="link">
           ← Home
         </Link>
-        <h1 className={`title ${styles.heading}`}>Registry Map</h1>
+        <h1 className={`title ${styles.heading}`}>Registry map</h1>
       </div>
 
       <MapSkeleton />

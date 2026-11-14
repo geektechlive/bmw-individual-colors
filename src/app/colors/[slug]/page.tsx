@@ -1,5 +1,6 @@
 import { notFound, permanentRedirect } from 'next/navigation';
 import Link from 'next/link';
+import { ViewTransition } from 'react';
 import { getEntriesByColor, getEntries, resolveColorSlug } from '../../../lib/queries';
 import { computeRarityLabel, computeColorCounts } from '../../../lib/analytics';
 import { getColorHex, getColorFamily, isLightColor, COLOR_ALIASES, aliasRedirectSlug, canonicalColorName, colorToSlug } from '../../../lib/colors';
@@ -16,7 +17,7 @@ export const dynamic = 'force-dynamic';
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
   const resolved = await resolveColorSlug(slug);
-  if (!resolved) return { title: 'Color Not Found' };
+  if (!resolved) return { title: 'Color not found' };
   // resolveColorSlug already returns a canonical name (getEntries() canonicalizes
   // ext_color at the source), but canonicalize defensively so an aliased request
   // slug (e.g. /colors/enzian-blue) still points its canonical tag/OG image at
@@ -47,7 +48,8 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     .map(([wheel]) => wheel);
 
   const description = [
-    `${rarityLabel} BMW M Individual color`,
+    // A paint with no builds has no rarity label (computeRarityLabel(0) is '').
+    rarityLabel ? `${rarityLabel} BMW M Individual color` : 'BMW M Individual color',
     yearRange ? `seen on MY${yearRange} builds` : null,
     topWheels.length > 0 ? `most often paired with ${topWheels.join(' and ')} wheels` : null,
   ]
@@ -55,13 +57,13 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     .join(', ') + '.';
 
   return {
-    title: `${colorName} — ${totalBuilds} build${totalBuilds === 1 ? '' : 's'}`,
+    title: `${colorName}, ${totalBuilds} build${totalBuilds === 1 ? '' : 's'}`,
     description,
     alternates: {
       canonical: `/colors/${canonicalSlug}`,
     },
     openGraph: {
-      title: `${colorName} — BMW M Individual Colors Registry`,
+      title: `${colorName} | BMW M Individual Colors Registry`,
       description,
       images: [`/colors/${canonicalSlug}/opengraph-image`],
     },
@@ -150,7 +152,9 @@ export default async function ColorDetailPage({ params }: { params: Promise<{ sl
         <div className={styles.cove} aria-hidden="true">
           <div className={styles.lamp} />
           <div className={`${styles.spray} ${isLightColor(hex) ? styles.sprayLight : ''}`}>
-            <PaintSwatch name={colorName} hex={hex} size="fill" />
+            <ViewTransition name={`paint-${colorToSlug(colorName)}`} share="morph" default="none">
+              <PaintSwatch name={colorName} hex={hex} size="fill" />
+            </ViewTransition>
             <div className={styles.sprayLabel}>
               <span>{colorName}</span>
               <span>BMW Individual</span>
@@ -175,7 +179,7 @@ export default async function ColorDetailPage({ params }: { params: Promise<{ sl
         </div>
         <div>
           <dt className="label">Rarity</dt>
-          <dd><span className={styles.pill}>{rarityLabel}</span></dd>
+          <dd>{rarityLabel ? <span className={styles.pill}>{rarityLabel}</span> : '–'}</dd>
         </div>
       </dl>
 

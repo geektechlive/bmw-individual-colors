@@ -29,7 +29,10 @@ interface Props {
   totalPaints: number;
 }
 
-const buildsText = (n: number) => `${n} build${n === 1 ? '' : 's'}`;
+/** "Reds & Oranges" becomes "Reds" where the full name doesn't fit. */
+const shortFamily = (family: string) => family.split(' & ')[0];
+
+const buildsText =(n: number) => `${n} build${n === 1 ? '' : 's'}`;
 
 /**
  * The registry as one lit surface: a strip per paint, as wide as its build count (#46).
@@ -79,7 +82,8 @@ export default function PaintWall({ paints, ticks, totalPaints }: Props) {
       <div className={styles.ticks} aria-hidden="true">
         {ticks.map((t) => (
           <span key={`${t.family}-${t.start}`} className={styles.tick} style={cssVars({ '--x': `${t.start * 100}%`, '--w': `${t.share * 100}%` })}>
-            {t.labelled ? t.family : ''}
+            <span className={styles.tickFull}>{t.family}</span>
+            <span className={styles.tickShort}>{shortFamily(t.family)}</span>
           </span>
         ))}
       </div>

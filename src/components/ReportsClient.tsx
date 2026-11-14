@@ -215,64 +215,64 @@ export default function ReportsClient({ entries }: Props) {
 
       {/* Chart grid */}
       <div className={styles.grid}>
-        <ChartCard id="growth" full title="Registry Growth" summary={summaries.growth} desc="Cumulative builds added to the registry over time">
+        <ChartCard id="growth" full title="Registry growth" summary={summaries.growth} desc="Cumulative builds added to the registry over time">
           <RegistryGrowth data={growthData} />
         </ChartCard>
 
-        <ChartCard id="distribution" title="Color Distribution" summary={summaries.distribution} desc="Top 20 Individual colors by build count">
+        <ChartCard id="distribution" title="Color distribution" summary={summaries.distribution} desc="Top 20 Individual colors by build count">
           <ColorDonut data={colorCounts} />
         </ChartCard>
 
-        <ChartCard title="Color Treemap" summary={summaries.treemap} desc="Size proportional to count — filled with actual BMW color">
+        <ChartCard title="Color treemap" summary={summaries.treemap} desc="Each block's size is its build count, filled with the paint's own color">
           <ColorTreemapLoader data={colorCounts} />
         </ChartCard>
 
         <ChartCard
           id="models"
           full
-          title="Model, Drivetrain & Transmission Breakdown" summary={summaries.models}
+          title="Model, drivetrain & transmission breakdown" summary={summaries.models}
           desc="Split by body style (M3/M4), drivetrain, and transmission"
         >
           <ModelBreakdown entries={filteredEntries} />
         </ChartCard>
 
         <ChartCard
-          title="Competition Package Adoption" summary={summaries.competition}
+          title="Competition package adoption" summary={summaries.competition}
           desc="% of M3 and M4 builds with Competition package by year"
         >
           <CompetitionAdoption data={competitionData} />
         </ChartCard>
 
         <ChartCard
-          title="Drivetrain & Transmission Mix" summary={summaries.driveMix}
+          title="Drivetrain & transmission mix" summary={summaries.driveMix}
           desc="Breakdown of RWD/AWD × Manual/Auto combinations"
         >
           <DrivetrainMatrix entries={filteredEntries} />
         </ChartCard>
 
-        <ChartCard id="trends" full title="Color Popularity by Model Year" summary={summaries.trends} desc="Top 8 colors tracked across model years">
+        <ChartCard id="trends" full title="Color popularity by model year" summary={summaries.trends} desc="Top 8 colors tracked across model years">
           <YearTrend entries={filteredEntries} />
         </ChartCard>
 
         <ChartCard
           full
-          title="Color Family Trends by Year" summary={summaries.families}
+          title="Color family trends by year" summary={summaries.families}
           desc="Stacked breakdown of color families across model years"
         >
           <ColorFamilyTrends data={familyTrendData} />
         </ChartCard>
 
-        <ChartCard id="interiors" title="Interior Colors" summary={summaries.interiors} desc="Frequency of interior color selections">
+        <ChartCard id="interiors" title="Interior colors" summary={summaries.interiors} desc="Frequency of interior color selections">
           <InteriorBar data={interiorCounts} />
         </ChartCard>
 
-        <ChartCard title="Wheel Popularity" summary={summaries.wheels} desc="Most common wheel packages in the registry">
+        <ChartCard title="Wheel popularity" summary={summaries.wheels} desc="Most common wheel packages in the registry">
           <WheelBar data={wheelCounts} />
         </ChartCard>
 
         <ChartCard
           full
-          title="Color × Interior Heatmap" summary={summaries.pairings}
+          title="Color × interior heatmap" summary={summaries.pairings}
           desc="Top 15 exterior × top 8 interior color combinations"
         >
           <ColorInteriorMatrix entries={filteredEntries} />
@@ -281,7 +281,7 @@ export default function ReportsClient({ entries }: Props) {
         <ChartCard
           id="matrix"
           full
-          title="Color × Year × Drivetrain Matrix" summary={summaries.matrix}
+          title="Color × year × drivetrain matrix" summary={summaries.matrix}
           desc="Detailed breakdown of each color by year, model, and drivetrain"
         >
           <ColorMatrix data={matrixData} />

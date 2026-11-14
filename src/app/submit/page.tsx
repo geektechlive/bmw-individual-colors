@@ -4,7 +4,7 @@ import type { Metadata } from 'next';
 import styles from './page.module.css';
 
 export const metadata: Metadata = {
-  title: 'Submit Your Build — BMW Individual Colors Registry',
+  title: 'Submit your build',
 };
 
 export default function SubmitPage() {

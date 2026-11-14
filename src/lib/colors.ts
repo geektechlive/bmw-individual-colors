@@ -268,8 +268,35 @@ export function getColorFamily(colorName: string): string {
   return 'Other';
 }
 
+/**
+ * Strips control and format characters (zero-width spaces and joiners, BOM, bidi
+ * overrides), then trims and collapses whitespace. Applied to every paint name on the
+ * way in, so look-alikes of a catalog paint can't be stored (#55).
+ */
+export function cleanPaintName(name: string): string {
+  return (name ?? '').replace(/[\p{Cc}\p{Cf}]/gu, '').trim().replace(/\s+/g, ' ');
+}
+
+/** 32-bit FNV-1a as 8 hex digits: tiny, pure JS, no crypto import (Workers CPU budget). */
+function fnv1a(text: string): string {
+  let h = 0x811c9dc5;
+  for (let i = 0; i < text.length; i++) {
+    h ^= text.charCodeAt(i);
+    h = Math.imul(h, 0x01000193) >>> 0;
+  }
+  return h.toString(16).padStart(8, '0');
+}
+
+/**
+ * URL slug for a paint name. A name with no ASCII letters or digits ("!!!", non-Latin
+ * scripts) would slug to "" and link to `/colors/`, so it gets a stable `paint-<hash>`
+ * slug instead (#55). Blank input stays "".
+ */
 export function colorToSlug(colorName: string): string {
-  return colorName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  const slug = colorName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  if (slug) return slug;
+  const cleaned = cleanPaintName(colorName).toLowerCase();
+  return cleaned ? `paint-${fnv1a(cleaned)}` : '';
 }
 
 export function slugToColor(slug: string): string | null {
@@ -329,10 +356,24 @@ export function aliasRedirectSlug(slug: string): string | null {
  * and falls back to the cleaned input when the color is unknown.
  */
 export function canonicalColorName(name: string): string {
-  const cleaned = (name ?? '').trim().replace(/\s+/g, ' ');
+  const cleaned = cleanPaintName(name);
   if (!cleaned) return cleaned;
   const key = cleaned.toLowerCase();
-  return ownValue(ALIAS_LOOKUP, key) ?? ownValue(CANONICAL_LOOKUP, key) ?? cleaned;
+  const exact = ownValue(ALIAS_LOOKUP, key) ?? ownValue(CANONICAL_LOOKUP, key);
+  if (exact) return exact;
+  // "Twilight-Purple" and "twilight_purple" are the same paint as "Twilight Purple" (#55).
+  return catalogNameForSlug(colorToSlug(cleaned)) ?? cleaned;
+}
+
+/** Slug → canonical catalog name, aliases included. A Map: slugs are derived from free text. */
+const CATALOG_BY_SLUG: ReadonlyMap<string, string> = new Map([
+  ...Object.keys(BMW_COLORS).map((n): [string, string] => [colorToSlug(n), n]),
+  ...Object.entries(COLOR_ALIASES).map(([a, c]): [string, string] => [colorToSlug(a), c]),
+]);
+
+/** The catalog paint (or alias target) whose slug is `slug`, else undefined. */
+export function catalogNameForSlug(slug: string): string | undefined {
+  return CATALOG_BY_SLUG.get(slug);
 }
 
 // Interior upholstery colors, used to fill the interior chart bars. Data, like BMW_COLORS.

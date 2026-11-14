@@ -7,7 +7,7 @@
  */
 
 import { COUNTRIES } from './countries';
-import { BMW_COLORS, canonicalColorName } from './colors';
+import { BMW_COLORS, canonicalColorName, cleanPaintName } from './colors';
 
 export interface EntryInput {
   model_year: number;
@@ -177,7 +177,10 @@ function toTitleCase(s: string): string {
  * case it's Title Cased.
  */
 export function snapColorName(raw: string): string {
-  const cleaned = raw.trim().replace(/\s+/g, ' ');
+  // Invisible characters are stripped first: "Twilight​ Purple" must not become a
+  // look-alike of the catalog paint (#55). canonicalColorName also matches by slug, so
+  // hyphens, underscores and punctuation fold into the catalog name too.
+  const cleaned = cleanPaintName(raw);
   // Aliases are stored under their canonical name (#35), so one car can't be
   // registered twice under two names and the unique index sees one string.
   const canonical = canonicalColorName(cleaned);
@@ -229,7 +232,7 @@ export function validateEntryInput(formData: FormData): ValidationResult {
     transmission = t;
   }
 
-  const extColorClean = cap(field(formData, 'ext_color').trim().replace(/\s+/g, ' '), ENTRY_LIMITS.EXT_COLOR_MAX);
+  const extColorClean = cap(cleanPaintName(field(formData, 'ext_color')), ENTRY_LIMITS.EXT_COLOR_MAX).trim();
   if (!extColorClean) {
     return { ok: false, error: 'Individual color is required.' };
   }

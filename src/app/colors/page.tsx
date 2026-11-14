@@ -9,7 +9,7 @@ import styles from './page.module.css';
 
 export const dynamic = 'force-dynamic';
 
-export const metadata: Metadata = { title: 'All Colors — BMW M Individual Colors Registry' };
+export const metadata: Metadata = { title: 'All colors' };
 
 export default async function ColorsPage() {
   const entries = await getEntries();

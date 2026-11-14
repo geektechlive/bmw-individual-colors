@@ -13,6 +13,8 @@ import {
 } from './options';
 import styles from './form.module.css';
 
+const TRANSMISSION_NOTE_ID = 'transmission-note';
+
 interface Props {
   defaults: FormDefaults;
   loc: LocationState;
@@ -36,6 +38,8 @@ export default function FormFields({
   const [leather, setLeather] = useState(defaults.interiorLeather);
   const [forum, setForum] = useState(defaults.forum);
 
+  const isBase = variant === BASE_VARIANT;
+  const transmissionErrorProps = fieldErrorProps('transmission', errorField);
   const interiorType = seats === 'Carbon Buckets' ? 'Carbon Buckets' : leather ? 'Full Leather' : '';
 
   return (
@@ -95,14 +99,23 @@ export default function FormFields({
             id="transmission"
             name="transmission"
             required
-            value={transmission}
+            // Competition always has the 8AT and the server sets it, so the select is
+            // disabled (a disabled select isn't posted) and shows 8AT even for old rows.
+            value={isBase ? transmission : '8AT'}
+            disabled={!isBase}
             onChange={(e) => setTransmission(e.target.value)}
-            className={`input ${variant !== BASE_VARIANT ? styles.locked : ''}`}
-            {...fieldErrorProps('transmission', errorField)}
+            className={`input ${isBase ? '' : styles.locked}`}
+            {...transmissionErrorProps}
+            aria-describedby={isBase ? transmissionErrorProps['aria-describedby'] : TRANSMISSION_NOTE_ID}
           >
             <option value="8AT">8AT (8-Speed Auto)</option>
             <option value="6MT">6MT (Manual)</option>
           </select>
+          {!isBase && (
+            <p id={TRANSMISSION_NOTE_ID} className="field-hint">
+              Competition models come with the 8-speed auto.
+            </p>
+          )}
         </div>
       </div>
 

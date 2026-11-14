@@ -9,7 +9,7 @@ import type { Metadata } from 'next';
 import styles from './page.module.css';
 
 export const metadata: Metadata = {
-  title: 'All Entries — BMW Individual Colors Registry',
+  title: 'All builds',
 };
 
 export default async function EntriesPage({

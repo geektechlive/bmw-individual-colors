@@ -1,6 +1,6 @@
-# BMW Individual Colors Registry
+# BMW M Individual Colors Registry
 
-A community registry of BMW Individual paint colors submitted by owners. Browse builds, explore color rarity, and see where Individual-spec cars are registered around the world.
+A community registry of BMW Individual paint on M3 and M4 cars, submitted by owners. Browse builds, explore how rare each paint is, and see where Individual-spec cars are registered around the world.
 
 Live at [mcolors.geektechlive.com](https://mcolors.geektechlive.com).
 

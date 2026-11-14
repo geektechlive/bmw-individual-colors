@@ -81,6 +81,40 @@ test('driveMixSummary names the most common drivetrain and gearbox pair', () => 
   assert.equal(driveMixSummary([]), NO_BUILDS);
 });
 
+const NO_LEADER = 'No paint clearly leads. The top spot is tied or changes from year to year.';
+
+test('trendSummary says so when a year is tied instead of crowning the alphabetical first (#56)', () => {
+  const es = [entry({ model_year: 2022, ext_color: 'A' }), entry({ model_year: 2022, ext_color: 'B' })];
+  assert.equal(trendSummary(es), NO_LEADER);
+});
+
+test('trendSummary says so when every year has a different leader (#56)', () => {
+  const es = [
+    ...many(2, { model_year: 2022, ext_color: 'A' }),
+    ...many(2, { model_year: 2023, ext_color: 'B' }),
+    ...many(2, { model_year: 2024, ext_color: 'C' }),
+  ];
+  assert.equal(trendSummary(es), NO_LEADER);
+});
+
+test('trendSummary ignores a tied year when one paint still wins another (#56)', () => {
+  const es = [
+    ...many(2, { model_year: 2022, ext_color: 'A' }),
+    entry({ model_year: 2023, ext_color: 'A' }), entry({ model_year: 2023, ext_color: 'B' }),
+  ];
+  assert.equal(trendSummary(es), 'A is the top paint in 1 of 2 model years.');
+});
+
+test('pairingSummary trims interiors and skips blank ones (#56)', () => {
+  const es = [
+    entry({ ext_color: 'A', interior_color: '   ' }),
+    entry({ ext_color: 'A', interior_color: '  Red ' }),
+    entry({ ext_color: 'A', interior_color: 'Red' }),
+  ];
+  assert.equal(pairingSummary(es), 'The most common pairing is A with Red interior, in 2 builds.');
+  assert.equal(pairingSummary([entry({ interior_color: '  ' })]), NO_BUILDS);
+});
+
 test('trendSummary names the paint that tops the most model years', () => {
   const es = [
     ...many(3, { model_year: 2022, ext_color: 'A' }), entry({ model_year: 2022, ext_color: 'B' }),

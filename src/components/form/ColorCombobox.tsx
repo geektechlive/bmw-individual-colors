@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import type { KeyboardEvent } from 'react';
 import PaintSwatch from '../PaintSwatch';
 import type { FieldErrorProps } from './field-error';
+import { optionToPick, stepActive } from './combobox-nav';
 import styles from './form.module.css';
 
 interface Props {
@@ -52,24 +53,19 @@ export default function ColorCombobox({
 
   function step(delta: 1 | -1) {
     if (filtered.length === 0) return;
-    if (!open) {
-      setOpen(true);
-      setActiveIndex(delta === 1 ? 0 : filtered.length - 1);
-      return;
-    }
-    setActiveIndex((i) => {
-      if (delta === 1) return (i + 1) % filtered.length;
-      return i <= 0 ? filtered.length - 1 : i - 1;
-    });
+    if (!open) setOpen(true);
+    setActiveIndex((i) => stepActive(i, delta, filtered.length, open));
   }
 
   function handleKeyDown(e: KeyboardEvent<HTMLInputElement>) {
+    const picked = e.key === 'Enter' ? optionToPick(isOpen, activeIndex, filtered) : null;
     if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
       e.preventDefault();
       step(e.key === 'ArrowDown' ? 1 : -1);
-    } else if (e.key === 'Enter' && isOpen && activeIndex >= 0 && filtered[activeIndex]) {
+    } else if (picked !== null) {
+      // Only a keyboard-highlighted option; with none, Enter keeps what was typed.
       e.preventDefault();
-      select(filtered[activeIndex]);
+      select(picked);
     } else if (e.key === 'Escape' && open) {
       e.preventDefault();
       setOpen(false);
@@ -136,7 +132,6 @@ export default function ColorCombobox({
               // mousedown would blur the input and close the list before the click lands
               onMouseDown={(e) => e.preventDefault()}
               onClick={() => select(c)}
-              onMouseEnter={() => setActiveIndex(i)}
               className={[
                 styles.option,
                 c === value ? styles.optionSelected : '',

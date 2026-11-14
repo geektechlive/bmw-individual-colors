@@ -4,7 +4,8 @@ import { cache } from 'react';
 import { getCloudflareContext } from '@opennextjs/cloudflare';
 import { markRenderFailed } from './edge-cache';
 import { createServerClient, createAdminClient } from './supabase';
-import { BMW_COLORS, canonicalColorName, colorToSlug } from './colors';
+import { canonicalColorName } from './colors';
+import { mergePaintNames, pickNameForSlug } from './paint-names';
 import { groupOpenFlags, type FlaggedEntry, type OpenFlagRow } from './moderation';
 import type { BmwEntry } from '../types';
 
@@ -45,17 +46,15 @@ async function getEntriesUncached(): Promise<BmwEntry[]> {
       throw new Error(`getEntries failed: ${error.message}`);
     }
 
-    const page = (data ?? []) as BmwEntry[];
-    // Canonicalize alias color names in exactly one place so every downstream
-    // count, matrix and slug lookup sees merged colors. Immutable copy.
-    for (const row of page) {
-      all.push({ ...row, ext_color: canonicalColorName(row.ext_color) });
-    }
-
-    if (page.length < PAGE_SIZE) break;
+    all.push(...((data ?? []) as BmwEntry[]));
+    if ((data ?? []).length < PAGE_SIZE) break;
   }
 
-  return all;
+  // Canonicalize color names in exactly one place so every downstream count, matrix and
+  // slug lookup sees merged colors: aliases, and look-alike spellings that share a slug
+  // ("Twilight-Purple"), so listings keyed by slug never get duplicate keys (#55).
+  const display = mergePaintNames(all.map((row) => row.ext_color));
+  return all.map((row) => ({ ...row, ext_color: display.get(row.ext_color) ?? row.ext_color }));
 }
 
 // Deduped per request only (the color page reads entries three times in one
@@ -81,18 +80,9 @@ export async function getEntriesByColor(colorName: string): Promise<BmwEntry[]> 
  * static BMW_COLORS catalog. Returns null when nothing matches.
  */
 export async function resolveColorSlug(slug: string): Promise<string | null> {
-  const normalized = slug.toLowerCase();
-
   const entries = await getEntries();
-  for (const name of new Set(entries.map((e) => e.ext_color))) {
-    if (colorToSlug(name) === normalized) return name;
-  }
-
-  for (const name of Object.keys(BMW_COLORS)) {
-    if (colorToSlug(name) === normalized) return canonicalColorName(name);
-  }
-
-  return null;
+  // The catalog name wins over any registry look-alike with the same slug (#55).
+  return pickNameForSlug(slug, new Set(entries.map((e) => e.ext_color)));
 }
 
 /**

@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useId, useMemo, useState, useSyncExternalStore } from 'react';
+import { useId, useMemo, useState, useSyncExternalStore, ViewTransition } from 'react';
 import PaintSwatch from '../PaintSwatch';
 import { cssVars } from '../../lib/css-vars';
 import {
@@ -128,10 +128,12 @@ export default function ColorsBrowser({ colors }: { colors: BrowseColor[] }) {
         </div>
       ) : (
         <ul className={styles.grid}>
-          {visible.map((c) => (
-            <li key={c.slug}>
+          {visible.map((c, i) => (
+            <li key={c.slug} className="rise" style={cssVars({ '--i': i })}>
               <Link href={`/colors/${c.slug}`} className={styles.tile} style={cssVars({ '--p': c.hex })}>
-                <PaintSwatch name={c.name} hex={c.hex} size="tile" />
+                <ViewTransition name={`paint-${c.slug}`} share="morph" default="none">
+                  <PaintSwatch name={c.name} hex={c.hex} size="tile" />
+                </ViewTransition>
                 <span className={styles.meta}>
                   <span className={`paint-name ${styles.name}`}>{c.name}</span>
                   <span className={`mono ${styles.detail}`}>

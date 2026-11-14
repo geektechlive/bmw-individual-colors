@@ -160,7 +160,9 @@
   box-shadow: inset 3px 0 0 var(--accent);
 }
 
-.optionActive {
+/* Mouse hover is styling only; the keyboard highlight (aria-activedescendant) is state. */
+.optionActive,
+.option:hover {
   background: var(--panel-3);
 }
 

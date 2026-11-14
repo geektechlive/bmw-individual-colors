@@ -21,7 +21,7 @@ function EntrySummary({ e }: { e: BmwEntry }) {
   return (
     <>
       <div className={styles.entryTitle}>
-        {e.ext_color} — {e.model_year} {e.body_style}
+        {e.ext_color}, {e.model_year} {e.body_style}
         {e.competition ? ' Competition' : ''}
       </div>
       <div className={styles.entryMeta}>
@@ -71,7 +71,7 @@ export default async function AdminPage({ searchParams }: Props) {
   return (
     <main className={`page page--text ${styles.main}`}>
       <div className={styles.header}>
-        <h1 className="title">Admin — Reported Entries</h1>
+        <h1 className="title">Reported builds</h1>
         <form action={adminLogout}>
           <button type="submit" className="btn btn--sm">
             Sign out
