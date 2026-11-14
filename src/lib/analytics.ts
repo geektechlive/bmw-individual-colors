@@ -5,7 +5,7 @@
 // (ReportsClient and the chart components) import from this module, so it must
 // stay safe to bundle for the browser.
 
-import { COLOR_FAMILY_MAP, getColorHex } from './colors';
+import { COLOR_FAMILY_MAP, getColorHex, ownValue } from './colors';
 import { TOKENS } from './design-tokens';
 import type { BmwEntry, ColorCount, Stats } from '../types';
 
@@ -111,7 +111,8 @@ export function computeRegistryGrowth(entries: BmwEntry[]): GrowthPoint[] {
   const map = new Map<string, number>();
   for (const e of sorted) {
     const d = new Date(e.posted_at ?? e.created_at);
-    const key = `${d.toLocaleString('en-US', { month: 'short' })} ${d.getFullYear()}`;
+    // UTC, so the server render and the visitor's browser group a build into the same month.
+    const key = `${d.toLocaleString('en-US', { month: 'short', timeZone: 'UTC' })} ${d.getUTCFullYear()}`;
     map.set(key, (map.get(key) ?? 0) + 1);
   }
   let cumulative = 0;
@@ -169,7 +170,7 @@ export function computeColorFamilyByYear(entries: BmwEntry[]): FamilyYearPoint[]
     if (!yearMap.has(e.model_year)) {
       yearMap.set(e.model_year, { Blues: 0, Greens: 0, 'Reds & Oranges': 0, Yellows: 0, Purples: 0, 'Greys & Blacks': 0, Other: 0 });
     }
-    const family = COLOR_FAMILY_MAP[e.ext_color] ?? 'Other';
+    const family = ownValue(COLOR_FAMILY_MAP, e.ext_color) ?? 'Other';
     yearMap.get(e.model_year)![family]++;
   }
   return Array.from(yearMap.entries())
@@ -188,18 +189,10 @@ export function computeWheelCounts(entries: BmwEntry[]): ColorCount[] {
     .sort((a, b) => b.count - a.count);
 }
 
+// Labels and cut-offs from the approved mockups (ADR 0016; owner confirmed 2026-11-14).
 export function computeRarityLabel(count: number): string {
-  if (count <= 2) return 'Unicorn';
-  if (count <= 8) return 'Rare';
-  if (count <= 20) return 'Uncommon';
-  return 'Common';
-}
-
-export function computeRarityColor(label: string): string {
-  switch (label) {
-    case 'Unicorn': return TOKENS['m-violet'];
-    case 'Rare': return TOKENS['m-red'];
-    case 'Uncommon': return TOKENS['warn'];
-    default: return TOKENS['ink-3'];
-  }
+  if (count >= 15) return 'Very common';
+  if (count >= 6) return 'Common';
+  if (count >= 3) return 'Uncommon';
+  return 'Rare';
 }

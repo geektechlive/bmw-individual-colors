@@ -1,0 +1,42 @@
+.back {
+  width: 72px;
+  height: 20px;
+  margin-bottom: var(--s-5);
+}
+
+.title {
+  width: min(360px, 80vw);
+  height: 40px;
+  margin-bottom: var(--s-4);
+}
+
+.intro {
+  width: min(480px, 100%);
+  height: 22px;
+  margin-bottom: var(--s-4);
+}
+
+.filters {
+  height: 56px;
+  margin-bottom: var(--s-4);
+}
+
+.jump {
+  width: min(420px, 100%);
+  height: 30px;
+  margin-bottom: var(--s-5);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 560px), 1fr));
+  gap: var(--s-5);
+}
+
+.card {
+  height: 400px;
+}
+
+.full {
+  grid-column: 1 / -1;
+}

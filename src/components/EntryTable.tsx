@@ -4,6 +4,8 @@ import { useCallback, useEffect, useState } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { getColorHex, colorToSlug } from '../lib/colors';
+import { cityState as formatCityState, interiorDetail, modelLabel } from '../lib/entry-display';
+import EntryCard from './EntryCard';
 import FlagButton from './FlagButton';
 import PaintSwatch from './PaintSwatch';
 import styles from './EntryTable.module.css';
@@ -20,6 +22,17 @@ type SortKey = keyof Pick<
 
 const PAGE_SIZE = 50;
 const NUMERIC_SORT_KEYS: SortKey[] = ['model_year'];
+
+// Sort choices for the phone card list, which has no column headers.
+const SORT_OPTIONS: { key: SortKey; label: string }[] = [
+  { key: 'ext_color', label: 'Color' },
+  { key: 'model_year', label: 'Year' },
+  { key: 'body_style', label: 'Model' },
+  { key: 'drivetrain', label: 'Drive' },
+  { key: 'interior_color', label: 'Interior' },
+  { key: 'location_state', label: 'Location' },
+  { key: 'forum_username', label: 'Forum user' },
+];
 
 function getPageNumbers(current: number, total: number): (number | 'ellipsis')[] {
   if (total <= 7) {
@@ -164,6 +177,13 @@ export default function EntryTable({ entries }: Props) {
   const pageBtnClass = (active: boolean) =>
     active ? `${styles.pageBtn} ${styles.pageBtnActive}` : styles.pageBtn;
 
+  function handleSortSelect(key: SortKey) {
+    if (key === sortKey) return;
+    setSortKey(key);
+    setSortDir('asc');
+    resetPage();
+  }
+
   const sortHeader = (key: SortKey, label: string) => (
     <th className={styles.th} aria-sort={ariaSort(key)}>
       <button type="button" className={styles.sortBtn} onClick={() => handleSort(key)}>
@@ -242,7 +262,47 @@ export default function EntryTable({ entries }: Props) {
         </span>
       </div>
 
-      <div className="scroll-x">
+      <div className={styles.sortBar}>
+        <label htmlFor="entry-sort" className="label">
+          Sort by
+        </label>
+        <select
+          id="entry-sort"
+          className={`input ${styles.sortSelect}`}
+          value={sortKey}
+          onChange={(e) => handleSortSelect(e.target.value as SortKey)}
+        >
+          {SORT_OPTIONS.map((o) => (
+            <option key={o.key} value={o.key}>
+              {o.label}
+            </option>
+          ))}
+        </select>
+        <button
+          type="button"
+          className="chip"
+          onClick={() => {
+            setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'));
+            resetPage();
+          }}
+        >
+          {sortDir === 'asc' ? 'Ascending ↑' : 'Descending ↓'}
+        </button>
+      </div>
+
+      <div className={styles.cardView}>
+        {pageEntries.length === 0 ? (
+          <p className={styles.empty}>No entries found.</p>
+        ) : (
+          <ul className={styles.cards} aria-label="Builds">
+            {pageEntries.map((e) => (
+              <EntryCard key={e.id} entry={e} />
+            ))}
+          </ul>
+        )}
+      </div>
+
+      <div className={`scroll-x ${styles.tableView}`}>
         <table className={styles.table}>
           <thead>
             <tr className={styles.headRow}>
@@ -269,8 +329,9 @@ export default function EntryTable({ entries }: Props) {
             )}
             {pageEntries.map((e) => {
               const hex = getColorHex(e.ext_color);
-              const cityState = [e.location_city, e.location_state].filter(Boolean).join(', ');
-              const model = `${e.body_style}${e.competition ? ' Comp' : ''}`;
+              const cityState = formatCityState(e);
+              const model = modelLabel(e);
+              const detail = interiorDetail(e);
 
               return (
                 <tr key={e.id} className={styles.row}>
@@ -293,15 +354,7 @@ export default function EntryTable({ entries }: Props) {
                     {e.interior_color && (
                       <span>
                         {e.interior_color}
-                        {(e.interior_seats || e.interior_leather) ? (
-                          <span className={styles.interiorDetail}>
-                            ({[e.interior_seats, e.interior_leather ? `${e.interior_leather} Leather` : null].filter(Boolean).join(', ')})
-                          </span>
-                        ) : e.interior_type ? (
-                          <span className={styles.interiorDetail}>
-                            ({e.interior_type})
-                          </span>
-                        ) : null}
+                        {detail ? <span className={styles.interiorDetail}>({detail})</span> : null}
                       </span>
                     )}
                   </td>

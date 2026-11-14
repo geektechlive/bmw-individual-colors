@@ -231,8 +231,14 @@ async function storeWhenComplete(key: Request, copy: Response, deps: EdgeCacheDe
  * retries).
  *
  * The read blocks deliberately: waiting costs wall time, not CPU, and answering
- * with an older version would serve pre-edit pages to everyone. Concurrent
- * requests in one isolate share a single in-flight read (#23).
+ * with an older version would serve pre-edit pages to everyone.
+ *
+ * Concurrent requests do NOT share an in-flight read. They did (#23), but Workers
+ * drops a promise created by one request when another request awaits it after the
+ * first has ended (compatibility flag handle_cross_request_promise_resolution), so a
+ * cancelled prefetch that started the read 500'd every request waiting on it
+ * (production, 2026-11-14). A stale memo now costs one small read per concurrent
+ * request; within the TTL the memo serves everything.
  */
 export function createVersionSource(
   read: () => Promise<string>,
@@ -242,7 +248,6 @@ export function createVersionSource(
   const ttlMs = options.ttlMs ?? VERSION_TTL_MS;
   const now = options.now ?? Date.now;
   let memo: { value: string; at: number } | null = null;
-  let inFlight: Promise<string | null> | null = null;
 
   async function readOrFallBack(): Promise<string | null> {
     try {
@@ -268,10 +273,7 @@ export function createVersionSource(
 
   return () => {
     if (memo && now() - memo.at < ttlMs) return Promise.resolve(memo.value);
-    inFlight ??= readOrFallBack().finally(() => {
-      inFlight = null;
-    });
-    return inFlight;
+    return readOrFallBack();
   };
 }
 

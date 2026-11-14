@@ -1,5 +1,5 @@
 /* Real CSS so the `vh` declaration is a genuine fallback: browsers without `dvh`
-   ignore the second line and keep the first. */
+   ignore the second line and keep the first. Keep in step with MapSkeleton.module.css. */
 .container {
   width: 100%;
   border-radius: var(--r-lg);
@@ -7,55 +7,87 @@
   height: calc(100dvh - 140px);
 }
 
-/* Leaflet builds popups outside React, from HTML strings, so these class names
-   are global (bound via the popup's `className` option and the markup in
-   RegistryMap.tsx) rather than generated module names. */
-:global(.rm-popup) :global(.leaflet-popup-content-wrapper),
-:global(.rm-popup) :global(.leaflet-popup-tip) {
+/* Leaflet builds popups outside React, from an HTML string (src/lib/map-popup.ts), so the
+   popup is styled through these module class names, passed in as strings. Only Leaflet's
+   own classes need :global(). Text sits on opaque --panel-2. */
+.popup :global(.leaflet-popup-content-wrapper),
+.popup :global(.leaflet-popup-tip) {
   background: var(--panel-2);
   color: var(--ink);
   border: 1px solid var(--rule-strong);
+  box-shadow: var(--shadow-2);
 }
 
-:global(.rm-popup) :global(.leaflet-popup-content-wrapper) {
+.popup :global(.leaflet-popup-content-wrapper) {
   border-radius: var(--r-lg);
 }
 
-:global(.rm-popup) :global(.leaflet-popup-close-button) {
+.popup :global(.leaflet-popup-content) {
+  margin: var(--s-3) var(--s-4);
+  font-family: var(--font-text);
+}
+
+/* Same specificity as Leaflet's own `.leaflet-container a.leaflet-popup-close-button`;
+   this sheet loads after it. */
+.popup :global(a.leaflet-popup-close-button) {
   color: var(--ink-2);
 }
 
-:global(.rm-popup-body) {
-  min-width: 180px;
-  font-family: inherit;
+.popup :global(a.leaflet-popup-close-button:hover) {
+  color: var(--ink);
 }
 
-:global(.rm-popup-head) {
+.popup :global(a.leaflet-popup-close-button:focus-visible) {
+  outline: 2px solid var(--focus);
+  outline-offset: 1px;
+}
+
+.popupBody {
+  min-width: 180px;
+}
+
+.popupHead {
   display: flex;
   align-items: center;
   gap: var(--s-2);
-  margin-bottom: 6px;
+  margin-bottom: var(--s-2);
+  padding-right: var(--s-4);
 }
 
-:global(.rm-popup-swatch) {
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  background: var(--p);
-  border: 1px solid var(--rule-strong);
-  flex-shrink: 0;
+.popupSwatch {
+  flex: none;
 }
 
-:global(.rm-popup-name) {
+.popupName {
+  font-size: var(--t-16);
+}
+
+.popupMeta {
   font-size: var(--t-13);
-}
-
-:global(.rm-popup-meta) {
-  font-size: var(--t-12);
   color: var(--ink-2);
-  line-height: 1.6;
+  line-height: 1.5;
 }
 
-:global(.rm-popup-location) {
+.popupLocation {
   margin-top: var(--s-1);
+}
+
+/* `.popupBody .popupLink` beats Leaflet's `.leaflet-container a`. */
+.popupBody .popupLink {
+  display: inline-block;
+  margin-top: var(--s-3);
+  color: var(--accent-ink);
+  font-size: var(--t-13);
+  text-decoration: none;
+}
+
+.popupBody .popupLink:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.popupBody .popupLink:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+  border-radius: var(--r);
 }

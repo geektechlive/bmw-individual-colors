@@ -224,3 +224,58 @@
   color: var(--ink-3);
   padding: 0 var(--s-1);
 }
+
+/* Phone layout (#42): one card per build instead of the wide table. */
+.sortBar,
+.cardView {
+  display: none;
+}
+
+.sortBar {
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--s-2) var(--s-3);
+  margin-bottom: var(--s-3);
+}
+
+.sortSelect {
+  width: auto;
+  min-width: 0;
+}
+
+.cards {
+  display: grid;
+  gap: var(--s-3);
+  margin: 0;
+  padding: 0;
+}
+
+.empty {
+  margin: 0;
+  padding: var(--s-6);
+  text-align: center;
+  color: var(--ink-3);
+}
+
+@media (max-width: 719px) {
+  .sortBar {
+    display: flex;
+  }
+
+  .cardView {
+    display: block;
+  }
+
+  .tableView {
+    display: none;
+  }
+
+  .searchInput {
+    max-width: none;
+  }
+
+  .summary {
+    display: block;
+    margin: var(--s-2) 0 0;
+  }
+}

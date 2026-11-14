@@ -9,14 +9,27 @@ import 'leaflet.markercluster';
 import { useEffect, useMemo, useRef } from 'react';
 import { getColorHex } from '../lib/colors';
 import { TOKENS } from '../lib/design-tokens';
+import { buildPopupHtml, escapeHtml, type PopupClasses } from '../lib/map-popup';
+import { paintSwatchClassNames } from './PaintSwatch';
 import styles from './RegistryMap.module.css';
 import type { BmwEntry } from '../types';
 
+const POPUP_CLASSES: PopupClasses = {
+  body: styles.popupBody,
+  head: styles.popupHead,
+  swatch: styles.popupSwatch,
+  name: styles.popupName,
+  meta: styles.popupMeta,
+  location: styles.popupLocation,
+  link: styles.popupLink,
+};
+
+// A small flat dot: no finish at this size (#44). A dark ring keeps it crisp on the map.
 function makeIcon(hex: string): L.DivIcon {
   return L.divIcon({
     className: '',
-    html: `<svg width="14" height="14" viewBox="0 0 14 14" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="7" cy="7" r="6" fill="${hex}" stroke="${TOKENS['ink']}" stroke-width="1.5"/>
+    html: `<svg width="14" height="14" viewBox="0 0 14 14" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <circle cx="7" cy="7" r="5.5" fill="${escapeHtml(hex)}" stroke="${TOKENS['bg']}" stroke-width="2"/>
     </svg>`,
     iconSize: [14, 14],
     iconAnchor: [7, 7],
@@ -24,33 +37,8 @@ function makeIcon(hex: string): L.DivIcon {
   });
 }
 
-function esc(str: string): string {
-  return str
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
-}
-
-function makePopupHtml(entry: BmwEntry, hex: string): string {
-  const location = [entry.location_city, entry.location_state, entry.location_country]
-    .filter(Boolean)
-    .map((s) => esc(s!))
-    .join(', ');
-  return `
-    <div class="rm-popup-body">
-      <div class="rm-popup-head">
-        <div class="rm-popup-swatch" style="--p:${esc(hex)}"></div>
-        <strong class="rm-popup-name">${esc(entry.ext_color)}</strong>
-      </div>
-      <div class="rm-popup-meta">
-        <div>${esc(String(entry.model_year))} BMW ${esc(entry.body_style)}${entry.competition ? ' Competition' : ''}</div>
-        <div>${esc(entry.drivetrain)} · ${esc(entry.transmission)}</div>
-        ${location ? `<div class="rm-popup-location">${location}</div>` : ''}
-      </div>
-    </div>
-  `;
+function markerLabel(entry: BmwEntry): string {
+  return `${entry.ext_color}, ${entry.model_year} ${entry.body_style}`;
 }
 
 interface Props {
@@ -67,9 +55,10 @@ export default function RegistryMap({ entries }: Props) {
   const entriesSignature = useMemo(() => entries.map((e) => e.id).join(','), [entries]);
 
   useEffect(() => {
-    if (!containerRef.current || mapRef.current) return;
+    const container = containerRef.current;
+    if (!container || mapRef.current) return;
 
-    const map = L.map(containerRef.current, {
+    const map = L.map(container, {
       center: [30, 10],
       zoom: 2,
       minZoom: 2,
@@ -90,19 +79,49 @@ export default function RegistryMap({ entries }: Props) {
     entries.forEach((entry) => {
       if (entry.location_lat == null || entry.location_lng == null) return;
       const hex = getColorHex(entry.ext_color);
-      L.marker([entry.location_lat, entry.location_lng], { icon: makeIcon(hex) })
-        .bindPopup(makePopupHtml(entry, hex), { className: 'rm-popup' })
-        .addTo(group);
+      const popupHtml = buildPopupHtml(
+        entry,
+        hex,
+        paintSwatchClassNames(entry.ext_color, 'chip-sm'),
+        POPUP_CLASSES,
+      );
+      const marker = L.marker([entry.location_lat, entry.location_lng], {
+        icon: makeIcon(hex),
+        title: markerLabel(entry),
+      }).bindPopup(popupHtml, { className: styles.popup });
+      marker.on('add', () => marker.getElement()?.setAttribute('aria-label', markerLabel(entry)));
+      marker.addTo(group);
     });
 
     map.addLayer(group);
 
+    // When a popup opens from the keyboard (Enter on a focused marker), move focus to its
+    // link so the next Tab or Enter goes to "View paint". Mouse and touch keep their focus.
+    let viaKeyboard = false;
+    const onKey = () => { viaKeyboard = true; };
+    const onPointer = () => { viaKeyboard = false; };
+    container.addEventListener('keydown', onKey);
+    container.addEventListener('pointerdown', onPointer);
+    map.on('popupopen', (e) => {
+      if (!viaKeyboard) return;
+      e.popup.getElement()?.querySelector<HTMLElement>('a[href]')?.focus();
+    });
+
     return () => {
+      container.removeEventListener('keydown', onKey);
+      container.removeEventListener('pointerdown', onPointer);
       map.remove();
       mapRef.current = null;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [entriesSignature]);
 
-  return <div ref={containerRef} className={styles.container} />;
+  return (
+    <div
+      ref={containerRef}
+      className={styles.container}
+      role="region"
+      aria-label="Map of registry builds by location"
+    />
+  );
 }

@@ -2,6 +2,8 @@
 
 import { useActionState, useEffect, useState } from 'react';
 import { verifyForumUsername } from '../../actions';
+import FormError from '../../../components/form/FormError';
+import { fieldErrorProps } from '../../../components/form/field-error';
 import styles from './EditVerifyForm.module.css';
 
 const TURNSTILE_SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? '0x4AAAAAAC6yXfM_xBBaAkKj';
@@ -52,11 +54,7 @@ export default function EditVerifyForm({ entryId }: Props) {
         </p>
       </div>
 
-      {state?.error && (
-        <div className="alert alert--danger">
-          {state.error}
-        </div>
-      )}
+      <FormError message={state?.error} />
 
       <div className="field">
         <label className="field-label" htmlFor="forum_username">Forum Username *</label>
@@ -68,6 +66,7 @@ export default function EditVerifyForm({ entryId }: Props) {
           placeholder="Your forum username on this entry"
           required
           autoComplete="off"
+          {...fieldErrorProps('forum_username', state?.error?.startsWith('Username') ? 'forum_username' : null)}
         />
       </div>
 

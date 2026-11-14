@@ -8,6 +8,18 @@ Run `npx tsx scripts/post-to-bimmerpost.ts` to publish pending items to the foru
 
 ## [Unreleased]
 
+- **Fixed:** version reads are per request, so a cancelled prefetch can't 500 the others
+
+- **Added:** entries as cards on phones, chart headings and summaries, loading states (#41, #42, #43)
+
+- **Added:** dark map popups with a swatch and a link to the paint (#49)
+
+- **Added:** one shared submit/edit form; duplicates are a hard stop (#51, ADR 0017)
+
+- **Fixed:** paint names like "constructor" no longer resolve to JavaScript built-ins
+
+- **Added:** rarity labels from the approved mockups (Very common, Common, Uncommon, Rare)
+
 - **Added:** colors page with lit tiles, sort, filter and search (#47)
 
 - **Added:** home page paint wall, facts panel and latest builds (#46)

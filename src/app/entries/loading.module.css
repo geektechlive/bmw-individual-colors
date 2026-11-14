@@ -1,0 +1,61 @@
+.back {
+  width: 72px;
+  height: 20px;
+  margin-bottom: var(--s-5);
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--s-3);
+  margin-bottom: var(--s-5);
+}
+
+.headText {
+  display: grid;
+  gap: var(--s-2);
+}
+
+.title {
+  width: min(240px, 60vw);
+  height: 40px;
+}
+
+.count {
+  width: 160px;
+  height: 20px;
+}
+
+.button {
+  width: 140px;
+  height: 38px;
+}
+
+.card {
+  display: grid;
+  gap: var(--s-3);
+  padding: var(--s-5);
+  overflow: hidden;
+}
+
+.chips {
+  height: 28px;
+  max-width: 420px;
+}
+
+.search {
+  height: 38px;
+  max-width: 420px;
+}
+
+.row {
+  height: 44px;
+}
+
+@media (max-width: 719px) {
+  .row {
+    height: 150px;
+  }
+}

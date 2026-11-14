@@ -12,6 +12,18 @@ import {
   computeCompetitionAdoption,
   computeWheelCounts,
 } from '../lib/analytics';
+import {
+  rankedSummary,
+  shareSummary,
+  modelSummary,
+  competitionSummary,
+  driveMixSummary,
+  trendSummary,
+  familySummary,
+  pairingSummary,
+  matrixSummary,
+  growthSummary,
+} from '../lib/report-summaries';
 
 import styles from './ReportsClient.module.css';
 import ColorMatrix from './charts/ColorMatrix';
@@ -45,17 +57,20 @@ interface ChartCardProps {
   full?: boolean;
   title: string;
   desc: string;
+  summary: string;
   children: React.ReactNode;
 }
 
-function ChartCard({ id, full, title, desc, children }: ChartCardProps) {
+function ChartCard({ id, full, title, desc, summary, children }: ChartCardProps) {
   const className = `card ${styles.card}${full ? ` ${styles.full}` : ''}`;
+  const headingId = `chart-${title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')}`;
   return (
-    <div id={id} className={className}>
-      <div className={styles.cardTitle}>{title}</div>
-      <div className={styles.cardDesc}>{desc}</div>
+    <section id={id} className={className} aria-labelledby={headingId}>
+      <h2 id={headingId} className={styles.cardTitle}>{title}</h2>
+      <p className={styles.cardDesc}>{desc}</p>
+      <p className={styles.cardSummary}>{summary}</p>
       {children}
-    </div>
+    </section>
   );
 }
 
@@ -85,6 +100,24 @@ export default function ReportsClient({ entries }: Props) {
   const growthData = useMemo(() => computeRegistryGrowth(entries), [entries]);
   const familyTrendData = useMemo(() => computeColorFamilyByYear(filteredEntries), [filteredEntries]);
   const competitionData = useMemo(() => computeCompetitionAdoption(filteredEntries), [filteredEntries]);
+
+  const summaries = useMemo(
+    () => ({
+      growth: growthSummary(growthData),
+      distribution: rankedSummary(colorCounts, 'paint'),
+      treemap: shareSummary(colorCounts),
+      models: modelSummary(filteredEntries),
+      competition: competitionSummary(filteredEntries),
+      driveMix: driveMixSummary(filteredEntries),
+      trends: trendSummary(filteredEntries),
+      families: familySummary(familyTrendData),
+      interiors: rankedSummary(interiorCounts, 'interior'),
+      wheels: rankedSummary(wheelCounts, 'wheel package'),
+      pairings: pairingSummary(filteredEntries),
+      matrix: matrixSummary(filteredEntries),
+    }),
+    [growthData, colorCounts, filteredEntries, familyTrendData, interiorCounts, wheelCounts]
+  );
 
   const hasFilters = selectedYears.length > 0 || selectedBodyStyles.length > 0 || selectedDrivetrains.length > 0;
 
@@ -149,6 +182,7 @@ export default function ReportsClient({ entries }: Props) {
         </div>
         {hasFilters ? (
           <button
+            type="button"
             onClick={() => startTransition(() => {
               setSelectedYears([]);
               setSelectedBodyStyles([]);
@@ -162,7 +196,7 @@ export default function ReportsClient({ entries }: Props) {
       </div>
 
       {/* Section jump nav */}
-      <nav className={styles.jumpNav}>
+      <nav className={styles.jumpNav} aria-label="Report sections">
         <div className={styles.jumpList}>
           {[
             { label: 'Distribution', href: '#distribution' },
@@ -181,64 +215,64 @@ export default function ReportsClient({ entries }: Props) {
 
       {/* Chart grid */}
       <div className={styles.grid}>
-        <ChartCard id="growth" full title="Registry Growth" desc="Cumulative builds added to the registry over time">
+        <ChartCard id="growth" full title="Registry Growth" summary={summaries.growth} desc="Cumulative builds added to the registry over time">
           <RegistryGrowth data={growthData} />
         </ChartCard>
 
-        <ChartCard id="distribution" title="Color Distribution" desc="Top 20 Individual colors by build count">
+        <ChartCard id="distribution" title="Color Distribution" summary={summaries.distribution} desc="Top 20 Individual colors by build count">
           <ColorDonut data={colorCounts} />
         </ChartCard>
 
-        <ChartCard title="Color Treemap" desc="Size proportional to count — filled with actual BMW color">
+        <ChartCard title="Color Treemap" summary={summaries.treemap} desc="Size proportional to count — filled with actual BMW color">
           <ColorTreemapLoader data={colorCounts} />
         </ChartCard>
 
         <ChartCard
           id="models"
           full
-          title="Model, Drivetrain & Transmission Breakdown"
+          title="Model, Drivetrain & Transmission Breakdown" summary={summaries.models}
           desc="Split by body style (M3/M4), drivetrain, and transmission"
         >
           <ModelBreakdown entries={filteredEntries} />
         </ChartCard>
 
         <ChartCard
-          title="Competition Package Adoption"
+          title="Competition Package Adoption" summary={summaries.competition}
           desc="% of M3 and M4 builds with Competition package by year"
         >
           <CompetitionAdoption data={competitionData} />
         </ChartCard>
 
         <ChartCard
-          title="Drivetrain & Transmission Mix"
+          title="Drivetrain & Transmission Mix" summary={summaries.driveMix}
           desc="Breakdown of RWD/AWD × Manual/Auto combinations"
         >
           <DrivetrainMatrix entries={filteredEntries} />
         </ChartCard>
 
-        <ChartCard id="trends" full title="Color Popularity by Model Year" desc="Top 8 colors tracked across model years">
+        <ChartCard id="trends" full title="Color Popularity by Model Year" summary={summaries.trends} desc="Top 8 colors tracked across model years">
           <YearTrend entries={filteredEntries} />
         </ChartCard>
 
         <ChartCard
           full
-          title="Color Family Trends by Year"
+          title="Color Family Trends by Year" summary={summaries.families}
           desc="Stacked breakdown of color families across model years"
         >
           <ColorFamilyTrends data={familyTrendData} />
         </ChartCard>
 
-        <ChartCard id="interiors" title="Interior Colors" desc="Frequency of interior color selections">
+        <ChartCard id="interiors" title="Interior Colors" summary={summaries.interiors} desc="Frequency of interior color selections">
           <InteriorBar data={interiorCounts} />
         </ChartCard>
 
-        <ChartCard title="Wheel Popularity" desc="Most common wheel packages in the registry">
+        <ChartCard title="Wheel Popularity" summary={summaries.wheels} desc="Most common wheel packages in the registry">
           <WheelBar data={wheelCounts} />
         </ChartCard>
 
         <ChartCard
           full
-          title="Color × Interior Heatmap"
+          title="Color × Interior Heatmap" summary={summaries.pairings}
           desc="Top 15 exterior × top 8 interior color combinations"
         >
           <ColorInteriorMatrix entries={filteredEntries} />
@@ -247,7 +281,7 @@ export default function ReportsClient({ entries }: Props) {
         <ChartCard
           id="matrix"
           full
-          title="Color × Year × Drivetrain Matrix"
+          title="Color × Year × Drivetrain Matrix" summary={summaries.matrix}
           desc="Detailed breakdown of each color by year, model, and drivetrain"
         >
           <ColorMatrix data={matrixData} />

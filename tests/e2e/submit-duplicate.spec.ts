@@ -32,16 +32,15 @@ async function fillDuplicateBuild(page: Page) {
 async function findBotEntryIds(page: Page): Promise<string[]> {
   await page.goto('/entries');
   await page.getByLabel('Filter entries').fill(BOT_USERNAME);
-  const editLinks = page.locator('a[href*="/edit/"]');
-  const count = await editLinks.count();
-  const ids: string[] = [];
-  for (let i = 0; i < count; i++) {
-    const href = await editLinks.nth(i).getAttribute('href');
-    if (!href) continue;
-    const id = href.split('/edit/')[1].split(/[?#]/)[0];
-    ids.push(id);
-  }
-  return ids;
+  // Wait for the filter to apply before reading links, so only bot rows are collected.
+  // The username appears in both the table and the hidden phone card, so only count the visible one.
+  await expect(
+    page.getByText(BOT_USERNAME).or(page.getByText(/no entries found/i)).filter({ visible: true }).first()
+  ).toBeVisible();
+  // The table and the phone cards both carry an edit link per build (#42), so dedupe the ids.
+  const hrefs = await page.locator('a[href*="/edit/"]').evaluateAll((as) => as.map((a) => a.getAttribute('href') ?? ''));
+  const ids = hrefs.filter(Boolean).map((href) => href.split('/edit/')[1].split(/[?#]/)[0]);
+  return [...new Set(ids)];
 }
 
 /** Owner-initiated soft delete via the verify -> edit -> delete flow. */
@@ -52,44 +51,47 @@ async function deleteOwnEntryById(page: Page, id: string) {
   await page.getByRole('button', { name: /verify & edit/i }).click();
 
   await expect(page.getByRole('button', { name: /save changes/i })).toBeVisible();
+  // Both builds must be saved as the year the user picked (a reset form used to post 2021).
+  // Soft, so a failure still deletes the row instead of leaving it on the live site.
+  await expect.soft(page.locator('#model_year')).toHaveValue('2024');
   await page.getByRole('button', { name: /delete this entry/i }).click();
   await page.getByRole('button', { name: /yes, delete it/i }).click();
   await expect(page).toHaveURL(/\/entries\?deleted=1/);
 }
 
 test.describe('Duplicate submission flow', () => {
-  test('duplicate warning appears and Submit Anyway creates a second entry; both are cleaned up', async ({ page }) => {
+  test('an identical second submission is stopped with a link to edit the first; the form keeps its values', async ({ page }) => {
     test.setTimeout(90000);
 
-    // First submission — should succeed outright.
+    // First submission: should succeed outright.
     await fillDuplicateBuild(page);
     await page.getByRole('button', { name: /submit build/i }).click();
     await expect(page).toHaveURL(/\/entries\?submitted=1/, { timeout: 15000 });
 
-    // Second, identical submission — should surface the duplicate warning.
-    await fillDuplicateBuild(page);
-    await page.getByRole('button', { name: /^submit build$/i }).click();
+    try {
+      // Second, identical submission: a hard stop (ADR 0017), not a second row.
+      await fillDuplicateBuild(page);
+      await page.getByRole('button', { name: /^submit build$/i }).click();
 
-    const duplicateWarning = page.getByText(/potential duplicate entry/i);
-    await expect(duplicateWarning).toBeVisible({ timeout: 15000 });
+      await expect(page.getByText(/you've already registered this build/i)).toBeVisible({ timeout: 15000 });
+      await expect(page.getByRole('button', { name: /submit anyway/i })).toHaveCount(0);
+      // The warning must not reset what the user typed (React resets uncontrolled fields).
+      await expect(page.locator('#model_year')).toHaveValue('2024');
 
-    const submitAnywayBtn = page.getByRole('button', { name: /submit anyway/i });
-    await expect(submitAnywayBtn).toBeVisible();
+      // "Edit that build" points at the first submission.
+      const editHref = await page.getByRole('link', { name: /edit that build/i }).getAttribute('href');
+      expect(editHref).toMatch(/^\/edit\/[0-9a-f-]{36}$/);
 
-    // The widget is reset after the duplicate response; wait for a fresh
-    // token before the button becomes clickable again.
-    await waitForTurnstileToken(page);
-    await expect(submitAnywayBtn).toBeEnabled({ timeout: 15000 });
-    await submitAnywayBtn.click();
-
-    await expect(page).toHaveURL(/\/entries\?submitted=1/, { timeout: 15000 });
-
-    // Cleanup: soft-delete both bot rows via the owner edit flow (the admin
-    // page only lists flagged rows, and these were never flagged).
-    const ids = await findBotEntryIds(page);
-    expect(ids.length).toBeGreaterThanOrEqual(2);
-    for (const id of ids) {
-      await deleteOwnEntryById(page, id);
+      // Exactly one row exists for the bot, and it's the one the link points at.
+      const botIds = await findBotEntryIds(page);
+      expect(botIds).toEqual([editHref!.split('/edit/')[1]]);
+    } finally {
+      // Cleanup: soft-delete every bot row via the owner edit flow (the admin page only
+      // lists flagged rows, and these were never flagged). Runs even if a check failed,
+      // so nothing is left on the live site.
+      for (const id of await findBotEntryIds(page)) {
+        await deleteOwnEntryById(page, id);
+      }
     }
 
     // Verify cleanup: no more rows for this bot username.

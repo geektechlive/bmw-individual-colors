@@ -181,7 +181,8 @@ export function snapColorName(raw: string): string {
   // Aliases are stored under their canonical name (#35), so one car can't be
   // registered twice under two names and the unique index sees one string.
   const canonical = canonicalColorName(cleaned);
-  if (canonical in BMW_COLORS) return canonical;
+  // Own keys only: `in` also matches built-ins like "toString" (see ownValue in colors.ts).
+  if (Object.hasOwn(BMW_COLORS, canonical)) return canonical;
 
   const isAllLower = cleaned !== cleaned.toUpperCase() && cleaned === cleaned.toLowerCase();
   const isAllUpper = cleaned !== cleaned.toLowerCase() && cleaned === cleaned.toUpperCase();

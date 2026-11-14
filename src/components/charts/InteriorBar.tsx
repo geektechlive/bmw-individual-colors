@@ -20,7 +20,7 @@ import {
   GRID_STROKE,
   TOOLTIP_STYLE,
 } from './palette';
-import { INTERIOR_HEX_MAP } from '../../lib/colors';
+import { INTERIOR_HEX_MAP, ownValue } from '../../lib/colors';
 import shared from './charts.module.css';
 
 interface Props {
@@ -62,7 +62,7 @@ export default function InteriorBar({ data }: Props) {
         />
         <Bar dataKey="count" radius={[0, 4, 4, 0]}>
           {data.map((entry) => (
-            <Cell key={entry.color} fill={INTERIOR_HEX_MAP[entry.color] ?? FALLBACK_PAINT} />
+            <Cell key={entry.color} fill={ownValue(INTERIOR_HEX_MAP, entry.color) ?? FALLBACK_PAINT} />
           ))}
         </Bar>
       </BarChart>

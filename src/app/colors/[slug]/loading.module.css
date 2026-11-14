@@ -1,0 +1,96 @@
+/* Same box model as page.module.css so nothing jumps when the page arrives. */
+.page {
+  max-width: var(--w-page);
+  margin: 0 auto;
+  padding: 0 var(--s-5) var(--s-8);
+}
+
+.hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+  gap: var(--s-6);
+  align-items: end;
+  margin: 0 calc(var(--s-5) * -1);
+  padding: var(--s-6) var(--s-5) 0;
+  background: var(--panel);
+  border-bottom: 1px solid var(--rule);
+}
+
+.heroText {
+  display: grid;
+  gap: var(--s-3);
+  justify-items: start;
+  padding-bottom: var(--s-7);
+  min-width: 0;
+}
+
+.crumbs {
+  width: 180px;
+  height: 16px;
+}
+
+.name {
+  width: min(420px, 100%);
+  height: 72px;
+}
+
+.tag {
+  width: 260px;
+  max-width: 100%;
+  height: 26px;
+}
+
+.lede {
+  width: min(380px, 100%);
+  height: 52px;
+}
+
+.cove {
+  display: grid;
+  justify-items: center;
+  align-content: end;
+  min-height: 340px;
+  padding: var(--s-2) 0 var(--s-7);
+}
+
+.sample {
+  width: min(210px, 62%);
+  aspect-ratio: 4 / 5.6;
+}
+
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr));
+  gap: var(--s-4);
+  margin: var(--s-4) 0 var(--s-6);
+}
+
+.tile {
+  height: 64px;
+}
+
+.charts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+  gap: var(--s-6);
+  margin-bottom: var(--s-7);
+}
+
+.chart {
+  height: 220px;
+}
+
+@media (max-width: 720px) {
+  .hero {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+  }
+
+  .heroText {
+    padding-bottom: var(--s-4);
+  }
+
+  .cove {
+    min-height: 260px;
+  }
+}

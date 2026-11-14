@@ -174,8 +174,18 @@ export function guessColorFromName(name: string): string {
   return '#888888';
 }
 
+/**
+ * Reads `map[key]` only when `key` is the map's own entry. Paint names are free text from an
+ * anonymous form, and a plain `map[key]` would return built-ins for names like "constructor"
+ * or "toString" (a function where a name or hex was expected breaks every page that lists
+ * builds).
+ */
+export function ownValue<T>(map: Readonly<Record<string, T>>, key: string): T | undefined {
+  return Object.hasOwn(map, key) ? map[key] : undefined;
+}
+
 export function getColorHex(colorName: string): string {
-  return BMW_COLORS[colorName] ?? guessColorFromName(colorName);
+  return ownValue(BMW_COLORS, colorName) ?? guessColorFromName(colorName);
 }
 
 export const COLOR_FAMILY_MAP: Record<string, string> = {
@@ -244,7 +254,8 @@ export const COLOR_FAMILY_MAP: Record<string, string> = {
 };
 
 export function getColorFamily(colorName: string): string {
-  if (COLOR_FAMILY_MAP[colorName]) return COLOR_FAMILY_MAP[colorName];
+  const known = ownValue(COLOR_FAMILY_MAP, colorName);
+  if (known) return known;
   const n = colorName.toLowerCase();
   if (/\bred\b|scarlet|crimson|carmine|corsa|ruby|preciosa|chianti|cinnabar|imola|zinnober|picasso|rosso/.test(n)) return 'Reds & Oranges';
   if (/\borange\b|sakhir|solar/.test(n)) return 'Reds & Oranges';
@@ -309,7 +320,7 @@ const ALIAS_SLUG_REDIRECTS: Record<string, string> = Object.fromEntries(
  * URLs redirect permanently instead of 404ing (#37).
  */
 export function aliasRedirectSlug(slug: string): string | null {
-  return ALIAS_SLUG_REDIRECTS[slug.toLowerCase()] ?? null;
+  return ownValue(ALIAS_SLUG_REDIRECTS, slug.toLowerCase()) ?? null;
 }
 
 /**
@@ -321,7 +332,7 @@ export function canonicalColorName(name: string): string {
   const cleaned = (name ?? '').trim().replace(/\s+/g, ' ');
   if (!cleaned) return cleaned;
   const key = cleaned.toLowerCase();
-  return ALIAS_LOOKUP[key] ?? CANONICAL_LOOKUP[key] ?? cleaned;
+  return ownValue(ALIAS_LOOKUP, key) ?? ownValue(CANONICAL_LOOKUP, key) ?? cleaned;
 }
 
 // Interior upholstery colors, used to fill the interior chart bars. Data, like BMW_COLORS.

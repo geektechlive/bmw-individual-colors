@@ -1,0 +1,95 @@
+.card {
+  padding: var(--s-4);
+  list-style: none;
+  min-width: 0;
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  margin-bottom: var(--s-3);
+  padding-bottom: var(--s-3);
+  border-bottom: 1px solid var(--rule);
+}
+
+.paint {
+  flex: 1;
+  min-width: 0;
+  color: var(--ink);
+  font-size: var(--t-16);
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}
+
+.paint:hover {
+  color: var(--accent-ink);
+}
+
+.paint:focus-visible,
+.edit:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  flex-shrink: 0;
+}
+
+.edit {
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  padding: 0 var(--s-2);
+  color: var(--accent-ink);
+  font-size: var(--t-13);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.edit:hover {
+  color: var(--ink);
+}
+
+.facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--s-3) var(--s-4);
+  margin: 0;
+}
+
+.fact {
+  min-width: 0;
+}
+
+.value {
+  margin: 2px 0 0;
+  color: var(--ink);
+  font-size: var(--t-14);
+  overflow-wrap: anywhere;
+}
+
+.detail {
+  color: var(--ink-3);
+  font-size: var(--t-12);
+}
+
+.forum {
+  display: inline-block;
+  background: var(--panel-2);
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--r);
+  padding: 1px 5px;
+  font-size: var(--t-11);
+  color: var(--ink-3);
+  margin-right: 5px;
+  vertical-align: middle;
+}
+
+.user {
+  color: var(--accent-ink);
+  font-weight: 500;
+}

@@ -365,14 +365,19 @@ test('a failed last-known-good save never downgrades a fresh read to an older ve
   assert.equal(await source(), '7', 'the fresh value is memoized, not the stale fallback');
 });
 
-test('concurrent requests in one isolate share a single in-flight version read (#23)', async () => {
+test('concurrent requests do NOT share an in-flight read: each waits on its own promise', async () => {
+  // Workers drops a promise created by one request when another request awaits it after
+  // the first has ended (compatibility flag handle_cross_request_promise_resolution). A
+  // cancelled prefetch that started the shared read 500'd every request waiting on it
+  // (seen in production 2026-11-14). So a stale memo means one read per request; the memo
+  // still serves everything else within the TTL.
   let reads = 0;
-  let release: (v: string) => void = () => {};
+  const releases: Array<(v: string) => void> = [];
   const source = createVersionSource(
     async () => {
       reads += 1;
       return new Promise<string>((resolve) => {
-        release = resolve;
+        releases.push(resolve);
       });
     },
     lkgStore(),
@@ -381,9 +386,11 @@ test('concurrent requests in one isolate share a single in-flight version read (
   const a = source();
   const b = source();
   await Promise.resolve();
-  release('3');
+  assert.equal(reads, 2, 'each concurrent request starts its own read');
+  releases.forEach((release) => release('3'));
   assert.deepEqual(await Promise.all([a, b]), ['3', '3']);
-  assert.equal(reads, 1);
+  assert.equal(await source(), '3', 'then the memo serves');
+  assert.equal(reads, 2, 'no read while the memo is fresh');
 });
 
 test('a successful read is saved as last-known-good', async () => {

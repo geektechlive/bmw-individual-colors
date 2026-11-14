@@ -1,0 +1,170 @@
+/* Layout and controls shared by the submit and edit forms. */
+
+.grid2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--s-4);
+}
+
+.gridAuto {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: var(--s-4);
+}
+
+.gridAutoTight {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: var(--s-3);
+}
+
+.row {
+  display: flex;
+  gap: var(--s-2);
+}
+
+.rowWrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+}
+
+.rowWrapSpaced {
+  margin-bottom: var(--s-2);
+}
+
+/* fieldset + legend that look like a .field with a .field-label */
+.fieldset {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  min-inline-size: 0;
+}
+
+.legend {
+  padding: 0;
+  margin-bottom: var(--s-2);
+}
+
+.subLabel {
+  font-size: var(--t-12);
+}
+
+.hint {
+  margin: 0;
+}
+
+.textarea {
+  resize: vertical;
+}
+
+.locked {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+/* Body style (M3 / M4) choice tiles */
+.choice {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: var(--s-2) var(--s-3);
+  background: var(--panel-2);
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--r);
+  cursor: pointer;
+  font-size: var(--t-14);
+  font-weight: 600;
+  color: var(--ink);
+}
+
+/* Forum pills. The radio inside is sr-only; the ring is drawn on the pill. */
+.pill {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  background: var(--panel-2);
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--r-pill);
+  cursor: pointer;
+  font-size: var(--t-13);
+  color: var(--ink);
+  transition: background var(--dur-fast) var(--ease), border-color var(--dur-fast) var(--ease);
+}
+
+.pill:hover {
+  border-color: var(--ink-3);
+}
+
+.pill:has(:focus-visible) {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.pillActive {
+  background: var(--panel-3);
+  border-color: var(--accent);
+}
+
+/* Color combobox */
+.comboWrap {
+  position: relative;
+}
+
+.comboRow {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+}
+
+.comboInput {
+  flex: 1;
+}
+
+.listbox {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  background: var(--panel-2);
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--r);
+  max-height: 220px;
+  overflow-y: auto;
+  margin-top: 2px;
+  box-shadow: var(--shadow-2);
+}
+
+.listbox[hidden] {
+  display: none;
+}
+
+.option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: var(--s-2) var(--s-3);
+  cursor: pointer;
+  border-bottom: 1px solid var(--rule);
+  color: var(--ink);
+  background: var(--panel-2);
+}
+
+.optionSelected {
+  color: var(--accent-ink);
+  box-shadow: inset 3px 0 0 var(--accent);
+}
+
+.optionActive {
+  background: var(--panel-3);
+}
+
+/* Paint names in the list are input text, so they stay in the body font */
+.optionName {
+  font-size: var(--t-14);
+}

@@ -16,6 +16,8 @@ interface FormState {
   error?: string;
   duplicate?: boolean;
   duplicateInfo?: string;
+  /** The submitter's existing build with the same spec, so the form can link to its edit page. */
+  duplicateId?: string;
 }
 
 interface VerifyState {
@@ -135,24 +137,25 @@ export async function submitEntry(
   const supabase = createAdminClient();
 
   // ── Duplicate check ───────────────────────────────────────────────────────
-  const forceSubmit = formData.get('force_submit') === '1';
-  if (!forceSubmit) {
-    const { data: existing } = await supabase
-      .from('bmwic_entries')
-      .select('id')
-      .eq('forum_username', value.forum_username)
-      .eq('ext_color', value.ext_color)
-      .eq('model_year', value.model_year)
-      .eq('body_style', value.body_style)
-      .eq('drivetrain', value.drivetrain)
-      .is('deleted_at', null)
-      .limit(1);
-    if (existing && existing.length > 0) {
-      return {
-        duplicate: true,
-        duplicateInfo: `${value.model_year} ${value.body_style} ${value.drivetrain} in ${value.ext_color} is already registered under "${value.forum_username}".`,
-      };
-    }
+  // One visible build per user and spec, the same rule the unique index enforces (#35).
+  // A duplicate is a hard stop with a link to edit the existing build (ADR 0017); there is
+  // no "submit anyway", because the index would refuse the insert anyway.
+  const { data: existing } = await supabase
+    .from('bmwic_entries')
+    .select('id')
+    .eq('forum_username', value.forum_username)
+    .eq('ext_color', value.ext_color)
+    .eq('model_year', value.model_year)
+    .eq('body_style', value.body_style)
+    .eq('drivetrain', value.drivetrain)
+    .is('deleted_at', null)
+    .limit(1);
+  if (existing && existing.length > 0) {
+    return {
+      duplicate: true,
+      duplicateInfo: `${value.model_year} ${value.body_style} ${value.drivetrain} in ${value.ext_color} is already registered under "${value.forum_username}".`,
+      duplicateId: existing[0].id,
+    };
   }
 
   // ── Insert ────────────────────────────────────────────────────────────────

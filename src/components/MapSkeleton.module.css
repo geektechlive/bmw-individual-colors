@@ -1,0 +1,7 @@
+/* Same box as RegistryMap.module.css .container so nothing jumps when the map mounts. */
+.box {
+  width: 100%;
+  height: calc(100vh - 140px);
+  height: calc(100dvh - 140px);
+  border: 1px solid var(--rule);
+}
