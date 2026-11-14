@@ -63,9 +63,9 @@ async function respond(request: Request, env: Env, ctx: ExecutionContext): Promi
 
   // OG cards: global KV first; misses render through the per-colo page cache,
   // so 404s for unknown slugs are cached like any other page (#24).
+  // The card key uses OG_DESIGN_VERSION, not the deploy id, so deploys don't wipe cards.
   const og = await handleOgImage(request, {
     store: env.OG_CACHE,
-    buildId: env.CF_VERSION_METADATA.id,
     getVersion,
     origin: edgeCached,
     waitUntil: (promise) => ctx.waitUntil(promise),

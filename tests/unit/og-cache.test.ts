@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { handleOgImage, ogSlug, type OgCacheDeps } from '../../src/lib/og-cache';
+import { handleOgImage, ogSlug, OG_DESIGN_VERSION, type OgCacheDeps } from '../../src/lib/og-cache';
 
 const SITE = 'https://mcolors.geektechlive.com';
 const PNG = new Uint8Array([0x89, 0x50, 0x4e, 0x47, 1, 2, 3]);
@@ -30,7 +30,7 @@ function harness(opts: { version?: string | null; origin?: (r: Request) => Respo
   let originCalls = 0;
   const deps: OgCacheDeps = {
     store: kv,
-    buildId: 'b1',
+    designVersion: 'd1',
     getVersion: async () => (opts.version === undefined ? '7' : opts.version),
     origin: async (r) => {
       originCalls += 1;
@@ -81,16 +81,16 @@ test('a miss renders once, stores the PNG in KV, and a second request is a HIT w
   assert.equal(h.originCalls, 1);
 });
 
-test('the KV key carries build id, slug and data version; entries expire', async () => {
+test('the KV key carries the card design version, slug and data version (not the deploy); entries expire', async () => {
   const h = harness();
   await handleOgImage(req('/colors/smyrna-green/opengraph-image'), h.deps);
   await h.settle();
   const [key] = [...h.kv.store.keys()];
-  assert.equal(key, 'og:b1:smyrna-green:7');
+  assert.equal(key, 'og:d1:smyrna-green:7');
   assert.ok((h.kv.store.get(key)?.ttl ?? 0) > 0);
 });
 
-test('a new data version or a new deploy misses (fresh build count / new layout)', async () => {
+test('a new data version or a new card design misses (fresh build count / new layout)', async () => {
   const h = harness();
   await handleOgImage(req('/colors/smyrna-green/opengraph-image'), h.deps);
   await h.settle();
@@ -98,9 +98,25 @@ test('a new data version or a new deploy misses (fresh build count / new layout)
   const bumped = await handleOgImage(req('/colors/smyrna-green/opengraph-image'), h.deps);
   assert.equal(bumped?.headers.get('x-og-cache'), 'MISS');
   await h.settle();
-  h.deps.buildId = 'b2';
-  const redeployed = await handleOgImage(req('/colors/smyrna-green/opengraph-image'), h.deps);
-  assert.equal(redeployed?.headers.get('x-og-cache'), 'MISS');
+  h.deps.designVersion = 'd2';
+  const redesigned = await handleOgImage(req('/colors/smyrna-green/opengraph-image'), h.deps);
+  assert.equal(redesigned?.headers.get('x-og-cache'), 'MISS');
+});
+
+test('a redeploy does not wipe the cards: the key has no deploy id (ADR 0006 addendum)', async () => {
+  // Every deploy used to change the key, so a crawler after each deploy re-rendered every
+  // card at 1-2 s CPU each, and Cloudflare killed some (2026-11-14). Same design and data
+  // version after a deploy must be a HIT.
+  const h = harness();
+  await handleOgImage(req('/colors/smyrna-green/opengraph-image'), h.deps);
+  await h.settle();
+  const afterDeploy = await handleOgImage(req('/colors/smyrna-green/opengraph-image'), { ...h.deps });
+  assert.equal(afterDeploy?.headers.get('x-og-cache'), 'HIT');
+  assert.equal(h.originCalls, 1);
+});
+
+test('the default design version is a non-empty constant, so the worker needs no deploy id', () => {
+  assert.match(OG_DESIGN_VERSION, /^\S+$/);
 });
 
 test('query strings are ignored, so they cannot force renders or mint keys', async () => {

@@ -6,7 +6,8 @@
  * 1.3-2 s of CPU on a 10 ms plan; both requests Cloudflare killed in the week
  * of 2026-11-06 were cards. Cards are requested rarely and from many data
  * centers, so the per-colo Cache API almost never has them. Free-tier Workers
- * KV is global: a card renders again only after a data change or a deploy.
+ * KV is global: a card renders again only after a data change or a card
+ * design change (OG_DESIGN_VERSION), never because of a deploy.
  * KV is eventually consistent (~60 s), so concurrent first requests in
  * different regions can still each render; that is acceptable at this volume.
  *
@@ -23,17 +24,25 @@ export interface OgStore {
   put(key: string, value: ArrayBuffer, options?: { expirationTtl?: number }): Promise<void>;
 }
 
+/**
+ * Bump when the card layout changes, so cached cards re-render. Deliberately NOT the deploy
+ * id: keying on the deploy wiped every card on every deploy, and a crawler then re-rendered
+ * them all at 1-2 s CPU each; Cloudflare killed some (2026-11-14, ADR 0006 addendum).
+ */
+export const OG_DESIGN_VERSION = 'card-1';
+
 export interface OgCacheDeps {
   /** Undefined when the binding is not configured; the handler then steps aside. */
   store: OgStore | undefined;
-  buildId: string;
+  /** Defaults to OG_DESIGN_VERSION; tests override it. */
+  designVersion?: string;
   getVersion: () => Promise<string | null>;
   origin: (request: Request) => Promise<Response>;
   waitUntil: (promise: Promise<unknown>) => void;
   renderFailed?: () => boolean;
 }
 
-/** Safety net only; keys change with every data version and deploy. */
+/** Safety net only; keys change with every data version and card design. */
 export const OG_KV_TTL_S = 30 * 86_400;
 /** Crawlers and chat apps may hold a card this long; counts can lag by that much. */
 const OG_BROWSER_CACHE_CONTROL = 'public, max-age=3600';
@@ -44,8 +53,8 @@ export function ogSlug(pathname: string): string | null {
   return OG_PATH.exec(pathname)?.[1] ?? null;
 }
 
-function ogKey(buildId: string, slug: string, version: string): string {
-  return `og:${buildId}:${slug}:${version}`;
+function ogKey(designVersion: string, slug: string, version: string): string {
+  return `og:${designVersion}:${slug}:${version}`;
 }
 
 function pngResponse(body: ArrayBuffer | null, status: 'HIT' | 'MISS', cacheControl = OG_BROWSER_CACHE_CONTROL): Response {
@@ -70,7 +79,7 @@ export async function handleOgImage(request: Request, deps: OgCacheDeps): Promis
   if (version === null) return null;
 
   const isHead = request.method === 'HEAD';
-  const key = ogKey(deps.buildId, slug, version);
+  const key = ogKey(deps.designVersion ?? OG_DESIGN_VERSION, slug, version);
   const cached = await deps.store.get(key, 'arrayBuffer').catch((error) => {
     console.error('og-cache: KV read failed', error);
     return null;
