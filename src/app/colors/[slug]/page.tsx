@@ -1,14 +1,17 @@
 import { notFound, permanentRedirect } from 'next/navigation';
 import Link from 'next/link';
 import { getEntriesByColor, getEntries, resolveColorSlug } from '../../../lib/queries';
-import { computeRarityLabel, computeRarityColor } from '../../../lib/analytics';
-
-export const dynamic = 'force-dynamic';
-import { getColorHex, getColorFamily, COLOR_ALIASES, aliasRedirectSlug, canonicalColorName, colorToSlug } from '../../../lib/colors';
+import { computeRarityLabel, computeColorCounts } from '../../../lib/analytics';
+import { getColorHex, getColorFamily, isLightColor, COLOR_ALIASES, aliasRedirectSlug, canonicalColorName, colorToSlug } from '../../../lib/colors';
+import { readablePaint, paintSurfaces } from '../../../lib/paint-accent';
+import { rankOf, paintSummary } from '../../../lib/paint-summary';
 import FlagButton from '../../../components/FlagButton';
+import PaintSwatch from '../../../components/PaintSwatch';
 import type { Metadata } from 'next';
 import { cssVars } from '../../../lib/css-vars';
 import styles from './page.module.css';
+
+export const dynamic = 'force-dynamic';
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
@@ -83,126 +86,125 @@ export default async function ColorDetailPage({ params }: { params: Promise<{ sl
   const family = getColorFamily(colorName);
   const totalBuilds = colorEntries.length;
   const rarityLabel = computeRarityLabel(totalBuilds);
-  const rarityColor = computeRarityColor(rarityLabel);
-  const totalRegistryBuilds = allEntries.length;
-  const pct = totalRegistryBuilds > 0 ? ((totalBuilds / totalRegistryBuilds) * 100).toFixed(1) : '0';
 
-  // Stats
-  const m3Count = colorEntries.filter(e => e.body_style === 'M3').length;
-  const m4Count = colorEntries.filter(e => e.body_style === 'M4').length;
-  const countries = new Set(colorEntries.map(e => e.location_country).filter(Boolean)).size;
+  // Readable form of the paint for text, bars and the pill (#45, ADR 0016 rule 6).
+  // The swatch keeps the paint's own hex.
+  const paintInk = readablePaint(hex, paintSurfaces(hex));
 
-  // Year distribution (for mini bar)
-  const yearMap = new Map<number, number>();
-  for (const e of colorEntries) yearMap.set(e.model_year, (yearMap.get(e.model_year) ?? 0) + 1);
-  const yearData = Array.from(yearMap.entries()).sort((a, b) => a[0] - b[0]);
+  const colorCounts = computeColorCounts(allEntries);
+  const rank = rankOf(colorCounts, colorName);
+  const summary = paintSummary(colorCounts, colorName);
 
-  // Drivetrain split
-  const rwdCount = colorEntries.filter(e => e.drivetrain === 'RWD').length;
-  const awdCount = colorEntries.filter(e => e.drivetrain === 'AWD').length;
+  const countBy = (pick: (e: (typeof colorEntries)[number]) => string) =>
+    colorEntries.reduce<Record<string, number>>((acc, e) => ({ ...acc, [pick(e)]: (acc[pick(e)] ?? 0) + 1 }), {});
+  const bodies = countBy((e) => e.body_style);
+  const gearboxes = countBy((e) => e.transmission);
+  const drives = countBy((e) => e.drivetrain);
+  const countries = new Set(colorEntries.map((e) => e.location_country).filter(Boolean)).size;
+
+  const years = colorEntries.map((e) => e.model_year);
+  const minYear = years.length ? Math.min(...years) : null;
+  const maxYear = years.length ? Math.max(...years) : null;
+  const yearRange = minYear === null ? null : minYear === maxYear ? `MY ${minYear}` : `MY ${minYear}–${maxYear}`;
+
+  // Spec tag: the build-sheet line under the name. Only parts with data are shown.
+  const specTag = [
+    yearRange,
+    [bodies.M3 ? `M3 ${bodies.M3}` : null, bodies.M4 ? `M4 ${bodies.M4}` : null].filter(Boolean).join(' · '),
+    Object.entries(gearboxes).sort((a, b) => b[1] - a[1]).map(([g, n]) => `${g} ${n}`).join(' · '),
+    Object.entries(drives).sort((a, b) => b[1] - a[1]).map(([d, n]) => `${d} ${n}`).join(' · '),
+  ].filter((s): s is string => Boolean(s));
+
+  const yearData = Object.entries(countBy((e) => String(e.model_year))).sort((a, b) => Number(a[0]) - Number(b[0]));
+  const maxYearCount = Math.max(0, ...yearData.map(([, c]) => c));
+  const driveSplit = Object.entries(drives).sort((a, b) => b[1] - a[1]);
 
   // Aliases: any alternate names that map to this canonical color.
   const aliases = Object.entries(COLOR_ALIASES)
     .filter(([, canonical]) => canonical === colorName)
     .map(([alias]) => alias);
 
-  const maxYearCount = Math.max(...yearData.map(([, c]) => c));
-
-  const statTiles = [
-    { label: 'Total Builds', value: totalBuilds, color: 'var(--m-blue)' },
-    { label: 'M3 / M4', value: `${m3Count} / ${m4Count}`, color: 'var(--m-violet)' },
-    { label: 'Countries', value: countries, color: 'var(--m-red)' },
-  ];
-  const drivetrainRows = [
-    { label: 'RWD', count: rwdCount, color: 'var(--m-red)' },
-    { label: 'AWD', count: awdCount, color: 'var(--m-blue)' },
-  ];
-
   return (
-    <main className="page page--text" style={cssVars({ '--p': hex })}>
-      {/* Breadcrumb */}
-      <div className={styles.crumbs}>
-        <Link href="/" className="link">Home</Link>
-        <span>›</span>
-        <Link href="/colors" className="link">Colors</Link>
-        <span>›</span>
-        <span className="muted">{colorName}</span>
-      </div>
-
-      {/* Header */}
-      <div className={styles.header}>
-        <div className={styles.swatch} />
-        <div>
-          <div className={styles.titleRow}>
-            <h1 className="title paint-name">{colorName}</h1>
-            <span className={styles.rarity} style={cssVars({ '--p': rarityColor })}>
-              {rarityLabel}
-            </span>
-          </div>
-          <div className={styles.sub}>
-            {family} · <span className="num">{pct}%</span> of all registry builds
-          </div>
+    <main className={styles.page} style={cssVars({ '--p': hex, '--paint-ink': paintInk })}>
+      <section className={styles.hero} aria-labelledby="paint-name">
+        <div className={styles.heroText}>
+          <nav aria-label="Breadcrumb" className={styles.crumbs}>
+            <Link href="/colors">Colors</Link>
+            <span aria-hidden="true">/</span>
+            <span>{family}</span>
+          </nav>
+          <h1 id="paint-name" className={`paint-name ${styles.name}`}>{colorName}</h1>
+          {specTag.length > 0 && (
+            <p className={styles.tag}>
+              {specTag.map((part) => <span key={part}>{part}</span>)}
+            </p>
+          )}
+          {summary && <p className={styles.lede}>{summary}</p>}
           {aliases.length > 0 && (
-            <div className={styles.alias}>
-              Also known as: <span className={styles.aliasNames}>{aliases.join(', ')}</span>
-            </div>
+            <p className={styles.alias}>
+              Also known as <span className={styles.aliasNames}>{aliases.join(', ')}</span>
+            </p>
           )}
         </div>
-      </div>
 
-      {/* Stat tiles */}
-      <div className={styles.tiles}>
-        {statTiles.map(({ label, value, color }) => (
-          <div key={label} className={`card ${styles.tile}`} style={cssVars({ '--p': color })}>
-            <div className={`${styles.tileValue} num`}>{value}</div>
-            <div className={styles.tileLabel}>{label}</div>
+        <div className={styles.cove} aria-hidden="true">
+          <div className={styles.lamp} />
+          <div className={`${styles.spray} ${isLightColor(hex) ? styles.sprayLight : ''}`}>
+            <PaintSwatch name={colorName} hex={hex} size="fill" />
+            <div className={styles.sprayLabel}>
+              <span>{colorName}</span>
+              <span>BMW Individual</span>
+            </div>
+            <div className={styles.sprayHide} />
           </div>
-        ))}
-      </div>
+        </div>
+      </section>
 
-      {/* Mini charts row */}
-      <div className={styles.charts}>
-        {/* Year distribution — simple inline bar chart (no Recharts, SSR safe) */}
-        <div className={`card ${styles.chartCard}`}>
-          <div className={`label ${styles.chartTitle}`}>By Year</div>
-          {yearData.length === 0 ? (
-            <p className={styles.noData}>No data</p>
-          ) : (
-            <div className={styles.yearList}>
+      <dl className={styles.tiles}>
+        <div>
+          <dt className="label">Builds</dt>
+          <dd className="num">{totalBuilds}</dd>
+        </div>
+        <div>
+          <dt className="label">Rank</dt>
+          <dd className="num">{rank ? `#${rank} of ${colorCounts.length}` : '–'}</dd>
+        </div>
+        <div>
+          <dt className="label">Countries</dt>
+          <dd className="num">{countries}</dd>
+        </div>
+        <div>
+          <dt className="label">Rarity</dt>
+          <dd><span className={styles.pill}>{rarityLabel}</span></dd>
+        </div>
+      </dl>
+
+      {totalBuilds > 0 && (
+        <div className={styles.charts}>
+          <section aria-labelledby="by-year">
+            <h2 id="by-year" className={styles.chartTitle}>Builds by model year</h2>
+            <ul className={styles.bars}>
               {yearData.map(([year, count]) => (
-                <div key={year} className={styles.yearRow}>
-                  <span className={`${styles.yearLabel} mono`}>{year}</span>
-                  <div className={styles.track}>
-                    <div className={styles.fill} style={cssVars({ '--w': `${(count / maxYearCount) * 100}%` })} />
-                  </div>
-                  <span className={`${styles.yearCount} mono`}>{count}</span>
+                <li key={year} className={styles.bar}>
+                  <span>{year}</span>
+                  <i style={cssVars({ '--w': `${(count / maxYearCount) * 100}%` })} />
+                  <span>{count}</span>
+                </li>
+              ))}
+            </ul>
+          </section>
+          <section aria-labelledby="by-drive">
+            <h2 id="by-drive" className={styles.chartTitle}>Drivetrain</h2>
+            <div className={styles.split}>
+              {driveSplit.map(([drive, count]) => (
+                <div key={drive} style={cssVars({ '--n': count })}>
+                  {drive} {count}
                 </div>
               ))}
             </div>
-          )}
+          </section>
         </div>
-
-        {/* Drivetrain split */}
-        <div className={`card ${styles.chartCard}`}>
-          <div className={`label ${styles.chartTitle}`}>Drivetrain</div>
-          <div className={styles.dtList}>
-            {drivetrainRows.map(({ label, count, color }) => {
-              const pctDt = totalBuilds > 0 ? Math.round((count / totalBuilds) * 100) : 0;
-              return (
-                <div key={label}>
-                  <div className={styles.dtHead}>
-                    <span className={styles.dtName}>{label}</span>
-                    <span className={`${styles.dtCount} num`}>{count} ({pctDt}%)</span>
-                  </div>
-                  <div className={styles.dtTrack}>
-                    <div className={styles.fill} style={cssVars({ '--w': `${pctDt}%`, '--p': color })} />
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </div>
+      )}
 
       {/* Build list */}
       {colorEntries.length === 0 ? (
@@ -210,7 +212,7 @@ export default async function ColorDetailPage({ params }: { params: Promise<{ sl
           No builds with this color yet. <Link href="/submit" className="link">Submit yours →</Link>
         </div>
       ) : (
-        <div>
+        <div className={styles.buildList}>
           <h2 className={`label ${styles.buildsTitle}`}>
             All Builds ({totalBuilds})
           </h2>
@@ -225,13 +227,15 @@ export default async function ColorDetailPage({ params }: { params: Promise<{ sl
                     </div>
                     <div className={styles.rowDetail}>
                       {[
-                        e.interior_color,
-                        (e.interior_seats || e.interior_leather)
-                          ? `(${[e.interior_seats, e.interior_leather ? `${e.interior_leather} Leather` : null].filter(Boolean).join(', ')})`
-                          : e.interior_type ? `(${e.interior_type})` : null,
-                      ].filter(Boolean).join(' ')}
-                      {e.wheels && ` · ${e.wheels}`}
-                      {location && ` · ${location}`}
+                        [
+                          e.interior_color,
+                          (e.interior_seats || e.interior_leather)
+                            ? `(${[e.interior_seats, e.interior_leather ? `${e.interior_leather} Leather` : null].filter(Boolean).join(', ')})`
+                            : e.interior_type ? `(${e.interior_type})` : null,
+                        ].filter(Boolean).join(' '),
+                        e.wheels,
+                        location,
+                      ].filter(Boolean).join(' · ')}
                     </div>
                   </div>
                   {e.forum_username && (

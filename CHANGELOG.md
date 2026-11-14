@@ -8,6 +8,16 @@ Run `npx tsx scripts/post-to-bimmerpost.ts` to publish pending items to the foru
 
 ## [Unreleased]
 
+- **Added:** colors page with lit tiles, sort, filter and search (#47)
+
+- **Added:** home page paint wall, facts panel and latest builds (#46)
+
+- **Added:** hue sort for paint walls and the colors page (#46, #47)
+
+- **Added:** color pages tinted by their paint, with a spray-out card (#45)
+
+- **Added:** PaintSwatch with solid, metallic, pearl and frozen finishes (#44)
+
 - **Improved:** CSS Modules on tokens, Tailwind removed, design lint (#39, #40)
 
 - **Added:** design tokens, three self-hosted fonts and tested contrast pairs (#38)

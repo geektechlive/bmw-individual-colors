@@ -153,17 +153,6 @@
   gap: var(--s-2);
 }
 
-.swatch {
-  display: inline-block;
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  background: var(--p);
-  border: 1px solid var(--rule-strong);
-  flex-shrink: 0;
-  box-shadow: 0 0 8px color-mix(in srgb, var(--p) 33%, transparent);
-}
-
 .colorLink {
   color: var(--ink);
   text-decoration: none;

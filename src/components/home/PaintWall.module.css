@@ -1,0 +1,151 @@
+/* The paint wall (#46). Strips are drawn flat (plain paint color) and the whole wall is lit as
+   one surface by ::after, so the reflection runs across every strip. No text sits on the wall:
+   the read-out and the family ticks are on the page ground. */
+
+.wall {
+  position: relative;
+  height: 230px;
+  border-radius: var(--r-lg);
+  overflow: hidden;
+}
+
+.strips {
+  display: flex;
+  gap: 2px;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.item {
+  flex: var(--n) 1 0;
+  min-width: 4px;
+  display: flex;
+}
+
+.strip {
+  position: relative;
+  flex: 1;
+  background: var(--p);
+  transition: filter var(--dur-fast) var(--ease);
+}
+
+.strip:hover,
+.strip:focus-visible {
+  filter: brightness(1.12);
+}
+
+.strip:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: -2px;
+  z-index: 2;
+}
+
+/* One light source over the whole wall */
+.wall::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 3;
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--light) 34%, transparent) 0%,
+      color-mix(in srgb, var(--light) 12%, transparent) 26%,
+      color-mix(in srgb, var(--light) 4%, transparent) 47%,
+      color-mix(in srgb, var(--shade) 22%, transparent) 49%,
+      color-mix(in srgb, var(--shade) 8%, transparent) 68%,
+      transparent 88%
+    ),
+    radial-gradient(60% 40% at 50% 0%, color-mix(in srgb, var(--light) 22%, transparent), transparent 70%);
+}
+
+/* One light sweep on load. The wall is complete without it. */
+.wall::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
+  background: linear-gradient(
+      100deg,
+      transparent 42%,
+      color-mix(in srgb, var(--light) 28%, transparent) 50%,
+      transparent 58%
+    )
+    0 0 / 260% 100% no-repeat;
+  background-position: 130% 0;
+  animation: sweep 2.2s cubic-bezier(0.45, 0, 0.2, 1) 0.4s 1 both;
+}
+
+@keyframes sweep {
+  from {
+    background-position: 130% 0;
+  }
+
+  to {
+    background-position: -30% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wall::before {
+    display: none;
+  }
+}
+
+/* ---------- Family ticks ---------- */
+
+.ticks {
+  position: relative;
+  height: 28px;
+  margin-top: var(--s-1);
+  overflow: hidden;
+}
+
+.tick {
+  position: absolute;
+  top: 0;
+  left: var(--x);
+  width: var(--w);
+  height: 100%;
+  box-sizing: border-box;
+  padding: 14px 0 0 6px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 14px;
+  border-left: 1px solid var(--ink-3);
+  font-family: var(--font-mono);
+  font-size: var(--t-11);
+  letter-spacing: var(--track-label);
+  text-transform: uppercase;
+  color: var(--ink-3);
+  white-space: nowrap;
+}
+
+/* ---------- Read-out ---------- */
+
+.read {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--s-3);
+  flex-wrap: wrap;
+  min-height: 1.6em;
+  margin-top: var(--s-2);
+  font-family: var(--font-mono);
+  font-size: var(--t-13);
+  color: var(--ink-2);
+}
+
+.read b {
+  color: var(--ink);
+  font-weight: 500;
+}
+
+@media (max-width: 720px) {
+  .wall {
+    height: 150px;
+  }
+}

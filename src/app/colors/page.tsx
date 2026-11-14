@@ -1,8 +1,9 @@
 import Link from 'next/link';
 import { getEntries } from '../../lib/queries';
-import { computeColorCounts } from '../../lib/analytics';
-import { getColorFamily, colorToSlug, isLightColor } from '../../lib/colors';
-import { cssVars } from '../../lib/css-vars';
+import { computeColorCounts, computeRarityLabel } from '../../lib/analytics';
+import { getColorFamily, colorToSlug } from '../../lib/colors';
+import { getPaintFinish } from '../../lib/paint-finish';
+import ColorsBrowser from '../../components/colors/ColorsBrowser';
 import type { Metadata } from 'next';
 import styles from './page.module.css';
 
@@ -13,6 +14,15 @@ export const metadata: Metadata = { title: 'All Colors — BMW M Individual Colo
 export default async function ColorsPage() {
   const entries = await getEntries();
   const colorCounts = computeColorCounts(entries);
+  const colors = colorCounts.map(({ color, count, hex }) => ({
+    name: color,
+    slug: colorToSlug(color),
+    hex,
+    count,
+    rarity: computeRarityLabel(count),
+    family: getColorFamily(color),
+    finish: getPaintFinish(color),
+  }));
 
   return (
     <main className="page">
@@ -23,27 +33,7 @@ export default async function ColorsPage() {
       <p className={`muted ${styles.intro}`}>
         {colorCounts.length} colors across {entries.length} builds in the registry.
       </p>
-
-      <div className={styles.grid}>
-        {colorCounts.map(({ color, count, hex }) => {
-          const slug = colorToSlug(color);
-          const family = getColorFamily(color);
-          const light = isLightColor(hex);
-          return (
-            <Link key={color} href={`/colors/${slug}`} className={styles.tileLink}>
-              <div
-                className={`${styles.tile} ${light ? styles.tileDark : styles.tileLight}`}
-                style={cssVars({ '--p': hex })}
-              >
-                <div className={`${styles.tileName} paint-name`}>{color}</div>
-                <div className={`${styles.tileMeta} num`}>
-                  {count} build{count !== 1 ? 's' : ''} · {family}
-                </div>
-              </div>
-            </Link>
-          );
-        })}
-      </div>
+      <ColorsBrowser colors={colors} />
     </main>
   );
 }

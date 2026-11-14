@@ -60,6 +60,10 @@
   /* Light and shade for lighting effects and shadows */
   --light: color-mix(in srgb, white 100%, transparent);
   --shade: color-mix(in srgb, black 100%, transparent);
+
+  /* Pearl paint shifts toward these two tints across the panel (PaintSwatch, #44). MARK-ONLY. */
+  --pearl-cool: oklch(0.82 0.09 200);
+  --pearl-warm: oklch(0.6 0.14 330);
   --shadow-1: 0 1px 2px color-mix(in srgb, black 40%, transparent);
   --shadow-2: 0 14px 30px -12px color-mix(in srgb, black 70%, transparent);
   --scrim: color-mix(in srgb, black 55%, transparent);

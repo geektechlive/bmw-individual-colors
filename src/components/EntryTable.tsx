@@ -4,8 +4,8 @@ import { useCallback, useEffect, useState } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { getColorHex, colorToSlug } from '../lib/colors';
-import { cssVars } from '../lib/css-vars';
 import FlagButton from './FlagButton';
+import PaintSwatch from './PaintSwatch';
 import styles from './EntryTable.module.css';
 import type { BmwEntry } from '../types';
 
@@ -276,7 +276,7 @@ export default function EntryTable({ entries }: Props) {
                 <tr key={e.id} className={styles.row}>
                   <td className={styles.td}>
                     <div className={styles.colorCell}>
-                      <span className={styles.swatch} style={cssVars({ '--p': hex })} />
+                      <PaintSwatch name={e.ext_color} hex={hex} />
                       <Link
                         href={`/colors/${colorToSlug(e.ext_color)}`}
                         className={`paint-name ${styles.colorLink}`}

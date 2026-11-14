@@ -1,0 +1,161 @@
+/* PaintSwatch (#44, ADR 0016). Paint is drawn in CSS from the paint's hex (--p) and its
+   finish: no images and no server work. Ported from the approved mockups' finish study
+   and "studio" lighting pass, with literals replaced by tokens. */
+
+.paint {
+  --p: var(--ink-3);
+  position: relative;
+  display: block;
+  flex: none;
+  overflow: hidden;
+  isolation: isolate;
+  background-color: var(--p);
+}
+
+.paint::before,
+.paint::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+/* ---------- Finishes ---------- */
+
+/* Solid: a hard gloss reflection across the top, no flake. */
+.solid {
+  background:
+    linear-gradient(
+      172deg,
+      color-mix(in srgb, var(--light) 26%, transparent) 0 26%,
+      color-mix(in srgb, var(--light) 4%, transparent) 27% 40%,
+      transparent 41%
+    ),
+    linear-gradient(
+      180deg,
+      color-mix(in oklab, var(--p), var(--light) 6%),
+      var(--p) 55%,
+      color-mix(in oklab, var(--p), var(--shade) 38%)
+    );
+}
+
+/* Metallic: a wide highlight that darkens toward the lower edge, plus fine flake. */
+.metallic {
+  background:
+    radial-gradient(
+      90% 60% at 28% 18%,
+      color-mix(in srgb, var(--light) 55%, transparent),
+      color-mix(in srgb, var(--light) 8%, transparent) 38%,
+      transparent 60%
+    ),
+    linear-gradient(
+      155deg,
+      color-mix(in oklab, var(--p), var(--light) 22%) 0%,
+      var(--p) 42%,
+      color-mix(in oklab, var(--p), var(--shade) 55%) 100%
+    );
+}
+
+.metallic::after {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.4' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 1.6 -0.55'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  mix-blend-mode: overlay;
+  opacity: 0.55;
+}
+
+/* Pearl: the color shifts from one edge to the other. */
+.pearl {
+  background:
+    radial-gradient(80% 55% at 30% 15%, color-mix(in srgb, var(--light) 45%, transparent), transparent 55%),
+    linear-gradient(
+      120deg,
+      color-mix(in oklab, var(--p), var(--pearl-cool) 28%) 0%,
+      var(--p) 45%,
+      color-mix(in oklab, var(--p), var(--pearl-warm) 30%) 85%,
+      color-mix(in oklab, var(--p), var(--shade) 40%) 100%
+    );
+}
+
+/* Frozen: matte. No highlight and no horizon, a soft fade and a faint grain. */
+.frozen {
+  background: linear-gradient(
+    165deg,
+    color-mix(in oklab, var(--p), var(--light) 7%),
+    var(--p) 60%,
+    color-mix(in oklab, var(--p), var(--shade) 22%)
+  );
+}
+
+.frozen::after {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.5'/%3E%3C/svg%3E");
+  mix-blend-mode: soft-light;
+  opacity: 0.35;
+}
+
+/* ---------- Studio lighting (tile and panel) ----------
+   An overhead softbox reflects in the clear coat as a bright band, then a hard horizon
+   line where the panel starts reflecting the dark floor. Matte paint gets no horizon. */
+.studio:not(.frozen)::before {
+  z-index: 1;
+  background:
+    linear-gradient(
+        100deg,
+        transparent 14%,
+        color-mix(in srgb, var(--light) 16%, transparent) 15% 21%,
+        transparent 22% 30%,
+        color-mix(in srgb, var(--light) 8%, transparent) 31% 33%,
+        transparent 34%
+      )
+      0 0 / 100% 46% no-repeat,
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--light) 30%, transparent) 0%,
+      color-mix(in srgb, var(--light) 10%, transparent) 28%,
+      color-mix(in srgb, var(--light) 3%, transparent) 45%,
+      color-mix(in srgb, var(--shade) 20%, transparent) 47%,
+      color-mix(in srgb, var(--shade) 8%, transparent) 64%,
+      transparent 85%
+    );
+}
+
+.studio.frozen::before {
+  z-index: 1;
+  background: radial-gradient(90% 60% at 50% 0%, color-mix(in srgb, var(--light) 10%, transparent), transparent 70%);
+}
+
+/* ---------- Sizes ---------- */
+
+/* Chip: tables, the home feed, pickers and map markers. */
+.chip {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--light) 12%, transparent);
+}
+
+.chipSm {
+  width: 14px;
+  height: 14px;
+}
+
+/* Tile: the colors grid. Fills its container's width. */
+.tile {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  border-radius: var(--r-lg);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--light) 8%, transparent);
+}
+
+/* Fill: covers its positioned parent and takes the parent's shape (the spray-out card). */
+.fill {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+}
+
+/* Panel: a body panel with a slight curve along its lower edge (the finish study). */
+.panel {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  border-radius: 3px 3px 40% 40% / 3px 3px 14% 14%;
+}

@@ -1,0 +1,15 @@
+.heading {
+  height: 40px;
+  max-width: 320px;
+  margin-bottom: var(--s-6);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 200px), 1fr));
+  gap: var(--s-4);
+}
+
+.tile {
+  aspect-ratio: 4 / 3;
+}
