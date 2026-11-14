@@ -12,6 +12,8 @@ import {
 } from 'recharts';
 import { getColorHex } from '../../lib/colors';
 import type { BmwEntry } from '../../types';
+import { AXIS_LINE, AXIS_TICK, GRID_STROKE, TOOLTIP_STYLE } from './palette';
+import shared from './charts.module.css';
 
 interface Props {
   entries: BmwEntry[];
@@ -19,7 +21,7 @@ interface Props {
 
 export default function YearTrend({ entries }: Props) {
   if (entries.length === 0) {
-    return <p style={{ color: '#94a3b8', textAlign: 'center', padding: '2rem' }}>No data yet.</p>;
+    return <p className={shared.empty}>No data yet.</p>;
   }
 
   // Get top 8 colors by total count
@@ -49,26 +51,26 @@ export default function YearTrend({ entries }: Props) {
   return (
     <ResponsiveContainer width="100%" height={360}>
       <LineChart data={chartData} margin={{ top: 8, right: 24, bottom: 8, left: 0 }}>
-        <CartesianGrid stroke="#2d3f55" strokeDasharray="3 3" />
+        <CartesianGrid stroke={GRID_STROKE} strokeDasharray="3 3" />
         <XAxis
           dataKey="year"
-          tick={{ fill: '#94a3b8', fontSize: 12 }}
-          axisLine={{ stroke: '#2d3f55' }}
+          tick={AXIS_TICK}
+          axisLine={AXIS_LINE}
           tickLine={false}
         />
         <YAxis
           allowDecimals={false}
-          tick={{ fill: '#94a3b8', fontSize: 12 }}
+          tick={AXIS_TICK}
           axisLine={false}
           tickLine={false}
         />
         <Tooltip
-          contentStyle={{ background: '#1e2a3a', border: '1px solid #2d3f55', color: '#e2e8f0' }}
+          contentStyle={TOOLTIP_STYLE}
           formatter={(v, name) => [Number(v), String(name)]}
         />
         <Legend
           formatter={(value) => (
-            <span style={{ color: '#cbd5e1', fontSize: 11 }}>{value}</span>
+            <span className={shared.legendLabelSmall}>{value}</span>
           )}
           iconType="circle"
           iconSize={8}

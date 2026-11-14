@@ -1,0 +1,28 @@
+.main { padding-block: var(--s-5); }
+.header { display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--s-2); }
+.notice { margin-bottom: var(--s-4); }
+.mutedNote { margin-bottom: var(--s-4); color: var(--ink-3); font-size: var(--t-13); }
+.row {
+  background: var(--panel);
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--r-lg);
+  padding: var(--s-4);
+  margin-bottom: var(--s-3);
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--s-4);
+  flex-wrap: wrap;
+}
+.body { flex: 1; min-width: 260px; }
+.actions { display: flex; gap: var(--s-2); flex-shrink: 0; }
+.entryTitle { font-weight: 700; color: var(--ink); margin-bottom: var(--s-1); }
+.entryMeta { color: var(--ink-2); font-size: var(--t-13); }
+.entrySource { color: var(--ink-3); font-size: var(--t-12); margin-top: var(--s-1); }
+.flags { list-style: none; padding: 0; margin: 10px 0 0; display: grid; gap: 6px; }
+.flag { font-size: var(--t-13); color: var(--ink); }
+.flagReason { color: var(--danger-ink); font-weight: 700; }
+.flagDate { color: var(--ink-3); font-size: var(--t-11); }
+.flagNote { color: var(--ink-2); margin-top: 2px; }
+.deletedAt { color: var(--ink-3); font-size: var(--t-11); margin-top: var(--s-1); }
+.sectionTitle { margin: 40px 0 var(--s-2); }

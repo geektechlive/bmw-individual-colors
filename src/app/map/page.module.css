@@ -1,0 +1,18 @@
+main.main {
+  padding-bottom: 0;
+}
+
+.head {
+  display: flex;
+  align-items: baseline;
+  gap: var(--s-4);
+  margin-bottom: var(--s-4);
+}
+
+.heading {
+  margin: 0;
+}
+
+.count {
+  font-size: var(--t-13);
+}

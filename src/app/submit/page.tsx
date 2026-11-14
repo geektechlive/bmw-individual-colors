@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import EntryForm from '../../components/EntryForm';
 import type { Metadata } from 'next';
+import styles from './page.module.css';
 
 export const metadata: Metadata = {
   title: 'Submit Your Build — BMW Individual Colors Registry',
@@ -8,46 +9,20 @@ export const metadata: Metadata = {
 
 export default function SubmitPage() {
   return (
-    <main style={{ maxWidth: 760, margin: '0 auto', padding: '2rem 1.5rem' }}>
-      <div style={{ marginBottom: 24 }}>
-        <Link
-          href="/"
-          style={{
-            color: '#1C69D4',
-            textDecoration: 'none',
-            fontSize: 14,
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: 4,
-          }}
-        >
+    <main className="page page--form">
+      <div className={styles.back}>
+        <Link href="/" className="link">
           ← Back to Home
         </Link>
       </div>
 
-      <h1
-        style={{
-          fontSize: 28,
-          fontWeight: 800,
-          color: '#e2e8f0',
-          marginBottom: 4,
-        }}
-      >
-        Submit Your Build
-      </h1>
-      <p style={{ color: '#94a3b8', fontSize: 14, marginBottom: 32 }}>
+      <h1 className={`title ${styles.heading}`}>Submit Your Build</h1>
+      <p className={`muted ${styles.lede}`}>
         Add your BMW M Individual color build to the community registry.
         Your submission helps track color popularity and distribution.
       </p>
 
-      <div
-        style={{
-          background: '#0f1923',
-          border: '1px solid #2d3f55',
-          borderRadius: 12,
-          padding: '2rem',
-        }}
-      >
+      <div className={`card ${styles.card}`}>
         <EntryForm />
       </div>
     </main>

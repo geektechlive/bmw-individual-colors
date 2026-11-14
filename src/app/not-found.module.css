@@ -1,0 +1,13 @@
+.main {
+  min-height: 60vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: var(--s-7) var(--s-4);
+  background: var(--bg);
+}
+.mark { width: 48px; margin-bottom: var(--s-4); }
+.heading { font-size: var(--t-display); font-weight: 900; color: var(--ink); letter-spacing: -0.02em; margin-bottom: var(--s-3); }
+.text { color: var(--ink-2); font-size: var(--t-16); max-width: 420px; margin-bottom: var(--s-6); line-height: 1.6; }

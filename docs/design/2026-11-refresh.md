@@ -54,21 +54,29 @@ All three load through `next/font`, self-hosted and subset. Three families is on
 usual limit. The exception is deliberate: Barlow Condensed is a single style used for one job, and
 it is what makes a paint name read as a paint name.
 
-## Tokens (starting values from the mockups)
+## Tokens
+
+The source of truth is `src/styles/tokens.css`, mirrored for SVG and canvas code in
+`src/lib/design-tokens.ts`. A unit test keeps the two in step and checks every allowed
+text-on-surface pair. The main ones are below. Ratios are against `--bg` and against `--panel-3`,
+the lightest surface.
 
 | Token | Value | Use |
 | --- | --- | --- |
 | `--bg` | `#0b0d10` | Page ground |
-| `--panel`, `--panel-2` | `#12151a`, `#181c22` | Raised surfaces |
-| `--rule` | `#262b33` | Hairlines (MARK-ONLY) |
-| `--ink` | `#eceef1` | Main text, 16.5:1 |
-| `--ink-2` | `#a9b0ba` | Secondary text, 8.9:1 |
-| `--ink-3` | `#848c97` | Labels and captions, 5.7:1 |
+| `--panel`, `--panel-2`, `--panel-3` | `#12151a`, `#181c22`, `#20252d` | Raised surfaces, lightest last |
+| `--rule`, `--rule-strong` | `#262b33`, `#3a414c` | Hairlines and input borders (MARK-ONLY) |
+| `--ink` | `#eceef1` | Main text, 16.7 / 13.2 |
+| `--ink-2` | `#a9b0ba` | Secondary text, 8.9 / 7.0 |
+| `--ink-3` | `#8b939e` | Labels and captions, 6.3 / 5.0 (lightened from the mockups' `#848c97` so it passes on every surface) |
+| `--accent`, `--accent-ink` | `#1c69d4`, `#6aa6ff` | Accent fill (MARK-ONLY) and its text form, 7.9 / 6.2 |
 | `--m-blue`, `--m-violet`, `--m-red` | `#1c69d4`, `#6f2da8`, `#e8002d` | M stripe (MARK-ONLY) |
+| `--danger`, `--warn`, `--ok` (+ `-ink`, `-wash`, `-rule`) | | Status fills, text, 16% washes and borders |
 | `--focus` | `#6aa6ff` | Focus ring |
-| `--r` | `4px` | The one radius for controls; tiles and frames may use 6 to 8px |
+| `--r`, `--r-lg` | `4px`, `8px` | Controls; cards and tiles |
 
-Spacing, the type scale, durations and easings are set in #38.
+The token file also holds the type scale (`--t-11` to `--t-40`, plus `--t-display` and
+`--t-title`), spacing (`--s-1` to `--s-8`), page widths, durations and easings.
 
 ## Paint swatch
 

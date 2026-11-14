@@ -4,6 +4,8 @@ import { useActionState, useState, useMemo, useEffect } from 'react';
 import { updateEntry, deleteOwnEntry } from '../../actions';
 import { BMW_COLORS, getColorHex, isLightColor } from '../../../lib/colors';
 import type { BmwEntry } from '../../../types';
+import { cssVars } from '../../../lib/css-vars';
+import styles from '../../../components/EntryForm.module.css';
 
 type CountryOption = { isoCode: string; name: string };
 type StateOption = { isoCode: string; name: string };
@@ -67,31 +69,6 @@ const COUNTRIES_WITH_STATES = new Set([
   'US', 'CA', 'AU', 'DE', 'GB', 'FR', 'JP', 'CN', 'BR', 'MX', 'IN', 'IT', 'ES', 'NL', 'CH', 'AT', 'BE', 'PL', 'CZ', 'SE', 'NO', 'DK', 'NZ',
 ]);
 
-const inputStyle: React.CSSProperties = {
-  width: '100%',
-  padding: '8px 12px',
-  background: '#1e2a3a',
-  border: '1px solid #2d3f55',
-  borderRadius: 6,
-  color: '#e2e8f0',
-  fontSize: 14,
-  outline: 'none',
-  boxSizing: 'border-box',
-};
-
-const labelStyle: React.CSSProperties = {
-  display: 'block',
-  fontSize: 13,
-  fontWeight: 600,
-  color: '#94a3b8',
-  marginBottom: 4,
-};
-
-const fieldStyle: React.CSSProperties = {
-  display: 'flex',
-  flexDirection: 'column',
-  gap: 4,
-};
 
 interface Props {
   entry: BmwEntry;
@@ -181,13 +158,13 @@ export default function EditEntryForm({ entry, editToken, editExpiry }: Props) {
 
   return (
     <>
-    <form action={action} style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+    <form action={action} className={styles.form}>
       <input type="hidden" name="id" value={entry.id} />
       <input type="hidden" name="edit_token" value={editToken ?? ''} />
       <input type="hidden" name="exp" value={editExpiry ?? ''} />
 
       {entry.edit_count > 0 && (
-        <p style={{ fontSize: 12, color: '#64748b', margin: 0 }}>
+        <p className={`field-hint ${styles.hint}`}>
           Edited {entry.edit_count} {entry.edit_count === 1 ? 'time' : 'times'}
           {entry.last_edited_at && (
             <> &middot; last updated {new Date(entry.last_edited_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</>
@@ -196,58 +173,39 @@ export default function EditEntryForm({ entry, editToken, editExpiry }: Props) {
       )}
 
       {countryNameMismatch && (
-        <div style={{
-          padding: '10px 14px',
-          background: 'rgba(234,179,8,0.1)',
-          border: '1px solid rgba(234,179,8,0.4)',
-          borderRadius: 6,
-          color: '#fde047',
-          fontSize: 13,
-        }}>
+        <div className="alert alert--warn">
           Original country &ldquo;{entry.location_country}&rdquo; was not recognized. Please select the correct country below before saving.
         </div>
       )}
 
       {state?.error && (
-        <div style={{
-          padding: '12px 16px',
-          background: 'rgba(220,38,38,0.15)',
-          border: '1px solid rgba(220,38,38,0.4)',
-          borderRadius: 8,
-          color: '#fca5a5',
-          fontSize: 14,
-        }}>
+        <div className="alert alert--danger">
           {state.error}
         </div>
       )}
 
       {/* Model Year + Body Style */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-        <div style={fieldStyle}>
-          <label style={labelStyle} htmlFor="model_year">Model Year</label>
-          <select id="model_year" name="model_year" required style={inputStyle} defaultValue={entry.model_year}>
+      <div className={styles.grid2}>
+        <div className="field">
+          <label className="field-label" htmlFor="model_year">Model Year</label>
+          <select id="model_year" name="model_year" required className="input" defaultValue={entry.model_year}>
             {[2021, 2022, 2023, 2024, 2025, 2026, 2027, 2028, 2029, 2030, 2031, 2032, 2033, 2034, 2035].map((y) => (
               <option key={y} value={y}>{y}</option>
             ))}
           </select>
         </div>
 
-        <div style={fieldStyle}>
-          <label style={labelStyle}>Body Style</label>
-          <div style={{ display: 'flex', gap: 8 }}>
+        <div className="field">
+          <label className="field-label">Body Style</label>
+          <div className={styles.row}>
             {['M3', 'M4'].map((bs) => (
-              <label key={bs} style={{
-                flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                padding: '8px 12px', background: '#1e2a3a', border: '1px solid #2d3f55',
-                borderRadius: 6, cursor: 'pointer', fontSize: 14, color: '#e2e8f0', fontWeight: 600,
-              }}>
+              <label key={bs} className={styles.choice}>
                 <input
                   type="radio"
                   name="body_style"
                   value={bs}
                   defaultChecked={entry.body_style === bs}
                   required
-                  style={{ marginRight: 6 }}
                 />
                 {bs}
               </label>
@@ -257,9 +215,9 @@ export default function EditEntryForm({ entry, editToken, editExpiry }: Props) {
       </div>
 
       {/* Variant + Transmission */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-        <div style={fieldStyle}>
-          <label style={labelStyle} htmlFor="variant">Variant</label>
+      <div className={styles.grid2}>
+        <div className="field">
+          <label className="field-label" htmlFor="variant">Variant</label>
           <select
             id="variant"
             name="variant"
@@ -270,7 +228,7 @@ export default function EditEntryForm({ entry, editToken, editExpiry }: Props) {
               setVariant(v);
               if (v !== 'Base (RWD)') setTransmission('8AT');
             }}
-            style={inputStyle}
+            className="input"
           >
             <option value="Base (RWD)">Base (RWD)</option>
             <option value="Competition">Competition</option>
@@ -278,19 +236,15 @@ export default function EditEntryForm({ entry, editToken, editExpiry }: Props) {
           </select>
         </div>
 
-        <div style={fieldStyle}>
-          <label style={labelStyle} htmlFor="transmission">Transmission</label>
+        <div className="field">
+          <label className="field-label" htmlFor="transmission">Transmission</label>
           <select
             id="transmission"
             name="transmission"
             required
             value={transmission}
             onChange={(e) => setTransmission(e.target.value)}
-            style={{
-              ...inputStyle,
-              opacity: variant !== 'Base (RWD)' ? 0.5 : 1,
-              pointerEvents: variant !== 'Base (RWD)' ? 'none' : 'auto',
-            }}
+            className={`input ${variant !== 'Base (RWD)' ? styles.locked : ''}`}
           >
             <option value="8AT">8AT (8-Speed Auto)</option>
             <option value="6MT">6MT (Manual)</option>
@@ -299,21 +253,17 @@ export default function EditEntryForm({ entry, editToken, editExpiry }: Props) {
       </div>
 
       {/* Individual Color — combobox */}
-      <div style={fieldStyle}>
-        <label style={labelStyle} htmlFor="ext_color_search">Individual Color *</label>
-        <div style={{ position: 'relative' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+      <div className="field">
+        <label className="field-label" htmlFor="ext_color_search">Individual Color *</label>
+        <div className={styles.comboWrap}>
+          <div className={styles.comboRow}>
             {selectedColorHex && (
-              <div style={{
-                width: 28, height: 28, borderRadius: 4, flexShrink: 0,
-                background: selectedColorHex,
-                border: '1px solid rgba(255,255,255,0.15)',
-                boxShadow: '0 1px 4px rgba(0,0,0,0.4)',
-              }} />
+              <div className={styles.swatch} style={cssVars({ '--p': selectedColorHex })} />
             )}
             <input
               type="text"
               id="ext_color_search"
+              className={`input ${styles.comboInput}`}
               placeholder="Type to search or enter a color name..."
               value={colorSearch}
               autoComplete="off"
@@ -324,19 +274,13 @@ export default function EditEntryForm({ entry, editToken, editExpiry }: Props) {
               }}
               onFocus={() => setShowColorDrop(true)}
               onBlur={() => setTimeout(() => setShowColorDrop(false), 150)}
-              style={{ ...inputStyle, flex: 1 }}
             />
           </div>
 
           <input type="hidden" name="ext_color" value={colorValue} />
 
           {showColorDrop && filteredColors.length > 0 && (
-            <div style={{
-              position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 50,
-              background: '#1e2a3a', border: '1px solid #2d3f55', borderRadius: 6,
-              maxHeight: 220, overflowY: 'auto', marginTop: 2,
-              boxShadow: '0 8px 24px rgba(0,0,0,0.5)',
-            }}>
+            <div className={styles.listbox}>
               {filteredColors.map((c) => {
                 const hex = getColorHex(c);
                 const light = isLightColor(hex);
@@ -344,54 +288,47 @@ export default function EditEntryForm({ entry, editToken, editExpiry }: Props) {
                   <div
                     key={c}
                     onMouseDown={() => handleColorSelect(c)}
-                    style={{
-                      display: 'flex', alignItems: 'center', gap: 10,
-                      padding: '8px 12px', cursor: 'pointer',
-                      borderBottom: '1px solid rgba(255,255,255,0.05)',
-                      color: c === colorValue ? '#1C69D4' : '#e2e8f0',
-                      background: c === colorValue ? 'rgba(28,105,212,0.1)' : 'transparent',
-                    }}
+                    className={`${styles.option} ${c === colorValue ? styles.optionSelected : ''}`}
                   >
-                    <div style={{
-                      width: 20, height: 20, borderRadius: 3, flexShrink: 0,
-                      background: hex,
-                      border: `1px solid ${light ? 'rgba(0,0,0,0.2)' : 'rgba(255,255,255,0.15)'}`,
-                    }} />
-                    <span style={{ fontSize: 14 }}>{c}</span>
+                    <div
+                      className={`${styles.optionSwatch} ${light ? styles.optionSwatchLight : ''}`}
+                      style={cssVars({ '--p': hex })}
+                    />
+                    <span className={styles.optionName}>{c}</span>
                   </div>
                 );
               })}
             </div>
           )}
         </div>
-        <p style={{ fontSize: 12, color: '#64748b', margin: 0 }}>
+        <p className={`field-hint ${styles.hint}`}>
           Select from the list or type a custom color name if yours isn&apos;t listed.
         </p>
       </div>
 
       {/* Interior */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 16 }}>
-        <div style={fieldStyle}>
-          <label style={labelStyle} htmlFor="interior_color">Interior Color</label>
-          <select id="interior_color" name="interior_color" style={inputStyle} defaultValue={entry.interior_color ?? ''}>
+      <div className={styles.gridAuto}>
+        <div className="field">
+          <label className="field-label" htmlFor="interior_color">Interior Color</label>
+          <select id="interior_color" name="interior_color" className="input" defaultValue={entry.interior_color ?? ''}>
             <option value="">-- Select --</option>
             {INTERIOR_OPTIONS.map((s) => <option key={s} value={s}>{s}</option>)}
             <option value="Other">Other</option>
           </select>
         </div>
 
-        <div style={fieldStyle}>
-          <label style={labelStyle} htmlFor="interior_seats">Seats</label>
-          <select id="interior_seats" name="interior_seats" style={inputStyle} defaultValue={entry.interior_seats ?? ''}>
+        <div className="field">
+          <label className="field-label" htmlFor="interior_seats">Seats</label>
+          <select id="interior_seats" name="interior_seats" className="input" defaultValue={entry.interior_seats ?? ''}>
             <option value="">-- Select --</option>
             <option value="Carbon Buckets">Carbon Buckets</option>
             <option value="Comfort Seats">Comfort Seats</option>
           </select>
         </div>
 
-        <div style={fieldStyle}>
-          <label style={labelStyle} htmlFor="interior_leather">Leather</label>
-          <select id="interior_leather" name="interior_leather" style={inputStyle} defaultValue={entry.interior_leather ?? ''}>
+        <div className="field">
+          <label className="field-label" htmlFor="interior_leather">Leather</label>
+          <select id="interior_leather" name="interior_leather" className="input" defaultValue={entry.interior_leather ?? ''}>
             <option value="">-- Select --</option>
             <option value="Full">Full Leather</option>
             <option value="Extended">Extended Leather</option>
@@ -400,9 +337,9 @@ export default function EditEntryForm({ entry, editToken, editExpiry }: Props) {
       </div>
 
       {/* Wheels */}
-      <div style={fieldStyle}>
-        <label style={labelStyle} htmlFor="wheels">Wheels</label>
-        <select id="wheels" name="wheels" style={inputStyle} defaultValue={entry.wheels ?? ''}>
+      <div className="field">
+        <label className="field-label" htmlFor="wheels">Wheels</label>
+        <select id="wheels" name="wheels" className="input" defaultValue={entry.wheels ?? ''}>
           <option value="">-- Select --</option>
           {WHEEL_OPTIONS.map((s) => <option key={s} value={s}>{s}</option>)}
           <option value="Other">Other</option>
@@ -410,18 +347,18 @@ export default function EditEntryForm({ entry, editToken, editExpiry }: Props) {
       </div>
 
       {/* Location */}
-      <div style={fieldStyle}>
-        <label style={labelStyle}>Location</label>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 12 }}>
-          <div style={fieldStyle}>
-            <label style={{ ...labelStyle, fontSize: 12 }} htmlFor="location_country">Country *</label>
+      <div className="field">
+        <label className="field-label">Location</label>
+        <div className={styles.gridAutoTight}>
+          <div className="field">
+            <label className={`field-label ${styles.subLabel}`} htmlFor="location_country">Country *</label>
             <select
               id="location_country"
               name="location_country"
               required
               value={countryCode}
               onChange={(e) => { setCountryCode(e.target.value); setStateValue(''); }}
-              style={inputStyle}
+              className="input"
             >
               {allCountries.map((c) => (
                 <option key={c.isoCode} value={c.isoCode}>{c.name}</option>
@@ -430,8 +367,8 @@ export default function EditEntryForm({ entry, editToken, editExpiry }: Props) {
             <input type="hidden" name="location_country_name" value={selectedCountry?.name ?? ''} />
           </div>
 
-          <div style={fieldStyle}>
-            <label style={{ ...labelStyle, fontSize: 12 }} htmlFor="location_state">
+          <div className="field">
+            <label className={`field-label ${styles.subLabel}`} htmlFor="location_state">
               {countryCode === 'US' ? 'State' : countryCode === 'CA' ? 'Province' : 'Region'}
             </label>
             {states.length > 0 ? (
@@ -440,7 +377,7 @@ export default function EditEntryForm({ entry, editToken, editExpiry }: Props) {
                 name="location_state"
                 value={stateValue}
                 onChange={(e) => setStateValue(e.target.value)}
-                style={inputStyle}
+                className="input"
               >
                 <option value="">-- Select --</option>
                 {states.map((s) => (
@@ -455,44 +392,38 @@ export default function EditEntryForm({ entry, editToken, editExpiry }: Props) {
                 placeholder="Region / Province"
                 value={stateValue}
                 onChange={(e) => setStateValue(e.target.value)}
-                style={inputStyle}
+                className="input"
               />
             )}
           </div>
 
-          <div style={fieldStyle}>
-            <label style={{ ...labelStyle, fontSize: 12 }} htmlFor="location_city">City</label>
+          <div className="field">
+            <label className={`field-label ${styles.subLabel}`} htmlFor="location_city">City</label>
             <input
               type="text"
               id="location_city"
               name="location_city"
               placeholder="e.g. Austin"
               defaultValue={entry.location_city ?? ''}
-              style={inputStyle}
+              className="input"
             />
           </div>
         </div>
       </div>
 
       {/* Forum Source */}
-      <div style={fieldStyle}>
-        <label style={labelStyle}>Forum</label>
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+      <div className="field">
+        <label className="field-label">Forum</label>
+        <div className={styles.rowWrap}>
           {FORUMS.map((f) => (
-            <label key={f.value} style={{
-              display: 'flex', alignItems: 'center', gap: 6,
-              padding: '7px 14px', background: forum === f.value ? 'rgba(28,105,212,0.2)' : '#1e2a3a',
-              border: `1px solid ${forum === f.value ? '#1C69D4' : '#2d3f55'}`,
-              borderRadius: 20, cursor: 'pointer', fontSize: 13, color: '#e2e8f0',
-              transition: 'all 0.15s',
-            }}>
+            <label key={f.value} className={`${styles.pill} ${forum === f.value ? styles.pillActive : ''}`}>
               <input
                 type="radio"
                 name="source_forum"
                 value={f.value}
                 checked={forum === f.value}
                 onChange={() => setForum(f.value)}
-                style={{ display: 'none' }}
+                className={styles.radioHidden}
               />
               {f.label}
             </label>
@@ -501,33 +432,22 @@ export default function EditEntryForm({ entry, editToken, editExpiry }: Props) {
       </div>
 
       {/* Notes */}
-      <div style={fieldStyle}>
-        <label style={labelStyle} htmlFor="notes">Notes</label>
+      <div className="field">
+        <label className="field-label" htmlFor="notes">Notes</label>
         <textarea
           id="notes"
           name="notes"
           rows={3}
           placeholder="Any additional details about your build..."
           defaultValue={entry.notes ?? ''}
-          style={{ ...inputStyle, resize: 'vertical' }}
+          className={`input ${styles.textarea}`}
         />
       </div>
 
       <button
         type="submit"
         disabled={isPending}
-        style={{
-          padding: '12px 24px',
-          background: isPending ? '#374151' : '#1C69D4',
-          color: '#ffffff',
-          border: 'none',
-          borderRadius: 8,
-          fontSize: 15,
-          fontWeight: 700,
-          cursor: isPending ? 'not-allowed' : 'pointer',
-          alignSelf: 'flex-start',
-          transition: 'background 0.2s',
-        }}
+        className={`btn btn--primary ${styles.submit}`}
       >
         {isPending ? 'Saving...' : 'Save Changes'}
       </button>
@@ -535,33 +455,24 @@ export default function EditEntryForm({ entry, editToken, editExpiry }: Props) {
     </form>
 
       {/* Delete entry — separate form, must not be nested inside the update form */}
-      <div style={{ borderTop: '1px solid #2d3f55', paddingTop: 20 }}>
+      <div className={styles.deleteZone}>
         {!confirmDelete ? (
           <button
             type="button"
             onClick={() => setConfirmDelete(true)}
-            style={{
-              padding: '10px 20px',
-              background: 'transparent',
-              color: '#ef4444',
-              border: '1px solid #ef4444',
-              borderRadius: 8,
-              fontSize: 14,
-              fontWeight: 600,
-              cursor: 'pointer',
-            }}
+            className="btn btn--danger"
           >
             Delete this entry
           </button>
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-            <p style={{ color: '#fca5a5', fontSize: 14, margin: 0 }}>
+          <div className={styles.deleteConfirm}>
+            <p className={styles.dangerText}>
               This will permanently remove your entry from the registry. Are you sure?
             </p>
             {deleteState?.error && (
-              <p style={{ color: '#fca5a5', fontSize: 13, margin: 0 }}>{deleteState.error}</p>
+              <p className={styles.dangerTextSm}>{deleteState.error}</p>
             )}
-            <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+            <div className={styles.deleteRow}>
               <form action={deleteAction}>
                 <input type="hidden" name="id" value={entry.id} />
                 <input type="hidden" name="edit_token" value={editToken ?? ''} />
@@ -569,16 +480,7 @@ export default function EditEntryForm({ entry, editToken, editExpiry }: Props) {
                 <button
                   type="submit"
                   disabled={isDeletePending}
-                  style={{
-                    padding: '10px 20px',
-                    background: isDeletePending ? '#7f1d1d' : '#ef4444',
-                    color: '#ffffff',
-                    border: 'none',
-                    borderRadius: 8,
-                    fontSize: 14,
-                    fontWeight: 700,
-                    cursor: isDeletePending ? 'not-allowed' : 'pointer',
-                  }}
+                  className={`btn ${styles.deleteSolid}`}
                 >
                   {isDeletePending ? 'Deleting...' : 'Yes, delete it'}
                 </button>
@@ -586,15 +488,7 @@ export default function EditEntryForm({ entry, editToken, editExpiry }: Props) {
               <button
                 type="button"
                 onClick={() => setConfirmDelete(false)}
-                style={{
-                  padding: '10px 20px',
-                  background: 'transparent',
-                  color: '#94a3b8',
-                  border: '1px solid #2d3f55',
-                  borderRadius: 8,
-                  fontSize: 14,
-                  cursor: 'pointer',
-                }}
+                className="btn"
               >
                 Cancel
               </button>

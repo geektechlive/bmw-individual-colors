@@ -1,0 +1,78 @@
+.empty {
+  color: var(--ink-2);
+  text-align: center;
+  padding: 2rem;
+}
+
+.emptyFaint {
+  color: var(--ink-3);
+  text-align: center;
+  padding: 2rem;
+}
+
+.legendLabel {
+  color: var(--ink-2);
+  font-size: var(--t-12);
+}
+
+.legendLabelSmall {
+  color: var(--ink-2);
+  font-size: var(--t-11);
+}
+
+.legendDonut {
+  color: var(--ink-2);
+  font-size: var(--t-12);
+  font-weight: 400;
+  transition: color var(--dur-fast), font-weight var(--dur-fast);
+}
+
+.legendDonutActive {
+  color: var(--ink);
+  font-weight: 700;
+}
+
+.pieRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-4);
+}
+
+.pieCol {
+  flex: 1 1 220px;
+  min-width: 220px;
+}
+
+.pieTitle {
+  text-align: center;
+  color: var(--ink-2);
+  font-size: var(--t-13);
+  margin-bottom: var(--s-1);
+}
+
+.tooltipCard {
+  background: var(--panel-2);
+  border: 1px solid var(--rule-strong);
+  padding: var(--s-2) var(--s-3);
+  border-radius: var(--r);
+  color: var(--ink);
+}
+
+.tooltipName {
+  font-weight: 600;
+}
+
+.tooltipSub {
+  color: var(--ink-2);
+}
+
+.swatch {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--p);
+  margin-right: 6px;
+  vertical-align: middle;
+  border: 1px solid var(--rule-strong);
+}

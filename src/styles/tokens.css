@@ -1,0 +1,131 @@
+/* Design tokens. The only file (with design-tokens.ts) allowed to hold color literals
+   and raw font sizes. Spec: docs/design/2026-11-refresh.md. ADR 0016.
+
+   Rules, enforced by stylelint, ESLint and tests/unit/design-tokens.test.ts:
+   1. Dark only. One theme.
+   2. Text reaches 4.5:1 on every surface it is used on. MARK-ONLY colors are for
+      borders, ticks and fills, never text.
+   3. Nothing under 11px.
+   4. Paint names, and only paint names, use --font-paint.
+   5. Every color value here matches src/lib/design-tokens.ts. */
+
+:root {
+  color-scheme: dark;
+
+  /* Ground and surfaces */
+  --bg: #0b0d10;
+  --panel: #12151a;
+  --panel-2: #181c22;
+  --panel-3: #20252d;
+
+  /* Lines (MARK-ONLY) */
+  --rule: #262b33;
+  --rule-strong: #3a414c;
+
+  /* Text. Ratios: on --bg / on --panel-3 (worst surface) */
+  --ink: #eceef1;          /* 16.7 / 13.2 */
+  --ink-2: #a9b0ba;        /* 8.9 / 7.0 */
+  --ink-3: #8b939e;        /* 6.3 / 5.0 */
+
+  /* Accent: --accent is a fill and mark; --accent-ink is the readable text form */
+  --accent: #1c69d4;
+  --accent-ink: #6aa6ff;   /* 7.9 / 6.2 */
+  --on-accent: #ffffff;
+  --focus: #6aa6ff;
+
+  /* M stripe (MARK-ONLY) */
+  --m-blue: #1c69d4;
+  --m-violet: #6f2da8;
+  --m-red: #e8002d;
+
+  /* Status: fill (MARK-ONLY) and readable text form */
+  --danger: #dc2626;
+  --danger-ink: #f87171;
+  --warn: #ca8a04;
+  --warn-ink: #fde047;
+  --ok: #16a34a;
+  --ok-ink: #4ade80;
+
+  /* Washes: a status or accent color at 16% over whatever is behind it */
+  --wash: 16%;
+  --accent-wash: color-mix(in srgb, var(--accent) var(--wash), transparent);
+  --danger-wash: color-mix(in srgb, var(--danger) var(--wash), transparent);
+  --warn-wash: color-mix(in srgb, var(--warn) var(--wash), transparent);
+  --ok-wash: color-mix(in srgb, var(--ok) var(--wash), transparent);
+  --danger-rule: color-mix(in srgb, var(--danger) 45%, transparent);
+  --warn-rule: color-mix(in srgb, var(--warn) 45%, transparent);
+  --ok-rule: color-mix(in srgb, var(--ok) 45%, transparent);
+  --accent-rule: color-mix(in srgb, var(--accent) 45%, transparent);
+
+  /* Light and shade for lighting effects and shadows */
+  --light: color-mix(in srgb, white 100%, transparent);
+  --shade: color-mix(in srgb, black 100%, transparent);
+  --shadow-1: 0 1px 2px color-mix(in srgb, black 40%, transparent);
+  --shadow-2: 0 14px 30px -12px color-mix(in srgb, black 70%, transparent);
+  --scrim: color-mix(in srgb, black 55%, transparent);
+
+  /* Type families (next/font sets the --font-*-src variables on <html>) */
+  --font-text: var(--font-archivo-src), "Helvetica Neue", Arial, sans-serif;
+  --font-mono: var(--font-jetbrains-src), ui-monospace, "SF Mono", Menlo, monospace;
+  --font-paint: var(--font-barlow-src), "Arial Narrow", sans-serif;
+
+  /* Type scale (rem; 1rem = 16px). Nothing under 11px. */
+  --t-11: 0.6875rem;
+  --t-12: 0.75rem;
+  --t-13: 0.8125rem;
+  --t-14: 0.875rem;
+  --t-15: 0.9375rem;
+  --t-16: 1rem;
+  --t-18: 1.125rem;
+  --t-20: 1.25rem;
+  --t-24: 1.5rem;
+  --t-32: 2rem;
+  --t-40: 2.5rem;
+  --t-display: clamp(2.5rem, 6vw, 4.5rem);
+  --t-title: clamp(1.75rem, 3.5vw, 2.25rem);
+
+  /* Heading width (Archivo's wdth axis, via font-stretch) and tracking */
+  --stretch-head: 115%;
+  --stretch-wide: 125%;
+  --track-tight: -0.02em;
+  --track-label: 0.12em;
+
+  /* Spacing */
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 12px;
+  --s-4: 16px;
+  --s-5: 24px;
+  --s-6: 32px;
+  --s-7: 48px;
+  --s-8: 64px;
+
+  /* Radius */
+  --r: 4px;
+  --r-lg: 8px;
+  --r-pill: 999px;
+
+  /* Page widths */
+  --w-page: 1280px;
+  --w-wide: 1440px;
+  --w-text: 900px;
+  --w-form: 760px;
+  --w-narrow: 560px;
+  --gutter: clamp(16px, 4vw, 24px);
+
+  /* Motion */
+  --dur-fast: 150ms;
+  --dur: 250ms;
+  --dur-slow: 500ms;
+  --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+
+  /* Layers */
+  --z-header: 50;
+  --z-stripe: 51;
+  --z-menu: 49;
+  --z-sticky: 40;
+
+  /* Header geometry: 4px stripe + 56px bar */
+  --stripe-h: 4px;
+  --header-h: 56px;
+}

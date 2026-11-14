@@ -8,6 +8,10 @@ Run `npx tsx scripts/post-to-bimmerpost.ts` to publish pending items to the foru
 
 ## [Unreleased]
 
+- **Improved:** CSS Modules on tokens, Tailwind removed, design lint (#39, #40)
+
+- **Added:** design tokens, three self-hosted fonts and tested contrast pairs (#38)
+
 - **Docs:** design refresh spec, mockups and ADR 0016 (mix direction)
 
 - **Fixed:** old alias color URLs redirect to the canonical color page

@@ -2,99 +2,64 @@
 
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import type { BmwEntry } from '../../types';
+import {
+  DRIVETRAIN_COLORS,
+  MODEL_COLORS,
+  SLICE_STROKE,
+  TOOLTIP_STYLE,
+  TRANSMISSION_COLORS,
+} from './palette';
+import shared from './charts.module.css';
 
 interface Props {
   entries: BmwEntry[];
 }
 
-export default function ModelBreakdown({ entries }: Props) {
-  // M3 vs M4
-  const modelMap = new Map<string, number>();
+interface Slice {
+  name: string;
+  value: number;
+}
+
+function countBy(entries: BmwEntry[], pick: (e: BmwEntry) => string): Slice[] {
+  const map = new Map<string, number>();
   for (const e of entries) {
-    const key = e.body_style;
-    modelMap.set(key, (modelMap.get(key) ?? 0) + 1);
+    const key = pick(e);
+    map.set(key, (map.get(key) ?? 0) + 1);
   }
-  const modelData = Array.from(modelMap.entries()).map(([name, value]) => ({ name, value }));
+  return Array.from(map.entries()).map(([name, value]) => ({ name, value }));
+}
 
-  // Drivetrain
-  const dtMap = new Map<string, number>();
-  for (const e of entries) {
-    dtMap.set(e.drivetrain, (dtMap.get(e.drivetrain) ?? 0) + 1);
-  }
-  const dtData = Array.from(dtMap.entries()).map(([name, value]) => ({ name, value }));
+const legendFormatter = (value: string) => <span className={shared.legendLabel}>{value}</span>;
 
-  // Transmission
-  const tmMap = new Map<string, number>();
-  for (const e of entries) {
-    tmMap.set(e.transmission, (tmMap.get(e.transmission) ?? 0) + 1);
-  }
-  const tmData = Array.from(tmMap.entries()).map(([name, value]) => ({ name, value }));
-
-  const MODEL_COLORS = ['#1C69D4', '#e85d04'];
-  const DT_COLORS = ['#1C69D4', '#3dd68c', '#f4a261'];
-  const TM_COLORS = ['#7c3aed', '#06b6d4'];
-
-  const tooltipStyle = { background: '#1e2a3a', border: '1px solid #2d3f55', color: '#e2e8f0' };
-  const legendFormatter = (value: string) => (
-    <span style={{ color: '#cbd5e1', fontSize: 12 }}>{value}</span>
+function BreakdownPie({ title, data, colors }: { title: string; data: Slice[]; colors: string[] }) {
+  return (
+    <div className={shared.pieCol}>
+      <p className={shared.pieTitle}>{title}</p>
+      <ResponsiveContainer width="100%" height={200}>
+        <PieChart>
+          <Pie data={data} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={70} paddingAngle={2} label={false}>
+            {data.map((_, i) => (
+              <Cell key={i} fill={colors[i % colors.length]} stroke={SLICE_STROKE} />
+            ))}
+          </Pie>
+          <Tooltip contentStyle={TOOLTIP_STYLE} formatter={(v) => [Number(v), 'Count']} />
+          <Legend formatter={legendFormatter} iconType="circle" iconSize={8} />
+        </PieChart>
+      </ResponsiveContainer>
+    </div>
   );
+}
 
+export default function ModelBreakdown({ entries }: Props) {
   if (entries.length === 0) {
-    return <p style={{ color: '#94a3b8', textAlign: 'center', padding: '2rem' }}>No data yet.</p>;
+    return <p className={shared.empty}>No data yet.</p>;
   }
 
   return (
-    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16 }}>
-      <div style={{ flex: '1 1 220px', minWidth: 220 }}>
-        <p style={{ textAlign: 'center', color: '#94a3b8', fontSize: 13, marginBottom: 4 }}>
-          Body Style
-        </p>
-        <ResponsiveContainer width="100%" height={200}>
-          <PieChart>
-            <Pie data={modelData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={70} paddingAngle={2} label={false}>
-              {modelData.map((_, i) => (
-                <Cell key={i} fill={MODEL_COLORS[i % MODEL_COLORS.length]} stroke="#0f172a" />
-              ))}
-            </Pie>
-            <Tooltip contentStyle={tooltipStyle} formatter={(v) => [Number(v), 'Count']} />
-            <Legend formatter={legendFormatter} iconType="circle" iconSize={8} />
-          </PieChart>
-        </ResponsiveContainer>
-      </div>
-
-      <div style={{ flex: '1 1 220px', minWidth: 220 }}>
-        <p style={{ textAlign: 'center', color: '#94a3b8', fontSize: 13, marginBottom: 4 }}>
-          Drivetrain
-        </p>
-        <ResponsiveContainer width="100%" height={200}>
-          <PieChart>
-            <Pie data={dtData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={70} paddingAngle={2} label={false}>
-              {dtData.map((_, i) => (
-                <Cell key={i} fill={DT_COLORS[i % DT_COLORS.length]} stroke="#0f172a" />
-              ))}
-            </Pie>
-            <Tooltip contentStyle={tooltipStyle} formatter={(v) => [Number(v), 'Count']} />
-            <Legend formatter={legendFormatter} iconType="circle" iconSize={8} />
-          </PieChart>
-        </ResponsiveContainer>
-      </div>
-
-      <div style={{ flex: '1 1 220px', minWidth: 220 }}>
-        <p style={{ textAlign: 'center', color: '#94a3b8', fontSize: 13, marginBottom: 4 }}>
-          Transmission
-        </p>
-        <ResponsiveContainer width="100%" height={200}>
-          <PieChart>
-            <Pie data={tmData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={70} paddingAngle={2} label={false}>
-              {tmData.map((_, i) => (
-                <Cell key={i} fill={TM_COLORS[i % TM_COLORS.length]} stroke="#0f172a" />
-              ))}
-            </Pie>
-            <Tooltip contentStyle={tooltipStyle} formatter={(v) => [Number(v), 'Count']} />
-            <Legend formatter={legendFormatter} iconType="circle" iconSize={8} />
-          </PieChart>
-        </ResponsiveContainer>
-      </div>
+    <div className={shared.pieRow}>
+      <BreakdownPie title="Body Style" data={countBy(entries, (e) => e.body_style)} colors={MODEL_COLORS} />
+      <BreakdownPie title="Drivetrain" data={countBy(entries, (e) => e.drivetrain)} colors={DRIVETRAIN_COLORS} />
+      <BreakdownPie title="Transmission" data={countBy(entries, (e) => e.transmission)} colors={TRANSMISSION_COLORS} />
     </div>
   );
 }

@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { getEntries } from '../../lib/queries';
 import ReportsClient from '../../components/ReportsClient';
 import type { Metadata } from 'next';
+import styles from './page.module.css';
 
 export const dynamic = 'force-dynamic';
 
@@ -13,16 +14,14 @@ export default async function ReportsPage() {
   const entries = await getEntries();
 
   return (
-    <main style={{ maxWidth: 1280, margin: '0 auto', padding: '2rem 1.5rem' }}>
-      <div style={{ marginBottom: 24 }}>
-        <Link href="/" style={{ color: '#1C69D4', textDecoration: 'none', fontSize: 14 }}>
+    <main className="page">
+      <div className={styles.back}>
+        <Link href="/" className="link">
           ← Home
         </Link>
       </div>
 
-      <h1 style={{ fontSize: 28, fontWeight: 800, color: '#e2e8f0', marginBottom: 16 }}>
-        Reports &amp; Analytics
-      </h1>
+      <h1 className={`title ${styles.heading}`}>Reports &amp; Analytics</h1>
 
       <ReportsClient entries={entries} />
     </main>

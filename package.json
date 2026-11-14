@@ -8,7 +8,7 @@
     "build:cf": "opennextjs-cloudflare build",
     "deploy": "opennextjs-cloudflare build && wrangler deploy",
     "start": "next start",
-    "lint": "eslint",
+    "lint": "eslint && stylelint \"src/**/*.css\"",
     "test:e2e": "node node_modules/.bin/playwright test",
     "typecheck": "tsc --noEmit",
     "test:unit": "node --import tsx --test --test-timeout=10000 tests/unit/*.test.ts",
@@ -27,7 +27,6 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.65.0",
-    "@tailwindcss/postcss": "^4.3.5",
     "@types/leaflet": "^1.9.22",
     "@types/leaflet.markercluster": "^1.5.6",
     "@types/node": "^22",
@@ -35,7 +34,7 @@
     "@types/react-dom": "^19.3.0",
     "eslint": "^9",
     "eslint-config-next": "16.4.6",
-    "tailwindcss": "^4.3.5",
+    "stylelint": "^18.0.0",
     "tsx": "^4.23.15",
     "typescript": "^5",
     "wrangler": "^4.161.0"

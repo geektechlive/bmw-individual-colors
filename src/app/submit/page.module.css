@@ -1,0 +1,17 @@
+.back {
+  margin-bottom: var(--s-5);
+  font-size: var(--t-14);
+}
+
+.heading {
+  margin-bottom: var(--s-1);
+}
+
+.lede {
+  margin-bottom: var(--s-6);
+  font-size: var(--t-14);
+}
+
+.card {
+  padding: var(--s-6);
+}

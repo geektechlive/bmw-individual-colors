@@ -2,7 +2,8 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useEffect, useId, useState, type CSSProperties } from 'react';
+import { useEffect, useId, useState } from 'react';
+import styles from './NavLinks.module.css';
 
 const NAV_LINKS = [
   { href: '/', label: 'Home' },
@@ -31,41 +32,27 @@ export default function NavLinks() {
   const renderLink = (href: string, label: string, isMobile: boolean) => {
     const isActive = pathname === href;
 
-    if (label === 'Submit') {
-      const style: CSSProperties = {
-        padding: '6px 14px',
-        background: '#1C69D4',
-        color: '#ffffff',
-        borderRadius: 6,
-        textDecoration: 'none',
-        fontSize: 13,
-        fontWeight: 700,
-        marginLeft: isMobile ? 0 : 8,
-        display: isMobile ? 'block' : 'inline-block',
-        textAlign: isMobile ? 'center' : undefined,
-      };
-
+    if (href === '/submit') {
+      const className = isMobile ? `${styles.cta} ${styles.ctaMobile}` : styles.cta;
       return (
-        <Link key={href} href={href} onClick={() => setIsOpen(false)} style={style}>
+        <Link key={href} href={href} onClick={() => setIsOpen(false)} className={className}>
           {label}
         </Link>
       );
     }
 
-    const style: CSSProperties = {
-      padding: isMobile ? '10px 12px' : '6px 12px',
-      color: isActive ? '#e2e8f0' : '#94a3b8',
-      textDecoration: 'none',
-      fontSize: 14,
-      fontWeight: 500,
-      borderRadius: 6,
-      borderBottom: !isMobile && isActive ? '2px solid #1C69D4' : undefined,
-      borderLeft: isMobile && isActive ? '2px solid #1C69D4' : undefined,
-      paddingBottom: !isMobile && isActive ? '4px' : undefined,
-    };
+    const className = [styles.link, isMobile && styles.mobile, isActive && styles.active]
+      .filter(Boolean)
+      .join(' ');
 
     return (
-      <Link key={href} href={href} onClick={() => setIsOpen(false)} style={style}>
+      <Link
+        key={href}
+        href={href}
+        onClick={() => setIsOpen(false)}
+        className={className}
+        aria-current={isActive ? 'page' : undefined}
+      >
         {label}
       </Link>
     );

@@ -2,6 +2,7 @@
 
 import { useActionState, useEffect } from 'react';
 import { adminLogin } from '../actions';
+import styles from './AdminLoginForm.module.css';
 
 const TURNSTILE_SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? '0x4AAAAAAC6yXfM_xBBaAkKj';
 
@@ -21,8 +22,8 @@ export default function AdminLoginForm() {
   }, [state]);
 
   return (
-    <form action={action} style={{ display: 'flex', flexDirection: 'column', gap: 14, maxWidth: 360 }}>
-      <label htmlFor="admin_token" style={{ color: '#cbd5e1', fontSize: 14, fontWeight: 600 }}>
+    <form action={action} className={styles.form}>
+      <label htmlFor="admin_token" className="field-label">
         Admin token
       </label>
       <input
@@ -31,37 +32,15 @@ export default function AdminLoginForm() {
         type="password"
         autoComplete="current-password"
         required
-        style={{
-          padding: '10px 12px',
-          background: '#0f1923',
-          color: '#e2e8f0',
-          border: '1px solid #2d3f55',
-          borderRadius: 8,
-          fontSize: 14,
-        }}
+        className="input"
       />
       <div className="cf-turnstile" data-sitekey={TURNSTILE_SITE_KEY} data-theme="dark" />
       {state.error && (
-        <div role="alert" style={{ color: '#fca5a5', fontSize: 13 }}>
+        <div role="alert" className={styles.error}>
           {state.error}
         </div>
       )}
-      <button
-        type="submit"
-        disabled={pending}
-        style={{
-          padding: '10px 16px',
-          background: '#1C69D4',
-          color: '#fff',
-          border: 'none',
-          borderRadius: 8,
-          fontSize: 14,
-          fontWeight: 700,
-          cursor: pending ? 'not-allowed' : 'pointer',
-          opacity: pending ? 0.6 : 1,
-          alignSelf: 'flex-start',
-        }}
-      >
+      <button type="submit" disabled={pending} className={`btn btn--primary ${styles.submit}`}>
         {pending ? 'Signing in…' : 'Sign in'}
       </button>
     </form>

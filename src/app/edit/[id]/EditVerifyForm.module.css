@@ -1,0 +1,22 @@
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.intro {
+  margin: 0 0 20px;
+  line-height: 1.6;
+  font-size: var(--t-14);
+}
+
+.submit {
+  align-self: flex-start;
+  padding: var(--s-3) var(--s-5);
+  font-size: var(--t-15);
+  font-weight: 700;
+}
+
+.hint {
+  margin: 0;
+}

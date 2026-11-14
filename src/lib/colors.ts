@@ -323,3 +323,17 @@ export function canonicalColorName(name: string): string {
   const key = cleaned.toLowerCase();
   return ALIAS_LOOKUP[key] ?? CANONICAL_LOOKUP[key] ?? cleaned;
 }
+
+// Interior upholstery colors, used to fill the interior chart bars. Data, like BMW_COLORS.
+export const INTERIOR_HEX_MAP: Record<string, string> = {
+  'Black': '#1a1a1a',
+  'Fiona Red': '#8c1a1a',
+  'Fjord Blue': '#1a3a7c',
+  'Fjord Blue/Black': '#1a3a7c',
+  'Kyalami Orange': '#c45a1a',
+  'Sakhir Orange': '#d4661e',
+  'Silverstone': '#8a8a8a',
+  'Silverstone Grey': '#7a7a7a',
+  'Smoke White': '#d4d0cc',
+  'Tartufo Brown': '#6a3a1a',
+};

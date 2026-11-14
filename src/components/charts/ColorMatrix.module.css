@@ -1,0 +1,135 @@
+.scroll {
+  overflow-x: auto;
+  overflow-y: auto;
+  max-height: 500px;
+}
+
+.table {
+  border-collapse: collapse;
+  font-size: var(--t-13);
+  white-space: nowrap;
+  width: 100%;
+}
+
+.thead {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.headRow,
+.footRow {
+  background: var(--panel-2);
+}
+
+.table th,
+.table td {
+  border: 1px solid var(--rule-strong);
+}
+
+.thCorner {
+  padding: 8px 12px;
+  text-align: left;
+  color: var(--ink-2);
+  position: sticky;
+  left: 0;
+  background: var(--panel-2);
+  z-index: 11;
+  font-weight: 600;
+}
+
+.thCol {
+  padding: 8px 10px;
+  text-align: center;
+  color: var(--ink-2);
+  font-weight: 600;
+  min-width: 80px;
+}
+
+.thYear {
+  display: block;
+  color: var(--accent-ink);
+  font-size: var(--t-13);
+  font-weight: 700;
+}
+
+.thSub {
+  display: block;
+  color: var(--ink-3);
+  font-size: var(--t-11);
+}
+
+.thTotal {
+  padding: 8px 10px;
+  text-align: center;
+  color: var(--accent-ink);
+  font-weight: 700;
+  min-width: 60px;
+}
+
+.row {
+  background: var(--panel);
+}
+
+.row:nth-child(even) {
+  background: var(--panel-2);
+}
+
+.tdColor {
+  padding: 6px 12px;
+  color: var(--ink);
+  font-weight: 500;
+  position: sticky;
+  left: 0;
+  background: var(--panel);
+  z-index: 1;
+}
+
+.row:nth-child(even) .tdColor {
+  background: var(--panel-2);
+}
+
+.cell {
+  padding: 6px 10px;
+  text-align: center;
+  color: var(--ink-3);
+  font-weight: 400;
+}
+
+.cellHit {
+  color: var(--ink);
+  background: color-mix(in srgb, var(--accent) 18%, transparent);
+  font-weight: 600;
+}
+
+.tdRowTotal {
+  padding: 6px 10px;
+  text-align: center;
+  color: var(--accent-ink);
+  font-weight: 700;
+}
+
+.tfColor {
+  padding: 8px 12px;
+  color: var(--accent-ink);
+  font-weight: 700;
+  position: sticky;
+  left: 0;
+  background: var(--panel-2);
+  z-index: 1;
+}
+
+.tfCol {
+  padding: 8px 10px;
+  text-align: center;
+  color: var(--accent-ink);
+  font-weight: 700;
+}
+
+.tfGrand {
+  padding: 8px 10px;
+  text-align: center;
+  color: var(--on-accent);
+  font-weight: 700;
+  background: var(--accent);
+}

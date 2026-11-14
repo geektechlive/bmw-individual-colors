@@ -11,20 +11,24 @@ import {
   Cell,
 } from 'recharts';
 import type { ColorCount } from '../../types';
+import {
+  AXIS_LINE,
+  AXIS_TICK,
+  AXIS_TICK_LABEL,
+  BAR_CURSOR,
+  GRID_STROKE,
+  TOOLTIP_STYLE,
+  WHEEL_PALETTE,
+} from './palette';
+import shared from './charts.module.css';
 
 interface Props {
   data: ColorCount[];
 }
 
-const WHEEL_PALETTE = ['#8a8a9a', '#6a6a7a', '#aaaaaa', '#5a5a6a', '#9a9aaa', '#4a4a5a'];
-
 export default function WheelBar({ data }: Props) {
   if (data.length === 0) {
-    return (
-      <p style={{ color: '#94a3b8', textAlign: 'center', padding: '2rem' }}>
-        No wheel data yet.
-      </p>
-    );
+    return <p className={shared.empty}>No wheel data yet.</p>;
   }
 
   return (
@@ -34,11 +38,11 @@ export default function WheelBar({ data }: Props) {
         data={data}
         margin={{ top: 4, right: 32, bottom: 4, left: 16 }}
       >
-        <CartesianGrid horizontal={false} stroke="#2d3f55" />
+        <CartesianGrid horizontal={false} stroke={GRID_STROKE} />
         <XAxis
           type="number"
-          tick={{ fill: '#94a3b8', fontSize: 12 }}
-          axisLine={{ stroke: '#2d3f55' }}
+          tick={AXIS_TICK}
+          axisLine={AXIS_LINE}
           tickLine={false}
           allowDecimals={false}
         />
@@ -46,17 +50,13 @@ export default function WheelBar({ data }: Props) {
           type="category"
           dataKey="color"
           width={160}
-          tick={{ fill: '#e2e8f0', fontSize: 12 }}
+          tick={AXIS_TICK_LABEL}
           axisLine={false}
           tickLine={false}
         />
         <Tooltip
-          cursor={{ fill: 'rgba(255,255,255,0.04)' }}
-          contentStyle={{
-            background: '#1e2a3a',
-            border: '1px solid #2d3f55',
-            color: '#e2e8f0',
-          }}
+          cursor={BAR_CURSOR}
+          contentStyle={TOOLTIP_STYLE}
           formatter={(v) => [Number(v), 'Entries']}
         />
         <Bar dataKey="count" radius={[0, 4, 4, 0]}>

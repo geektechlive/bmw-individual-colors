@@ -1,0 +1,290 @@
+/* Shared by EntryForm (submit) and EditEntryForm (edit). */
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.grid2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--s-4);
+}
+
+.gridAuto {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: var(--s-4);
+}
+
+.gridAutoTight {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: var(--s-3);
+}
+
+.row {
+  display: flex;
+  gap: var(--s-2);
+}
+
+.rowWrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+}
+
+.rowWrapSpaced {
+  margin-bottom: var(--s-2);
+}
+
+/* fieldset + legend that look like a .field with a .field-label */
+.fieldset {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  min-inline-size: 0;
+}
+
+.legend {
+  padding: 0;
+  margin-bottom: var(--s-2);
+}
+
+.subLabel {
+  font-size: var(--t-12);
+}
+
+.hint {
+  margin: 0;
+}
+
+.textarea {
+  resize: vertical;
+}
+
+.locked {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+/* Body style (M3 / M4) choice tiles */
+.choice {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: var(--s-2) var(--s-3);
+  background: var(--panel-2);
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--r);
+  cursor: pointer;
+  font-size: var(--t-14);
+  font-weight: 600;
+  color: var(--ink);
+}
+
+/* Forum pills */
+.pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  background: var(--panel-2);
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--r-pill);
+  cursor: pointer;
+  font-size: var(--t-13);
+  color: var(--ink);
+  transition: background var(--dur-fast) var(--ease), border-color var(--dur-fast) var(--ease);
+}
+
+.pillActive {
+  background: var(--accent-wash);
+  border-color: var(--accent);
+}
+
+.radioHidden {
+  display: none;
+}
+
+/* Color combobox */
+.comboWrap {
+  position: relative;
+}
+
+.comboRow {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+}
+
+.comboInput {
+  flex: 1;
+}
+
+.swatch {
+  width: 28px;
+  height: 28px;
+  border-radius: var(--r);
+  flex-shrink: 0;
+  background: var(--p);
+  border: 1px solid color-mix(in srgb, var(--light) 15%, transparent);
+  box-shadow: var(--shadow-1);
+}
+
+.listbox {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  background: var(--panel-2);
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--r);
+  max-height: 220px;
+  overflow-y: auto;
+  margin-top: 2px;
+  box-shadow: var(--shadow-2);
+}
+
+.option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: var(--s-2) var(--s-3);
+  cursor: pointer;
+  border-bottom: 1px solid color-mix(in srgb, var(--light) 5%, transparent);
+  color: var(--ink);
+  background: transparent;
+}
+
+.optionSelected {
+  color: var(--accent-ink);
+  background: var(--accent-wash);
+}
+
+.optionActive {
+  background: color-mix(in srgb, var(--light) 6%, transparent);
+}
+
+.optionSwatch {
+  width: 20px;
+  height: 20px;
+  border-radius: 3px;
+  flex-shrink: 0;
+  background: var(--p);
+  border: 1px solid color-mix(in srgb, var(--light) 15%, transparent);
+}
+
+.optionSwatchLight {
+  border-color: color-mix(in srgb, var(--shade) 20%, transparent);
+}
+
+.optionName {
+  font-size: var(--t-14);
+}
+
+/* Potential-duplicate warning (submit only) */
+.dup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+  padding: 20px;
+  background: var(--warn-wash);
+  border: 2px solid var(--warn);
+  border-radius: var(--r-lg);
+}
+
+.dupHead {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.dupIcon {
+  font-size: var(--t-24);
+}
+
+.dupTitle {
+  color: var(--warn-ink);
+  font-size: var(--t-18);
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+
+.dupText {
+  margin: 0;
+  color: var(--ink);
+  font-size: var(--t-14);
+  line-height: 1.5;
+}
+
+.dupSub {
+  margin: 0;
+  color: var(--ink-2);
+  font-size: var(--t-13);
+}
+
+.dupStrong {
+  color: var(--warn-ink);
+}
+
+.dupButton {
+  align-self: flex-start;
+  border-width: 2px;
+  border-color: var(--warn);
+  font-weight: 800;
+}
+
+.submit {
+  align-self: flex-start;
+  padding: var(--s-3) var(--s-5);
+  font-size: var(--t-15);
+  font-weight: 700;
+}
+
+/* Edit form: status + delete zone */
+.dangerText {
+  margin: 0;
+  color: var(--danger-ink);
+  font-size: var(--t-14);
+}
+
+.dangerTextSm {
+  margin: 0;
+  color: var(--danger-ink);
+  font-size: var(--t-13);
+}
+
+.deleteZone {
+  border-top: 1px solid var(--rule-strong);
+  padding-top: 20px;
+}
+
+.deleteConfirm {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+}
+
+.deleteRow {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+}
+
+.deleteSolid {
+  background: var(--danger);
+  border-color: var(--danger);
+  color: var(--on-accent);
+  font-weight: 700;
+}
+
+.deleteSolid:hover {
+  background: var(--danger);
+  border-color: var(--danger-ink);
+  filter: brightness(1.1);
+}

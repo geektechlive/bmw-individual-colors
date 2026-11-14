@@ -8,13 +8,15 @@ import L from 'leaflet';
 import 'leaflet.markercluster';
 import { useEffect, useMemo, useRef } from 'react';
 import { getColorHex } from '../lib/colors';
+import { TOKENS } from '../lib/design-tokens';
+import styles from './RegistryMap.module.css';
 import type { BmwEntry } from '../types';
 
 function makeIcon(hex: string): L.DivIcon {
   return L.divIcon({
     className: '',
     html: `<svg width="14" height="14" viewBox="0 0 14 14" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="7" cy="7" r="6" fill="${hex}" stroke="#ffffff" stroke-width="1.5"/>
+      <circle cx="7" cy="7" r="6" fill="${hex}" stroke="${TOKENS['ink']}" stroke-width="1.5"/>
     </svg>`,
     iconSize: [14, 14],
     iconAnchor: [7, 7],
@@ -37,15 +39,15 @@ function makePopupHtml(entry: BmwEntry, hex: string): string {
     .map((s) => esc(s!))
     .join(', ');
   return `
-    <div style="min-width:180px;font-family:inherit">
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
-        <div style="width:14px;height:14px;border-radius:50%;background:${esc(hex)};border:1px solid #ccc;flex-shrink:0"></div>
-        <strong style="font-size:13px">${esc(entry.ext_color)}</strong>
+    <div class="rm-popup-body">
+      <div class="rm-popup-head">
+        <div class="rm-popup-swatch" style="--p:${esc(hex)}"></div>
+        <strong class="rm-popup-name">${esc(entry.ext_color)}</strong>
       </div>
-      <div style="font-size:12px;color:#555;line-height:1.6">
+      <div class="rm-popup-meta">
         <div>${esc(String(entry.model_year))} BMW ${esc(entry.body_style)}${entry.competition ? ' Competition' : ''}</div>
         <div>${esc(entry.drivetrain)} · ${esc(entry.transmission)}</div>
-        ${location ? `<div style="margin-top:4px">${location}</div>` : ''}
+        ${location ? `<div class="rm-popup-location">${location}</div>` : ''}
       </div>
     </div>
   `;
@@ -89,7 +91,7 @@ export default function RegistryMap({ entries }: Props) {
       if (entry.location_lat == null || entry.location_lng == null) return;
       const hex = getColorHex(entry.ext_color);
       L.marker([entry.location_lat, entry.location_lng], { icon: makeIcon(hex) })
-        .bindPopup(makePopupHtml(entry, hex))
+        .bindPopup(makePopupHtml(entry, hex), { className: 'rm-popup' })
         .addTo(group);
     });
 
@@ -102,26 +104,5 @@ export default function RegistryMap({ entries }: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [entriesSignature]);
 
-  return (
-    <>
-      {/*
-        Real CSS (not a JS style object) so the `vh` declaration can act as a
-        genuine fallback: browsers without `dvh` support ignore that line and
-        keep the one above it, while browsers that understand `dvh` (which
-        accounts for mobile browser chrome) apply it as the later, more
-        specific rule.
-      */}
-      <style>{`
-        .registry-map-container {
-          height: calc(100vh - 140px);
-          height: calc(100dvh - 140px);
-        }
-      `}</style>
-      <div
-        ref={containerRef}
-        className="registry-map-container"
-        style={{ width: '100%', borderRadius: 8 }}
-      />
-    </>
-  );
+  return <div ref={containerRef} className={styles.container} />;
 }

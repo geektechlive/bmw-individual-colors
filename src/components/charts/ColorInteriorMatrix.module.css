@@ -1,0 +1,64 @@
+.scroll {
+  overflow-x: auto;
+}
+
+.table {
+  border-collapse: collapse;
+  font-size: var(--t-12);
+  white-space: nowrap;
+}
+
+.table th,
+.table td {
+  border: 1px solid var(--rule-strong);
+}
+
+.headRow {
+  background: var(--panel-2);
+}
+
+.thCorner {
+  padding: 8px 12px;
+  text-align: left;
+  color: var(--ink-2);
+  font-weight: 600;
+  min-width: 160px;
+}
+
+.thCol {
+  padding: 8px 10px;
+  text-align: center;
+  color: var(--ink-2);
+  font-weight: 600;
+  min-width: 80px;
+  max-width: 100px;
+  word-break: break-word;
+  white-space: normal;
+}
+
+.row {
+  background: var(--panel);
+}
+
+.row:nth-child(even) {
+  background: var(--panel-2);
+}
+
+.tdColor {
+  padding: 6px 12px;
+  color: var(--ink);
+  font-weight: 500;
+}
+
+.cell {
+  padding: 6px 10px;
+  text-align: center;
+  color: var(--ink-3);
+  font-weight: 400;
+}
+
+.cellHit {
+  color: var(--ink);
+  font-weight: 600;
+  background: color-mix(in srgb, var(--accent) calc(var(--heat) * 100%), transparent);
+}

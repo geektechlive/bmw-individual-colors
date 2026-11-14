@@ -6,6 +6,7 @@
 // stay safe to bundle for the browser.
 
 import { COLOR_FAMILY_MAP, getColorHex } from './colors';
+import { TOKENS } from './design-tokens';
 import type { BmwEntry, ColorCount, Stats } from '../types';
 
 export function computeStats(entries: BmwEntry[]): Stats {
@@ -93,7 +94,7 @@ export function computeInteriorCounts(entries: BmwEntry[]): ColorCount[] {
     }
   }
   return Array.from(map.entries())
-    .map(([color, count]) => ({ color, count, hex: '#888888' }))
+    .map(([color, count]) => ({ color, count, hex: TOKENS['ink-3'] }))
     .sort((a, b) => b.count - a.count);
 }
 
@@ -183,7 +184,7 @@ export function computeWheelCounts(entries: BmwEntry[]): ColorCount[] {
     if (w) map.set(w, (map.get(w) ?? 0) + 1);
   }
   return Array.from(map.entries())
-    .map(([color, count]) => ({ color, count, hex: '#888888' }))
+    .map(([color, count]) => ({ color, count, hex: TOKENS['ink-3'] }))
     .sort((a, b) => b.count - a.count);
 }
 
@@ -196,9 +197,9 @@ export function computeRarityLabel(count: number): string {
 
 export function computeRarityColor(label: string): string {
   switch (label) {
-    case 'Unicorn': return '#862086';
-    case 'Rare': return '#E8002D';
-    case 'Uncommon': return '#e8a020';
-    default: return '#64748b';
+    case 'Unicorn': return TOKENS['m-violet'];
+    case 'Rare': return TOKENS['m-red'];
+    case 'Uncommon': return TOKENS['warn'];
+    default: return TOKENS['ink-3'];
   }
 }

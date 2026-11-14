@@ -4,6 +4,8 @@ import { useState, useTransition, useRef, useEffect } from 'react';
 import { flagEntry } from '../app/actions';
 import { FLAG_NOTE_MAX, FLAG_REASONS, FLAG_REASON_LABELS, type FlagReason } from '../lib/flag-validation';
 
+import styles from './FlagButton.module.css';
+
 const TURNSTILE_SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? '0x4AAAAAAC6yXfM_xBBaAkKj';
 
 declare global {
@@ -80,30 +82,20 @@ export default function FlagButton({ id }: { id: string }) {
   }
 
   if (flagged) {
-    return <span style={{ color: '#64748b', fontSize: 11 }}>Reported, thanks</span>;
+    return <span className={styles.done}>Reported, thanks</span>;
   }
 
   if (confirming) {
-    const fieldStyle: React.CSSProperties = {
-      background: '#0f1923',
-      color: '#e2e8f0',
-      border: '1px solid #2d3f55',
-      borderRadius: 4,
-      fontSize: 12,
-      padding: '4px 6px',
-      width: '100%',
-      maxWidth: 260,
-    };
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 6, alignItems: 'flex-start' }}>
-        <label style={{ color: '#94a3b8', fontSize: 11 }} htmlFor={`flag-reason-${id}`}>
+      <div className={styles.panel}>
+        <label className={styles.panelLabel} htmlFor={`flag-reason-${id}`}>
           What&apos;s wrong with this entry?
         </label>
         <select
           id={`flag-reason-${id}`}
           value={reason}
           onChange={(e) => setReason(e.target.value as FlagReason | '')}
-          style={fieldStyle}
+          className={`input ${styles.field}`}
           required
         >
           <option value="" disabled>
@@ -122,13 +114,11 @@ export default function FlagButton({ id }: { id: string }) {
           maxLength={FLAG_NOTE_MAX}
           onChange={(e) => setNote(e.target.value)}
           rows={2}
-          style={{ ...fieldStyle, resize: 'vertical' }}
+          className={`input ${styles.field} ${styles.note}`}
         />
         <div ref={widgetContainerRef} />
-        {flagError && (
-          <span style={{ color: '#f87171', fontSize: 11 }}>{flagError}</span>
-        )}
-        <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+        {flagError && <span className={styles.error}>{flagError}</span>}
+        <div className={styles.actions}>
           <button
             disabled={!canSubmit || pending}
             aria-label="Send report about this entry"
@@ -147,32 +137,14 @@ export default function FlagButton({ id }: { id: string }) {
                 }
               });
             }}
-            style={{
-              padding: '3px 8px',
-              background: '#ef4444',
-              color: '#fff',
-              border: 'none',
-              borderRadius: 4,
-              fontSize: 11,
-              fontWeight: 600,
-              cursor: canSubmit && !pending ? 'pointer' : 'not-allowed',
-              opacity: canSubmit && !pending ? 1 : 0.5,
-            }}
+            className={`btn btn--danger ${styles.small}`}
           >
             {pending ? '...' : 'Send report'}
           </button>
           <button
             onClick={handleCancel}
             aria-label="Cancel flagging this entry"
-            style={{
-              padding: '3px 8px',
-              background: 'transparent',
-              color: '#94a3b8',
-              border: '1px solid #2d3f55',
-              borderRadius: 4,
-              fontSize: 11,
-              cursor: 'pointer',
-            }}
+            className={`btn ${styles.small}`}
           >
             Cancel
           </button>
@@ -186,13 +158,7 @@ export default function FlagButton({ id }: { id: string }) {
       onClick={() => setConfirming(true)}
       title="Flag this entry as incorrect"
       aria-label="Flag this entry as incorrect"
-      style={{
-        background: 'none', border: 'none', cursor: 'pointer',
-        color: '#475569', fontSize: 12, padding: '2px 4px', borderRadius: 4,
-        transition: 'color 0.15s', lineHeight: 1,
-      }}
-      onMouseEnter={(e) => (e.currentTarget.style.color = '#f87171')}
-      onMouseLeave={(e) => (e.currentTarget.style.color = '#475569')}
+      className={styles.flag}
     >
       🚩
     </button>

@@ -1,0 +1,28 @@
+.back {
+  margin-bottom: var(--s-5);
+  font-size: var(--t-14);
+}
+
+.heading {
+  margin-bottom: 6px;
+}
+
+.lede {
+  margin-bottom: 28px;
+  font-size: var(--t-14);
+}
+
+.ledeShort {
+  margin-bottom: var(--s-2);
+}
+
+.expired {
+  margin-bottom: 20px;
+  color: var(--danger-ink);
+  font-size: var(--t-13);
+}
+
+.who {
+  color: var(--accent-ink);
+  font-weight: 600;
+}

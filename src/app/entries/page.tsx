@@ -6,6 +6,7 @@ export const dynamic = 'force-dynamic';
 import EntryTable from '../../components/EntryTable';
 import SubmittedBanner from '../../components/SubmittedBanner';
 import type { Metadata } from 'next';
+import styles from './page.module.css';
 
 export const metadata: Metadata = {
   title: 'All Entries — BMW Individual Colors Registry',
@@ -23,46 +24,19 @@ export default async function EntriesPage({
   const deleted = params.deleted === '1';
 
   return (
-    <main style={{ maxWidth: 1280, margin: '0 auto', padding: '2rem 1.5rem' }}>
-      <div style={{ marginBottom: 24 }}>
-        <Link
-          href="/"
-          style={{ color: '#1C69D4', textDecoration: 'none', fontSize: 14 }}
-        >
+    <main className="page">
+      <div className={styles.back}>
+        <Link href="/" className="link">
           ← Home
         </Link>
       </div>
 
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          marginBottom: 24,
-          flexWrap: 'wrap',
-          gap: 12,
-        }}
-      >
+      <div className={styles.head}>
         <div>
-          <h1 style={{ fontSize: 28, fontWeight: 800, color: '#e2e8f0', marginBottom: 4 }}>
-            All Entries
-          </h1>
-          <p style={{ color: '#94a3b8', fontSize: 14 }}>
-            {entries.length} builds in the registry
-          </p>
+          <h1 className={`title ${styles.heading}`}>All Entries</h1>
+          <p className={`muted ${styles.count}`}>{entries.length} builds in the registry</p>
         </div>
-        <Link
-          href="/submit"
-          style={{
-            padding: '10px 20px',
-            background: '#1C69D4',
-            color: '#ffffff',
-            borderRadius: 8,
-            textDecoration: 'none',
-            fontWeight: 700,
-            fontSize: 14,
-          }}
-        >
+        <Link href="/submit" className="btn btn--primary">
           + Submit Build
         </Link>
       </div>
@@ -81,16 +55,8 @@ export default async function EntriesPage({
         />
       )}
 
-      <div
-        style={{
-          background: '#0f1923',
-          border: '1px solid #2d3f55',
-          borderRadius: 12,
-          padding: '1.5rem',
-          overflow: 'hidden',
-        }}
-      >
-        <Suspense fallback={<div style={{ color: '#64748b', padding: '2rem', textAlign: 'center' }}>Loading entries…</div>}>
+      <div className={`card ${styles.tableCard}`}>
+        <Suspense fallback={<div className={`faint ${styles.loading}`}>Loading entries…</div>}>
           <EntryTable entries={entries} />
         </Suspense>
       </div>

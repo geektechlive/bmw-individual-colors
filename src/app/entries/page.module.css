@@ -1,0 +1,30 @@
+.back {
+  margin-bottom: var(--s-5);
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--s-5);
+  flex-wrap: wrap;
+  gap: var(--s-3);
+}
+
+.heading {
+  margin-bottom: var(--s-1);
+}
+
+.count {
+  font-size: var(--t-14);
+}
+
+.tableCard {
+  padding: var(--s-5);
+  overflow: hidden;
+}
+
+.loading {
+  padding: var(--s-6);
+  text-align: center;
+}

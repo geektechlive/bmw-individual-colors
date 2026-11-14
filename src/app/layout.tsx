@@ -1,18 +1,32 @@
 import type { Metadata } from 'next';
-import { Geist, Geist_Mono } from 'next/font/google';
+import { Archivo, Barlow_Condensed, JetBrains_Mono } from 'next/font/google';
 import Link from 'next/link';
 import Script from 'next/script';
 import './globals.css';
+import styles from './layout.module.css';
 import NavLinks from './NavLinks';
 
-const geistSans = Geist({
-  variable: '--font-geist-sans',
+// Three families, one job each (ADR 0016): Archivo for headings and text (with its
+// width axis for wide headings), JetBrains Mono for numbers and labels, and Barlow
+// Condensed italic for paint names only. next/font self-hosts and subsets them.
+const archivo = Archivo({
+  variable: '--font-archivo-src',
   subsets: ['latin'],
+  axes: ['wdth'],
 });
 
-const geistMono = Geist_Mono({
-  variable: '--font-geist-mono',
+const jetbrainsMono = JetBrains_Mono({
+  variable: '--font-jetbrains-src',
   subsets: ['latin'],
+  preload: false,
+});
+
+const barlowCondensed = Barlow_Condensed({
+  variable: '--font-barlow-src',
+  subsets: ['latin'],
+  weight: '700',
+  style: 'italic',
+  preload: false,
 });
 
 const SITE_DESCRIPTION =
@@ -61,88 +75,40 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" data-scroll-behavior="smooth" className={`${geistSans.variable} ${geistMono.variable}`}>
+    <html
+      lang="en"
+      data-scroll-behavior="smooth"
+      className={`${archivo.variable} ${jetbrainsMono.variable} ${barlowCondensed.variable}`}
+    >
       <body>
         <Script
           src="https://challenges.cloudflare.com/turnstile/v0/api.js"
           strategy="afterInteractive"
         />
-        {/* M-stripe top bar */}
-        <div style={{ display: 'flex', height: 4, position: 'sticky', top: 0, zIndex: 51 }}>
-          <div style={{ flex: 1, background: '#1C69D4' }} />
-          <div style={{ flex: 1, background: '#862086' }} />
-          <div style={{ flex: 1, background: '#E8002D' }} />
+        <div className={`stripe ${styles.topStripe}`} aria-hidden="true">
+          <span />
+          <span />
+          <span />
         </div>
 
-        {/* Top Nav */}
-        <header
-          style={{
-            background: '#070d14',
-            borderBottom: '1px solid #1e2a3a',
-            position: 'sticky',
-            top: 4,
-            zIndex: 50,
-          }}
-        >
-          <div
-            style={{
-              maxWidth: 1280,
-              margin: '0 auto',
-              padding: '0 1.5rem',
-              height: 56,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-            }}
-          >
-            {/* Logo / Site Title */}
-            <Link
-              href="/"
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 10,
-                textDecoration: 'none',
-              }}
-            >
-              {/* M-stripe logo mark */}
-              <div style={{ display: 'flex', gap: 2, flexShrink: 0, alignItems: 'stretch', height: 24 }}>
-                {['#1C69D4', '#862086', '#E8002D'].map((color) => (
-                  <div key={color} style={{ width: 4, height: '100%', background: color, borderRadius: 2 }} />
-                ))}
-              </div>
-              <span
-                style={{
-                  fontSize: 15,
-                  fontWeight: 800,
-                  color: '#e2e8f0',
-                  letterSpacing: '-0.01em',
-                }}
-              >
-                BMW M Individual Colors
+        <header className={styles.header}>
+          <div className={styles.headerInner}>
+            <Link href="/" className={styles.logo}>
+              <span className={styles.logoBars} aria-hidden="true">
+                <span />
+                <span />
+                <span />
               </span>
+              <span className={styles.logoText}>BMW M Individual Colors</span>
             </Link>
-
-            {/* Nav Links */}
             <NavLinks />
           </div>
         </header>
 
-        {/* Page Content */}
-        <div style={{ flex: 1 }}>{children}</div>
+        <div className={styles.main}>{children}</div>
 
-        {/* Footer */}
-        <footer
-          style={{
-            borderTop: '1px solid #1e2a3a',
-            padding: '1.5rem',
-            textAlign: 'center',
-            color: '#64748b',
-            fontSize: 13,
-            background: '#070d14',
-          }}
-        >
-          BMW M Individual Colors Registry — Community project. Not affiliated with BMW AG.
+        <footer className={styles.footer}>
+          BMW M Individual Colors Registry. A community project, not affiliated with BMW AG.
         </footer>
       </body>
     </html>

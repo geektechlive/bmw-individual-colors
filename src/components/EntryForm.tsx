@@ -4,6 +4,8 @@ import { useActionState, useState, useMemo, useEffect, useRef } from 'react';
 import type { KeyboardEvent } from 'react';
 import { submitEntry } from '../app/actions';
 import { BMW_COLORS, getColorHex, isLightColor } from '../lib/colors';
+import { cssVars } from '../lib/css-vars';
+import styles from './EntryForm.module.css';
 
 // Cloudflare Turnstile attaches a global widget API and invokes our named
 // callbacks via the data-callback/data-*-callback attributes. This is a
@@ -58,19 +60,6 @@ const INITIAL_COUNTRIES: CountryOption[] = [
   { isoCode: 'PL', name: 'Poland' },
 ];
 
-const inputStyle: React.CSSProperties = {
-  width: '100%', padding: '8px 12px', background: '#1e2a3a', border: '1px solid #2d3f55',
-  borderRadius: 6, color: '#e2e8f0', fontSize: 14, outline: 'none', boxSizing: 'border-box',
-};
-
-const labelStyle: React.CSSProperties = {
-  display: 'block', fontSize: 13, fontWeight: 600, color: '#94a3b8', marginBottom: 4,
-};
-
-const legendStyle: React.CSSProperties = { ...labelStyle, padding: 0, border: 0 };
-const fieldsetResetStyle: React.CSSProperties = { border: 'none', margin: 0, padding: 0 };
-const fieldStyle: React.CSSProperties = { display: 'flex', flexDirection: 'column', gap: 4 };
-
 /** ARIA combobox: free-text input with a filtered dropdown of known colors. */
 function ColorCombobox({ colors }: { colors: string[] }) {
   const [search, setSearch] = useState('');
@@ -124,16 +113,17 @@ function ColorCombobox({ colors }: { colors: string[] }) {
     activeIndex >= 0 && filtered[activeIndex] ? `ext-color-option-${activeIndex}` : undefined;
 
   return (
-    <div style={fieldStyle}>
-      <label style={labelStyle} htmlFor="ext_color_input">Individual Color *</label>
-      <div style={{ position: 'relative' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+    <div className="field">
+      <label className="field-label" htmlFor="ext_color_input">Individual Color *</label>
+      <div className={styles.comboWrap}>
+        <div className={styles.comboRow}>
           {selectedHex && (
-            <div style={{ width: 28, height: 28, borderRadius: 4, flexShrink: 0, background: selectedHex, border: '1px solid rgba(255,255,255,0.15)', boxShadow: '0 1px 4px rgba(0,0,0,0.4)' }} />
+            <div className={styles.swatch} style={cssVars({ '--p': selectedHex })} />
           )}
           <input
             type="text"
             id="ext_color_input"
+            className={`input ${styles.comboInput}`}
             placeholder="Type to search or enter a color name..."
             value={search}
             autoComplete="off"
@@ -153,7 +143,6 @@ function ColorCombobox({ colors }: { colors: string[] }) {
             onFocus={() => setOpen(true)}
             onBlur={() => setTimeout(() => setOpen(false), 150)}
             onKeyDown={handleKeyDown}
-            style={{ ...inputStyle, flex: 1 }}
           />
         </div>
 
@@ -161,19 +150,15 @@ function ColorCombobox({ colors }: { colors: string[] }) {
         <input type="hidden" name="ext_color" value={value} />
 
         {open && filtered.length > 0 && (
-          <div
-            role="listbox"
-            id="ext-color-listbox"
-            style={{
-              position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 50, background: '#1e2a3a',
-              border: '1px solid #2d3f55', borderRadius: 6, maxHeight: 220, overflowY: 'auto',
-              marginTop: 2, boxShadow: '0 8px 24px rgba(0,0,0,0.5)',
-            }}
-          >
+          <div role="listbox" id="ext-color-listbox" className={styles.listbox}>
             {filtered.map((c, i) => {
               const hex = getColorHex(c);
               const light = isLightColor(hex);
-              const active = i === activeIndex;
+              const optionClass = [
+                styles.option,
+                c === value ? styles.optionSelected : '',
+                i === activeIndex ? styles.optionActive : '',
+              ].join(' ');
               return (
                 <div
                   key={c}
@@ -182,21 +167,20 @@ function ColorCombobox({ colors }: { colors: string[] }) {
                   aria-selected={c === value}
                   onMouseDown={() => selectColor(c)}
                   onMouseEnter={() => setActiveIndex(i)}
-                  style={{
-                    display: 'flex', alignItems: 'center', gap: 10, padding: '8px 12px', cursor: 'pointer',
-                    borderBottom: '1px solid rgba(255,255,255,0.05)', color: c === value ? '#1C69D4' : '#e2e8f0',
-                    background: active ? 'rgba(255,255,255,0.06)' : c === value ? 'rgba(28,105,212,0.1)' : 'transparent',
-                  }}
+                  className={optionClass}
                 >
-                  <div style={{ width: 20, height: 20, borderRadius: 3, flexShrink: 0, background: hex, border: `1px solid ${light ? 'rgba(0,0,0,0.2)' : 'rgba(255,255,255,0.15)'}` }} />
-                  <span style={{ fontSize: 14 }}>{c}</span>
+                  <div
+                    className={`${styles.optionSwatch} ${light ? styles.optionSwatchLight : ''}`}
+                    style={cssVars({ '--p': hex })}
+                  />
+                  <span className={styles.optionName}>{c}</span>
                 </div>
               );
             })}
           </div>
         )}
       </div>
-      <p style={{ fontSize: 12, color: '#64748b', margin: 0 }}>
+      <p className={`field-hint ${styles.hint}`}>
         Select from the list or type a custom color name if yours isn&apos;t listed.
       </p>
     </div>
@@ -289,44 +273,33 @@ export default function EntryForm() {
   const submitDisabled = isPending || !forumUsername.trim() || needsFreshToken;
 
   return (
-    <form action={action} style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+    <form action={action} className={styles.form}>
       {state?.error && (
-        <div style={{
-          padding: '12px 16px', background: 'rgba(220,38,38,0.15)', border: '1px solid rgba(220,38,38,0.4)',
-          borderRadius: 8, color: '#fca5a5', fontSize: 14,
-        }}>
+        <div className="alert alert--danger">
           {state.error}
         </div>
       )}
 
       {state?.duplicate && (
-        <div style={{
-          padding: '20px', background: 'rgba(234,179,8,0.12)', border: '2px solid #eab308',
-          borderRadius: 10, display: 'flex', flexDirection: 'column', gap: 12,
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <span style={{ fontSize: 24 }}>⚠️</span>
-            <span style={{ color: '#fde047', fontSize: 17, fontWeight: 800, letterSpacing: '-0.01em' }}>
+        <div className={styles.dup}>
+          <div className={styles.dupHead}>
+            <span className={styles.dupIcon}>⚠️</span>
+            <span className={styles.dupTitle}>
               POTENTIAL DUPLICATE ENTRY
             </span>
           </div>
-          <p style={{ margin: 0, color: '#fef08a', fontSize: 14, lineHeight: 1.5 }}>
+          <p className={styles.dupText}>
             {state.duplicateInfo}
           </p>
-          <p style={{ margin: 0, color: '#ca8a04', fontSize: 13 }}>
-            If you own a second car with this exact spec, click <strong style={{ color: '#fde047' }}>Submit Anyway</strong>. Otherwise, fix your entry above and use the normal Submit button.
+          <p className={styles.dupSub}>
+            If you own a second car with this exact spec, click <strong className={styles.dupStrong}>Submit Anyway</strong>. Otherwise, fix your entry above and use the normal Submit button.
           </p>
           <button
             type="submit"
             name="force_submit"
             value="1"
             disabled={isPending || needsFreshToken}
-            style={{
-              padding: '10px 20px', background: isPending || needsFreshToken ? '#4b3a12' : '#854d0e',
-              border: '2px solid #eab308', borderRadius: 7, color: '#fde047', fontSize: 14, fontWeight: 800,
-              cursor: isPending || needsFreshToken ? 'not-allowed' : 'pointer',
-              opacity: isPending || needsFreshToken ? 0.6 : 1, alignSelf: 'flex-start',
-            }}
+            className={`btn btn--warn ${styles.dupButton}`}
           >
             Submit Anyway — I own two of this spec
           </button>
@@ -334,25 +307,22 @@ export default function EntryForm() {
       )}
 
       {/* Model Year + Body Style */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-        <div style={fieldStyle}>
-          <label style={labelStyle} htmlFor="model_year">Model Year</label>
-          <select id="model_year" name="model_year" required style={inputStyle}>
+      <div className={styles.grid2}>
+        <div className="field">
+          <label className="field-label" htmlFor="model_year">Model Year</label>
+          <select id="model_year" name="model_year" required className="input">
             {[2021, 2022, 2023, 2024, 2025, 2026, 2027, 2028, 2029, 2030, 2031, 2032, 2033, 2034, 2035].map((y) => (
               <option key={y} value={y}>{y}</option>
             ))}
           </select>
         </div>
 
-        <fieldset style={{ ...fieldStyle, ...fieldsetResetStyle }}>
-          <legend style={legendStyle}>Body Style</legend>
-          <div style={{ display: 'flex', gap: 8 }}>
+        <fieldset className={`field ${styles.fieldset}`}>
+          <legend className={`field-label ${styles.legend}`}>Body Style</legend>
+          <div className={styles.row}>
             {['M3', 'M4'].map((bs) => (
-              <label key={bs} style={{
-                flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '8px 12px',
-                background: '#1e2a3a', border: '1px solid #2d3f55', borderRadius: 6, cursor: 'pointer', fontSize: 14, color: '#e2e8f0', fontWeight: 600,
-              }}>
-                <input type="radio" name="body_style" value={bs} defaultChecked={bs === 'M3'} required style={{ marginRight: 6 }} />
+              <label key={bs} className={styles.choice}>
+                <input type="radio" name="body_style" value={bs} defaultChecked={bs === 'M3'} required />
                 {bs}
               </label>
             ))}
@@ -361,9 +331,9 @@ export default function EntryForm() {
       </div>
 
       {/* Variant + Transmission */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-        <div style={fieldStyle}>
-          <label style={labelStyle} htmlFor="variant">Variant</label>
+      <div className={styles.grid2}>
+        <div className="field">
+          <label className="field-label" htmlFor="variant">Variant</label>
           <select
             id="variant"
             name="variant"
@@ -374,7 +344,7 @@ export default function EntryForm() {
               setVariant(v);
               if (v !== 'Base (RWD)') setTransmission('8AT');
             }}
-            style={inputStyle}
+            className="input"
           >
             <option value="Base (RWD)">Base (RWD)</option>
             <option value="Competition">Competition</option>
@@ -382,19 +352,15 @@ export default function EntryForm() {
           </select>
         </div>
 
-        <div style={fieldStyle}>
-          <label style={labelStyle} htmlFor="transmission">Transmission</label>
+        <div className="field">
+          <label className="field-label" htmlFor="transmission">Transmission</label>
           <select
             id="transmission"
             name="transmission"
             required
             value={transmission}
             onChange={(e) => setTransmission(e.target.value)}
-            style={{
-              ...inputStyle,
-              opacity: variant !== 'Base (RWD)' ? 0.5 : 1,
-              pointerEvents: variant !== 'Base (RWD)' ? 'none' : 'auto',
-            }}
+            className={`input ${variant !== 'Base (RWD)' ? styles.locked : ''}`}
           >
             <option value="8AT">8AT (8-Speed Auto)</option>
             <option value="6MT">6MT (Manual)</option>
@@ -406,24 +372,24 @@ export default function EntryForm() {
       <ColorCombobox colors={COLOR_NAMES} />
 
       {/* Interior */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 16 }}>
-        <div style={fieldStyle}>
-          <label style={labelStyle} htmlFor="interior_color">Interior Color</label>
-          <select id="interior_color" name="interior_color" style={inputStyle}>
+      <div className={styles.gridAuto}>
+        <div className="field">
+          <label className="field-label" htmlFor="interior_color">Interior Color</label>
+          <select id="interior_color" name="interior_color" className="input">
             <option value="">-- Select --</option>
             {INTERIOR_OPTIONS.map((s) => <option key={s} value={s}>{s}</option>)}
             <option value="Other">Other</option>
           </select>
         </div>
 
-        <div style={fieldStyle}>
-          <label style={labelStyle} htmlFor="interior_seats">Seats</label>
+        <div className="field">
+          <label className="field-label" htmlFor="interior_seats">Seats</label>
           <select
             id="interior_seats"
             name="interior_seats"
             value={interiorSeats}
             onChange={(e) => setInteriorSeats(e.target.value)}
-            style={inputStyle}
+            className="input"
           >
             <option value="">-- Select --</option>
             <option value="Carbon Buckets">Carbon Buckets</option>
@@ -431,14 +397,14 @@ export default function EntryForm() {
           </select>
         </div>
 
-        <div style={fieldStyle}>
-          <label style={labelStyle} htmlFor="interior_leather">Leather</label>
+        <div className="field">
+          <label className="field-label" htmlFor="interior_leather">Leather</label>
           <select
             id="interior_leather"
             name="interior_leather"
             value={interiorLeather}
             onChange={(e) => setInteriorLeather(e.target.value)}
-            style={inputStyle}
+            className="input"
           >
             <option value="">-- Select --</option>
             <option value="Full">Full Leather</option>
@@ -451,9 +417,9 @@ export default function EntryForm() {
       <input type="hidden" name="interior_type" value={interiorType} />
 
       {/* Wheels */}
-      <div style={fieldStyle}>
-        <label style={labelStyle} htmlFor="wheels">Wheels</label>
-        <select id="wheels" name="wheels" style={inputStyle}>
+      <div className="field">
+        <label className="field-label" htmlFor="wheels">Wheels</label>
+        <select id="wheels" name="wheels" className="input">
           <option value="">-- Select --</option>
           {WHEEL_OPTIONS.map((s) => <option key={s} value={s}>{s}</option>)}
           <option value="Other">Other</option>
@@ -461,19 +427,19 @@ export default function EntryForm() {
       </div>
 
       {/* Location — Country first, then State, then City */}
-      <fieldset style={{ ...fieldStyle, ...fieldsetResetStyle }}>
-        <legend style={legendStyle}>Location</legend>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 12 }}>
+      <fieldset className={`field ${styles.fieldset}`}>
+        <legend className={`field-label ${styles.legend}`}>Location</legend>
+        <div className={styles.gridAutoTight}>
           {/* Country */}
-          <div style={fieldStyle}>
-            <label style={{ ...labelStyle, fontSize: 12 }} htmlFor="location_country">Country *</label>
+          <div className="field">
+            <label className={`field-label ${styles.subLabel}`} htmlFor="location_country">Country *</label>
             <select
               id="location_country"
               name="location_country"
               required
               value={countryCode}
               onChange={(e) => { setCountryCode(e.target.value); setLocationState(''); }}
-              style={inputStyle}
+              className="input"
             >
               {countries.map((c) => (
                 <option key={c.isoCode} value={c.isoCode}>{c.name}</option>
@@ -484,8 +450,8 @@ export default function EntryForm() {
           </div>
 
           {/* State / Province — only shown when country has states */}
-          <div style={fieldStyle}>
-            <label style={{ ...labelStyle, fontSize: 12 }} htmlFor="location_state">
+          <div className="field">
+            <label className={`field-label ${styles.subLabel}`} htmlFor="location_state">
               {countryCode === 'US' ? 'State' : countryCode === 'CA' ? 'Province' : 'Region'}
             </label>
             {showStatesDropdown ? (
@@ -494,7 +460,7 @@ export default function EntryForm() {
                 name="location_state"
                 value={locationState}
                 onChange={(e) => setLocationState(e.target.value)}
-                style={inputStyle}
+                className="input"
               >
                 <option value="">-- Select --</option>
                 {states.map((s) => (
@@ -509,72 +475,67 @@ export default function EntryForm() {
                 placeholder="Region / Province"
                 value={locationState}
                 onChange={(e) => setLocationState(e.target.value)}
-                style={inputStyle}
+                className="input"
               />
             )}
           </div>
 
           {/* City — always free text */}
-          <div style={fieldStyle}>
-            <label style={{ ...labelStyle, fontSize: 12 }} htmlFor="location_city">City</label>
+          <div className="field">
+            <label className={`field-label ${styles.subLabel}`} htmlFor="location_city">City</label>
             <input
               type="text"
               id="location_city"
               name="location_city"
               placeholder="e.g. Austin"
-              style={inputStyle}
+              className="input"
             />
           </div>
         </div>
       </fieldset>
 
       {/* Forum Source + Username */}
-      <div style={fieldStyle}>
-        <fieldset style={fieldsetResetStyle}>
-          <legend style={legendStyle}>Forum</legend>
-          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 8 }}>
+      <div className="field">
+        <fieldset className={styles.fieldset}>
+          <legend className={`field-label ${styles.legend}`}>Forum</legend>
+          <div className={`${styles.rowWrap} ${styles.rowWrapSpaced}`}>
             {FORUMS.map((f) => (
-              <label key={f.value} style={{
-                display: 'flex', alignItems: 'center', gap: 6, padding: '7px 14px',
-                background: forum === f.value ? 'rgba(28,105,212,0.2)' : '#1e2a3a',
-                border: `1px solid ${forum === f.value ? '#1C69D4' : '#2d3f55'}`,
-                borderRadius: 20, cursor: 'pointer', fontSize: 13, color: '#e2e8f0', transition: 'all 0.15s',
-              }}>
+              <label key={f.value} className={`${styles.pill} ${forum === f.value ? styles.pillActive : ''}`}>
                 <input
                   type="radio"
                   name="source_forum"
                   value={f.value}
                   checked={forum === f.value}
                   onChange={() => setForum(f.value)}
-                  style={{ display: 'none' }}
+                  className={styles.radioHidden}
                 />
                 {f.label}
               </label>
             ))}
           </div>
         </fieldset>
-        <label style={labelStyle} htmlFor="forum_username">Forum Username *</label>
+        <label className="field-label" htmlFor="forum_username">Forum Username *</label>
         <input
           type="text"
           id="forum_username"
           name="forum_username"
+          className="input"
           placeholder={`Your ${forum} username`}
           required
           value={forumUsername}
           onChange={(e) => setForumUsername(e.target.value)}
-          style={inputStyle}
         />
       </div>
 
       {/* Notes */}
-      <div style={fieldStyle}>
-        <label style={labelStyle} htmlFor="notes">Notes</label>
+      <div className="field">
+        <label className="field-label" htmlFor="notes">Notes</label>
         <textarea
           id="notes"
           name="notes"
           rows={3}
           placeholder="Any additional details about your build..."
-          style={{ ...inputStyle, resize: 'vertical' }}
+          className={`input ${styles.textarea}`}
         />
       </div>
 
@@ -591,12 +552,7 @@ export default function EntryForm() {
       <button
         type="submit"
         disabled={submitDisabled}
-        style={{
-          padding: '12px 24px', background: submitDisabled ? '#374151' : '#1C69D4',
-          color: '#ffffff', border: 'none', borderRadius: 8, fontSize: 15, fontWeight: 700,
-          cursor: submitDisabled ? 'not-allowed' : 'pointer',
-          alignSelf: 'flex-start', transition: 'background 0.2s',
-        }}
+        className={`btn btn--primary ${styles.submit}`}
       >
         {isPending ? 'Submitting...' : 'Submit Build'}
       </button>

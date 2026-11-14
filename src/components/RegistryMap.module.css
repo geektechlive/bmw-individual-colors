@@ -1,0 +1,61 @@
+/* Real CSS so the `vh` declaration is a genuine fallback: browsers without `dvh`
+   ignore the second line and keep the first. */
+.container {
+  width: 100%;
+  border-radius: var(--r-lg);
+  height: calc(100vh - 140px);
+  height: calc(100dvh - 140px);
+}
+
+/* Leaflet builds popups outside React, from HTML strings, so these class names
+   are global (bound via the popup's `className` option and the markup in
+   RegistryMap.tsx) rather than generated module names. */
+:global(.rm-popup) :global(.leaflet-popup-content-wrapper),
+:global(.rm-popup) :global(.leaflet-popup-tip) {
+  background: var(--panel-2);
+  color: var(--ink);
+  border: 1px solid var(--rule-strong);
+}
+
+:global(.rm-popup) :global(.leaflet-popup-content-wrapper) {
+  border-radius: var(--r-lg);
+}
+
+:global(.rm-popup) :global(.leaflet-popup-close-button) {
+  color: var(--ink-2);
+}
+
+:global(.rm-popup-body) {
+  min-width: 180px;
+  font-family: inherit;
+}
+
+:global(.rm-popup-head) {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  margin-bottom: 6px;
+}
+
+:global(.rm-popup-swatch) {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--p);
+  border: 1px solid var(--rule-strong);
+  flex-shrink: 0;
+}
+
+:global(.rm-popup-name) {
+  font-size: var(--t-13);
+}
+
+:global(.rm-popup-meta) {
+  font-size: var(--t-12);
+  color: var(--ink-2);
+  line-height: 1.6;
+}
+
+:global(.rm-popup-location) {
+  margin-top: var(--s-1);
+}

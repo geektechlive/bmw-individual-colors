@@ -1,0 +1,272 @@
+.hero {
+  background: linear-gradient(135deg, var(--bg) 0%, var(--panel) 50%, var(--bg) 100%);
+  border-bottom: 3px solid transparent;
+  border-image: linear-gradient(to right, var(--m-blue), var(--m-violet), var(--m-red)) 1;
+  padding: var(--s-8) var(--gutter) var(--s-7);
+  text-align: center;
+}
+
+.heroInner {
+  max-width: 680px;
+  margin: 0 auto;
+}
+
+.badge {
+  display: inline-block;
+  padding: var(--s-1) 14px;
+  background: var(--accent-wash);
+  border: 1px solid var(--accent-rule);
+  border-radius: var(--r-pill);
+  color: var(--accent-ink);
+  margin-bottom: 20px;
+  font-size: var(--t-12);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.heroTitle {
+  font-size: var(--t-display);
+  font-weight: 900;
+  color: var(--ink);
+  line-height: 1.15;
+  margin-bottom: var(--s-4);
+  letter-spacing: -0.02em;
+}
+
+.heroLede {
+  font-size: var(--t-18);
+  color: var(--ink-2);
+  line-height: 1.6;
+  max-width: 520px;
+  margin: 0 auto 36px;
+}
+
+.heroActions {
+  display: flex;
+  gap: var(--s-3);
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.treemapSection {
+  background: var(--bg);
+  padding: 0 var(--gutter) var(--s-5);
+}
+
+.treemapInner {
+  max-width: var(--w-text);
+  margin: 0 auto;
+}
+
+.treemapFrame {
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  border: 1px solid var(--rule);
+}
+
+.stats {
+  background: var(--panel);
+  border-bottom: 1px solid var(--rule);
+  padding: var(--s-5) var(--gutter);
+}
+
+.insights {
+  background: var(--panel);
+  border-bottom: 1px solid var(--rule);
+  padding: var(--s-4) var(--gutter);
+}
+
+.statGrid {
+  max-width: var(--w-text);
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 1px;
+}
+
+.stat {
+  text-align: center;
+  padding: var(--s-4);
+}
+
+.statValue {
+  font-size: var(--t-title);
+  font-weight: 900;
+  color: var(--ink);
+  line-height: 1;
+  margin-bottom: 6px;
+}
+
+/* The stripe colors are MARK-ONLY (ADR 0016), so they mark the number instead of coloring it. */
+.statValue::before {
+  content: '';
+  display: block;
+  width: var(--s-5);
+  height: 3px;
+  margin: 0 auto var(--s-3);
+  background: var(--p);
+}
+
+.statLabel {
+  font-size: var(--t-13);
+  color: var(--ink-3);
+  font-weight: 500;
+}
+
+.insight {
+  text-align: center;
+  padding: var(--s-3) var(--s-4);
+}
+
+.insightHead {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s-2);
+  margin-bottom: var(--s-1);
+}
+
+.swatchSmall {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--p);
+  border: 1px solid var(--rule-strong);
+  flex-shrink: 0;
+}
+
+.insightValue {
+  font-size: var(--t-15);
+  font-weight: 700;
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 200px;
+}
+
+.insightSub {
+  font-size: var(--t-11);
+  color: var(--ink-3);
+}
+
+.insightLabel {
+  font-size: var(--t-12);
+  color: var(--ink-3);
+  font-weight: 500;
+  margin-top: 2px;
+}
+
+.latest {
+  max-width: var(--w-text);
+  margin: 0 auto;
+  padding: var(--s-7) var(--gutter);
+}
+
+.latestHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.viewAll {
+  font-size: var(--t-13);
+  font-weight: 600;
+}
+
+.empty {
+  background: var(--panel);
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--r-lg);
+  padding: var(--s-7);
+  text-align: center;
+  color: var(--ink-3);
+}
+
+.feed {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: var(--s-4);
+  background: color-mix(in srgb, var(--p) 7%, transparent);
+  border: 1px solid var(--rule-strong);
+  border-left: 4px solid var(--p);
+  border-radius: var(--r-lg);
+  padding: 14px 20px;
+}
+
+.rowSwatch {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--p);
+  border: 2px solid var(--rule-strong);
+  flex-shrink: 0;
+}
+
+.rowBody {
+  flex: 1;
+  min-width: 0;
+}
+
+.rowLink {
+  text-decoration: none;
+}
+
+.rowColor {
+  color: var(--ink);
+  font-size: var(--t-16);
+}
+
+.rowMeta {
+  color: var(--ink-3);
+  font-size: var(--t-13);
+  margin-top: 2px;
+}
+
+.rowUser {
+  color: var(--ink-3);
+  font-size: var(--t-12);
+  flex-shrink: 0;
+}
+
+.rowDate {
+  color: var(--ink-3);
+  font-size: var(--t-11);
+  flex-shrink: 0;
+}
+
+.latestFoot {
+  display: flex;
+  gap: var(--s-3);
+  margin-top: var(--s-4);
+  justify-content: flex-end;
+  font-size: var(--t-13);
+}
+
+.footMuted {
+  color: var(--ink-3);
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.footMuted:hover {
+  color: var(--ink-2);
+}
+
+.footAccent {
+  font-weight: 600;
+}
+
+.heroActions .heroBtn {
+  padding: var(--s-3) 28px;
+  font-size: var(--t-15);
+  border-radius: var(--r-lg);
+}

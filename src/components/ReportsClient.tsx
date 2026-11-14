@@ -13,12 +13,13 @@ import {
   computeWheelCounts,
 } from '../lib/analytics';
 
+import styles from './ReportsClient.module.css';
 import ColorMatrix from './charts/ColorMatrix';
 import ColorInteriorMatrix from './charts/ColorInteriorMatrix';
 import DrivetrainMatrix from './charts/DrivetrainMatrix';
 
 const chartSkeleton = () => (
-  <div className="h-64 bg-gray-100 dark:bg-gray-800 animate-pulse rounded-lg" />
+  <div className="skeleton skeleton--chart" aria-hidden="true" />
 );
 
 const ColorDonut = dynamic(() => import('./charts/ColorDonut'), { ssr: false, loading: chartSkeleton });
@@ -39,39 +40,24 @@ function toggle<T>(arr: T[], val: T): T[] {
   return arr.includes(val) ? arr.filter((x) => x !== val) : [...arr, val];
 }
 
-function chipStyle(active: boolean): React.CSSProperties {
-  return {
-    padding: '4px 12px',
-    borderRadius: 20,
-    fontSize: 12,
-    fontWeight: 600,
-    cursor: 'pointer',
-    border: '1px solid',
-    borderColor: active ? '#1C69D4' : '#2d3f55',
-    background: active ? 'rgba(28,105,212,0.2)' : '#1e2a3a',
-    color: active ? '#e2e8f0' : '#94a3b8',
-  };
+interface ChartCardProps {
+  id?: string;
+  full?: boolean;
+  title: string;
+  desc: string;
+  children: React.ReactNode;
 }
 
-const cardStyle: React.CSSProperties = {
-  background: '#0f1923',
-  border: '1px solid #2d3f55',
-  borderRadius: 12,
-  padding: '1.5rem',
-};
-
-const cardTitleStyle: React.CSSProperties = {
-  fontSize: 17,
-  fontWeight: 700,
-  color: '#e2e8f0',
-  marginBottom: 4,
-};
-
-const cardDescStyle: React.CSSProperties = {
-  fontSize: 13,
-  color: '#64748b',
-  marginBottom: 20,
-};
+function ChartCard({ id, full, title, desc, children }: ChartCardProps) {
+  const className = `card ${styles.card}${full ? ` ${styles.full}` : ''}`;
+  return (
+    <div id={id} className={className}>
+      <div className={styles.cardTitle}>{title}</div>
+      <div className={styles.cardDesc}>{desc}</div>
+      {children}
+    </div>
+  );
+}
 
 export default function ReportsClient({ entries }: Props) {
   const [selectedYears, setSelectedYears] = useState<number[]>([]);
@@ -104,94 +90,58 @@ export default function ReportsClient({ entries }: Props) {
 
   return (
     <>
-      <p style={{ color: '#94a3b8', fontSize: 14, marginBottom: 16 }}>
+      <p className={`muted ${styles.intro}`}>
         Visual breakdowns of{' '}
         {hasFilters ? (
           <>
-            <strong style={{ color: '#e2e8f0' }}>{filteredEntries.length}</strong>
+            <strong>{filteredEntries.length}</strong>
             {' '}(filtered from {entries.length})
           </>
         ) : (
-          <strong style={{ color: '#e2e8f0' }}>{entries.length}</strong>
+          <strong>{entries.length}</strong>
         )}{' '}
         BMW M Individual color builds in the registry.
       </p>
 
       {/* Filter bar */}
-      <div
-        style={{
-          background: '#0f1923',
-          border: '1px solid #2d3f55',
-          borderRadius: 10,
-          padding: '12px 16px',
-          marginBottom: 16,
-          display: 'flex',
-          flexWrap: 'wrap',
-          gap: '8px 24px',
-          alignItems: 'center',
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <span
-            style={{
-              fontSize: 12,
-              color: '#64748b',
-              fontWeight: 600,
-              textTransform: 'uppercase',
-              letterSpacing: '0.06em',
-            }}
-          >
-            Year
-          </span>
+      <div className={styles.filterBar}>
+        <div className={styles.filterGroup}>
+          <span className="label">Year</span>
           {allYears.map((year) => (
             <button
               key={year}
+              type="button"
               onClick={() => startTransition(() => setSelectedYears(toggle(selectedYears, year)))}
-              style={chipStyle(selectedYears.includes(year))}
+              className="chip"
+              aria-pressed={selectedYears.includes(year)}
             >
               {year}
             </button>
           ))}
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <span
-            style={{
-              fontSize: 12,
-              color: '#64748b',
-              fontWeight: 600,
-              textTransform: 'uppercase',
-              letterSpacing: '0.06em',
-            }}
-          >
-            Model
-          </span>
+        <div className={styles.filterGroup}>
+          <span className="label">Model</span>
           {['M3', 'M4'].map((bs) => (
             <button
               key={bs}
+              type="button"
               onClick={() => startTransition(() => setSelectedBodyStyles(toggle(selectedBodyStyles, bs)))}
-              style={chipStyle(selectedBodyStyles.includes(bs))}
+              className="chip"
+              aria-pressed={selectedBodyStyles.includes(bs)}
             >
               {bs}
             </button>
           ))}
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <span
-            style={{
-              fontSize: 12,
-              color: '#64748b',
-              fontWeight: 600,
-              textTransform: 'uppercase',
-              letterSpacing: '0.06em',
-            }}
-          >
-            Drive
-          </span>
+        <div className={styles.filterGroup}>
+          <span className="label">Drive</span>
           {['RWD', 'AWD'].map((dt) => (
             <button
               key={dt}
+              type="button"
               onClick={() => startTransition(() => setSelectedDrivetrains(toggle(selectedDrivetrains, dt)))}
-              style={chipStyle(selectedDrivetrains.includes(dt))}
+              className="chip"
+              aria-pressed={selectedDrivetrains.includes(dt)}
             >
               {dt}
             </button>
@@ -204,14 +154,7 @@ export default function ReportsClient({ entries }: Props) {
               setSelectedBodyStyles([]);
               setSelectedDrivetrains([]);
             })}
-            style={{
-              fontSize: 12,
-              color: '#64748b',
-              background: 'none',
-              border: 'none',
-              cursor: 'pointer',
-              padding: '4px 8px',
-            }}
+            className={styles.clear}
           >
             Clear filters
           </button>
@@ -219,17 +162,8 @@ export default function ReportsClient({ entries }: Props) {
       </div>
 
       {/* Section jump nav */}
-      <nav
-        style={{
-          position: 'sticky',
-          top: 52,
-          zIndex: 40,
-          background: '#070d14',
-          paddingBottom: 12,
-          marginBottom: 8,
-        }}
-      >
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+      <nav className={styles.jumpNav}>
+        <div className={styles.jumpList}>
           {[
             { label: 'Distribution', href: '#distribution' },
             { label: 'Growth', href: '#growth' },
@@ -238,20 +172,7 @@ export default function ReportsClient({ entries }: Props) {
             { label: 'Interiors', href: '#interiors' },
             { label: 'Matrix', href: '#matrix' },
           ].map(({ label, href }) => (
-            <a
-              key={label}
-              href={href}
-              style={{
-                padding: '4px 14px',
-                borderRadius: 20,
-                fontSize: 13,
-                fontWeight: 500,
-                color: '#94a3b8',
-                background: '#1e2a3a',
-                border: '1px solid #2d3f55',
-                textDecoration: 'none',
-              }}
-            >
+            <a key={label} href={href} className={styles.jump}>
               {label}
             </a>
           ))}
@@ -259,97 +180,78 @@ export default function ReportsClient({ entries }: Props) {
       </nav>
 
       {/* Chart grid */}
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(560px, 1fr))',
-          gap: 24,
-        }}
-      >
-        {/* Registry Growth — full width */}
-        <div id="growth" style={{ ...cardStyle, gridColumn: '1 / -1' }}>
-          <div style={cardTitleStyle}>Registry Growth</div>
-          <div style={cardDescStyle}>Cumulative builds added to the registry over time</div>
+      <div className={styles.grid}>
+        <ChartCard id="growth" full title="Registry Growth" desc="Cumulative builds added to the registry over time">
           <RegistryGrowth data={growthData} />
-        </div>
+        </ChartCard>
 
-        {/* Color Distribution Donut */}
-        <div id="distribution" style={cardStyle}>
-          <div style={cardTitleStyle}>Color Distribution</div>
-          <div style={cardDescStyle}>Top 20 Individual colors by build count</div>
+        <ChartCard id="distribution" title="Color Distribution" desc="Top 20 Individual colors by build count">
           <ColorDonut data={colorCounts} />
-        </div>
+        </ChartCard>
 
-        {/* Color Treemap */}
-        <div style={cardStyle}>
-          <div style={cardTitleStyle}>Color Treemap</div>
-          <div style={cardDescStyle}>Size proportional to count — filled with actual BMW color</div>
+        <ChartCard title="Color Treemap" desc="Size proportional to count — filled with actual BMW color">
           <ColorTreemapLoader data={colorCounts} />
-        </div>
+        </ChartCard>
 
-        {/* Model Breakdown — full width */}
-        <div id="models" style={{ ...cardStyle, gridColumn: '1 / -1' }}>
-          <div style={cardTitleStyle}>Model, Drivetrain &amp; Transmission Breakdown</div>
-          <div style={cardDescStyle}>Split by body style (M3/M4), drivetrain, and transmission</div>
+        <ChartCard
+          id="models"
+          full
+          title="Model, Drivetrain & Transmission Breakdown"
+          desc="Split by body style (M3/M4), drivetrain, and transmission"
+        >
           <ModelBreakdown entries={filteredEntries} />
-        </div>
+        </ChartCard>
 
-        {/* Competition Adoption */}
-        <div style={cardStyle}>
-          <div style={cardTitleStyle}>Competition Package Adoption</div>
-          <div style={cardDescStyle}>% of M3 and M4 builds with Competition package by year</div>
+        <ChartCard
+          title="Competition Package Adoption"
+          desc="% of M3 and M4 builds with Competition package by year"
+        >
           <CompetitionAdoption data={competitionData} />
-        </div>
+        </ChartCard>
 
-        {/* Drivetrain Matrix */}
-        <div style={cardStyle}>
-          <div style={cardTitleStyle}>Drivetrain &amp; Transmission Mix</div>
-          <div style={cardDescStyle}>Breakdown of RWD/AWD × Manual/Auto combinations</div>
+        <ChartCard
+          title="Drivetrain & Transmission Mix"
+          desc="Breakdown of RWD/AWD × Manual/Auto combinations"
+        >
           <DrivetrainMatrix entries={filteredEntries} />
-        </div>
+        </ChartCard>
 
-        {/* Year Trend — full width */}
-        <div id="trends" style={{ ...cardStyle, gridColumn: '1 / -1' }}>
-          <div style={cardTitleStyle}>Color Popularity by Model Year</div>
-          <div style={cardDescStyle}>Top 8 colors tracked across model years</div>
+        <ChartCard id="trends" full title="Color Popularity by Model Year" desc="Top 8 colors tracked across model years">
           <YearTrend entries={filteredEntries} />
-        </div>
+        </ChartCard>
 
-        {/* Color Family Trends — full width */}
-        <div style={{ ...cardStyle, gridColumn: '1 / -1' }}>
-          <div style={cardTitleStyle}>Color Family Trends by Year</div>
-          <div style={cardDescStyle}>Stacked breakdown of color families across model years</div>
+        <ChartCard
+          full
+          title="Color Family Trends by Year"
+          desc="Stacked breakdown of color families across model years"
+        >
           <ColorFamilyTrends data={familyTrendData} />
-        </div>
+        </ChartCard>
 
-        {/* Interior Bar */}
-        <div id="interiors" style={cardStyle}>
-          <div style={cardTitleStyle}>Interior Colors</div>
-          <div style={cardDescStyle}>Frequency of interior color selections</div>
+        <ChartCard id="interiors" title="Interior Colors" desc="Frequency of interior color selections">
           <InteriorBar data={interiorCounts} />
-        </div>
+        </ChartCard>
 
-        {/* Wheel Bar */}
-        <div style={cardStyle}>
-          <div style={cardTitleStyle}>Wheel Popularity</div>
-          <div style={cardDescStyle}>Most common wheel packages in the registry</div>
+        <ChartCard title="Wheel Popularity" desc="Most common wheel packages in the registry">
           <WheelBar data={wheelCounts} />
-        </div>
+        </ChartCard>
 
-        {/* Color-Interior Heatmap */}
-        <div style={{ ...cardStyle, gridColumn: '1 / -1' }}>
-          <div style={cardTitleStyle}>Color × Interior Heatmap</div>
-          <div style={cardDescStyle}>Top 15 exterior × top 8 interior color combinations</div>
+        <ChartCard
+          full
+          title="Color × Interior Heatmap"
+          desc="Top 15 exterior × top 8 interior color combinations"
+        >
           <ColorInteriorMatrix entries={filteredEntries} />
-        </div>
+        </ChartCard>
 
-        {/* Color-Year Matrix — full width */}
-        <div id="matrix" style={{ ...cardStyle, gridColumn: '1 / -1' }}>
-          <div style={cardTitleStyle}>Color × Year × Drivetrain Matrix</div>
-          <div style={cardDescStyle}>Detailed breakdown of each color by year, model, and drivetrain</div>
+        <ChartCard
+          id="matrix"
+          full
+          title="Color × Year × Drivetrain Matrix"
+          desc="Detailed breakdown of each color by year, model, and drivetrain"
+        >
           <ColorMatrix data={matrixData} />
-        </div>
-
+        </ChartCard>
       </div>
     </>
   );

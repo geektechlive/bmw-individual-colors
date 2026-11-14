@@ -2,7 +2,10 @@
 
 import { Treemap, ResponsiveContainer, Tooltip } from 'recharts';
 import { isLightColor } from '../../lib/colors';
+import { TOKENS } from '../../lib/design-tokens';
 import type { ColorCount } from '../../types';
+import { FALLBACK_PAINT, SLICE_STROKE } from './palette';
+import shared from './charts.module.css';
 
 interface Props {
   data: ColorCount[];
@@ -18,10 +21,15 @@ interface TreemapContentProps {
   value?: number;
 }
 
+const MIN_LABEL_PX = 11;
+
 function CustomContent(props: TreemapContentProps) {
-  const { x = 0, y = 0, width = 0, height = 0, name = '', hex = '#888', value = 0 } = props;
-  const textColor = isLightColor(hex) ? '#1a1a1a' : '#ffffff';
-  const showLabel = width > 60 && height > 30;
+  const { x = 0, y = 0, width = 0, height = 0, name = '', hex = FALLBACK_PAINT, value = 0 } = props;
+  const textColor = isLightColor(hex) ? TOKENS['bg'] : TOKENS['on-accent'];
+  // Hide labels that can't fit at the 11px floor (roughly 0.6em per character, plus padding);
+  // the tooltip still names the tile.
+  const fitsName = width >= name.length * MIN_LABEL_PX * 0.6 + 8;
+  const showLabel = width > 60 && height > 30 && fitsName;
 
   return (
     <g>
@@ -30,7 +38,9 @@ function CustomContent(props: TreemapContentProps) {
         y={y}
         width={width}
         height={height}
-        style={{ fill: hex, stroke: '#0f172a', strokeWidth: 2 }}
+        fill={hex}
+        stroke={SLICE_STROKE}
+        strokeWidth={2}
       />
       {showLabel && (
         <>
@@ -39,7 +49,9 @@ function CustomContent(props: TreemapContentProps) {
             y={y + height / 2 - 6}
             textAnchor="middle"
             dominantBaseline="middle"
-            style={{ fill: textColor, fontSize: Math.min(13, width / 8), fontWeight: 600 }}
+            fill={textColor}
+            fontSize={Math.max(MIN_LABEL_PX, Math.min(13, width / 8))}
+            fontWeight={600}
           >
             {name}
           </text>
@@ -48,7 +60,9 @@ function CustomContent(props: TreemapContentProps) {
             y={y + height / 2 + 10}
             textAnchor="middle"
             dominantBaseline="middle"
-            style={{ fill: textColor, fontSize: Math.min(11, width / 10), opacity: 0.85 }}
+            fill={textColor}
+            fontSize={MIN_LABEL_PX}
+            opacity={0.85}
           >
             {value}
           </text>
@@ -79,9 +93,9 @@ export default function ColorTreemap({ data }: Props) {
             if (!active || !payload?.length) return null;
             const d = payload[0].payload;
             return (
-              <div style={{ background: '#1e2a3a', border: '1px solid #2d3f55', padding: '8px 12px', borderRadius: 6, color: '#e2e8f0' }}>
-                <div style={{ fontWeight: 600 }}>{d.name}</div>
-                <div style={{ color: '#94a3b8' }}>{d.value} entries</div>
+              <div className={shared.tooltipCard}>
+                <div className={shared.tooltipName}>{d.name}</div>
+                <div className={shared.tooltipSub}>{d.value} entries</div>
               </div>
             );
           }}

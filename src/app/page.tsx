@@ -4,6 +4,8 @@ import { computeStats, computeColorCounts } from '../lib/analytics';
 import { getColorHex, colorToSlug } from '../lib/colors';
 import ColorTreemapLoader from '../components/charts/ColorTreemapLoader';
 import type { Metadata } from 'next';
+import { cssVars } from '../lib/css-vars';
+import styles from './page.module.css';
 
 export const dynamic = 'force-dynamic';
 
@@ -59,103 +61,33 @@ export default async function HomePage() {
     },
   ];
 
+  const statItems = [
+    { label: 'Total Builds', value: stats.totalEntries, color: 'var(--m-blue)' },
+    { label: 'Individual Colors', value: stats.totalColors, color: 'var(--m-violet)' },
+    { label: 'Countries / Regions', value: stats.totalCountries, color: 'var(--m-red)' },
+  ];
+
   return (
     <main>
       {/* Hero */}
-      <section
-        style={{
-          background: 'linear-gradient(135deg, #0a0f1a 0%, #0f1923 50%, #0a1220 100%)',
-          borderBottom: '3px solid transparent',
-          borderImage: 'linear-gradient(to right, #1C69D4, #862086, #E8002D) 1',
-          padding: '4rem 1.5rem 3rem',
-          textAlign: 'center',
-        }}
-      >
-        <div style={{ maxWidth: 680, margin: '0 auto' }}>
-          <div
-            style={{
-              display: 'inline-block',
-              padding: '4px 14px',
-              background: 'rgba(28,105,212,0.15)',
-              border: '1px solid rgba(28,105,212,0.3)',
-              borderRadius: 20,
-              color: '#1C69D4',
-              fontSize: 12,
-              fontWeight: 700,
-              letterSpacing: '0.08em',
-              textTransform: 'uppercase',
-              marginBottom: 20,
-            }}
-          >
-            Community Registry
-          </div>
-          <h1
-            style={{
-              fontSize: 'clamp(28px, 5vw, 48px)',
-              fontWeight: 900,
-              color: '#f1f5f9',
-              lineHeight: 1.15,
-              marginBottom: 16,
-              letterSpacing: '-0.02em',
-            }}
-          >
+      <section className={styles.hero}>
+        <div className={styles.heroInner}>
+          <div className={styles.badge}>Community Registry</div>
+          <h1 className={styles.heroTitle}>
             BMW M Individual<br />Colors Registry
           </h1>
-          <p
-            style={{
-              fontSize: 17,
-              color: '#94a3b8',
-              lineHeight: 1.6,
-              maxWidth: 520,
-              margin: '0 auto 36px',
-            }}
-          >
+          <p className={styles.heroLede}>
             Track and explore BMW M3 and M4 Individual paint color builds from the M community.
             Discover which colors are out there and where.
           </p>
-          <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
-            <Link
-              href="/submit"
-              style={{
-                padding: '12px 28px',
-                background: '#1C69D4',
-                color: '#ffffff',
-                borderRadius: 8,
-                textDecoration: 'none',
-                fontWeight: 700,
-                fontSize: 15,
-              }}
-            >
+          <div className={styles.heroActions}>
+            <Link href="/submit" className={`btn btn--primary ${styles.heroBtn}`}>
               Submit Your Build
             </Link>
-            <Link
-              href="/entries"
-              style={{
-                padding: '12px 28px',
-                background: 'transparent',
-                color: '#e2e8f0',
-                border: '1px solid #2d3f55',
-                borderRadius: 8,
-                textDecoration: 'none',
-                fontWeight: 600,
-                fontSize: 15,
-              }}
-            >
+            <Link href="/entries" className={`btn ${styles.heroBtn}`}>
               Browse All Entries
             </Link>
-            <Link
-              href="/reports"
-              style={{
-                padding: '12px 28px',
-                background: 'transparent',
-                color: '#e2e8f0',
-                border: '1px solid #2d3f55',
-                borderRadius: 8,
-                textDecoration: 'none',
-                fontWeight: 600,
-                fontSize: 15,
-              }}
-            >
+            <Link href="/reports" className={`btn ${styles.heroBtn}`}>
               View Reports →
             </Link>
           </div>
@@ -163,113 +95,64 @@ export default async function HomePage() {
       </section>
 
       {/* Color Treemap */}
-      <section style={{ background: '#0a0f1a', padding: '0 1.5rem 1.5rem' }}>
-        <div style={{ maxWidth: 900, margin: '0 auto' }}>
-          <div style={{ borderRadius: 12, overflow: 'hidden', border: '1px solid #1e2a3a' }}>
+      <section className={styles.treemapSection}>
+        <div className={styles.treemapInner}>
+          <div className={styles.treemapFrame}>
             <ColorTreemapLoader data={computeColorCounts(entries).slice(0, 30)} />
           </div>
         </div>
       </section>
 
       {/* Stat Strip */}
-      <section
-        style={{
-          background: '#0f1923',
-          borderBottom: '1px solid #1e2a3a',
-          padding: '1.5rem',
-        }}
-      >
-        <div
-          style={{
-            maxWidth: 900,
-            margin: '0 auto',
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
-            gap: 1,
-          }}
-        >
-          {[
-            { label: 'Total Builds',        value: stats.totalEntries,  color: '#1C69D4' },
-            { label: 'Individual Colors',   value: stats.totalColors,   color: '#862086' },
-            { label: 'Countries / Regions', value: stats.totalCountries, color: '#E8002D' },
-          ].map(({ label, value, color }) => (
-            <div key={label} style={{ textAlign: 'center', padding: '1rem' }}>
-              <div
-                style={{
-                  fontSize: 'clamp(28px, 4vw, 40px)',
-                  fontWeight: 900,
-                  color,
-                  lineHeight: 1,
-                  marginBottom: 6,
-                }}
-              >
+      <section className={styles.stats}>
+        <div className={styles.statGrid}>
+          {statItems.map(({ label, value, color }) => (
+            <div key={label} className={styles.stat}>
+              <div className={`${styles.statValue} num`} style={cssVars({ '--p': color })}>
                 {value}
               </div>
-              <div style={{ fontSize: 13, color: '#64748b', fontWeight: 500 }}>
-                {label}
-              </div>
+              <div className={styles.statLabel}>{label}</div>
             </div>
           ))}
         </div>
       </section>
 
       {/* Insight strip */}
-      <section style={{ background: '#0f1923', borderBottom: '1px solid #1e2a3a', padding: '1rem 1.5rem' }}>
-        <div style={{ maxWidth: 900, margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 1 }}>
+      <section className={styles.insights}>
+        <div className={styles.statGrid}>
           {insightTiles.map(({ label, value, sub, hex }) => (
-            <div key={label} style={{ textAlign: 'center', padding: '0.75rem 1rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, marginBottom: 4 }}>
-                {hex && <div style={{ width: 14, height: 14, borderRadius: '50%', background: hex, border: '1px solid #2d3f55', flexShrink: 0 }} />}
-                <div style={{ fontSize: 15, fontWeight: 700, color: '#e2e8f0', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: 200 }}>{value}</div>
+            <div key={label} className={styles.insight}>
+              <div className={styles.insightHead}>
+                {hex && <div className={styles.swatchSmall} style={cssVars({ '--p': hex })} />}
+                <div className={styles.insightValue}>{value}</div>
               </div>
-              {sub && <div style={{ fontSize: 11, color: '#475569' }}>{sub}</div>}
-              <div style={{ fontSize: 12, color: '#64748b', fontWeight: 500, marginTop: 2 }}>{label}</div>
+              {sub && <div className={`${styles.insightSub} num`}>{sub}</div>}
+              <div className={styles.insightLabel}>{label}</div>
             </div>
           ))}
         </div>
       </section>
 
       {/* Latest 8 Submissions */}
-      <section style={{ maxWidth: 900, margin: '0 auto', padding: '3rem 1.5rem' }}>
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            marginBottom: 20,
-          }}
-        >
-          <h2 style={{ fontSize: 20, fontWeight: 700, color: '#e2e8f0' }}>
-            Latest Submissions
-          </h2>
-          <Link
-            href="/entries"
-            style={{ color: '#1C69D4', fontSize: 13, textDecoration: 'none', fontWeight: 600 }}
-          >
+      <section className={styles.latest}>
+        <div className={styles.latestHead}>
+          <h2 className="section-title">Latest Submissions</h2>
+          <Link href="/entries" className={`link ${styles.viewAll}`}>
             View all →
           </Link>
         </div>
 
         {latest8.length === 0 ? (
-          <div
-            style={{
-              background: '#0f1923',
-              border: '1px solid #2d3f55',
-              borderRadius: 12,
-              padding: '3rem',
-              textAlign: 'center',
-              color: '#64748b',
-            }}
-          >
+          <div className={styles.empty}>
             No builds yet. Be the first to{' '}
-            <Link href="/submit" style={{ color: '#1C69D4', textDecoration: 'none' }}>
+            <Link href="/submit" className="link">
               submit yours
             </Link>
             !
           </div>
         ) : (
           <>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <div className={styles.feed}>
               {latest8.map((e) => {
                 const hex = getColorHex(e.ext_color);
                 const location = [e.location_city, e.location_state, e.location_country]
@@ -277,45 +160,22 @@ export default async function HomePage() {
                   .join(', ');
 
                 return (
-                  <div
-                    key={e.id}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 16,
-                      background: `${hex}12`,
-                      border: '1px solid #2d3f55',
-                      borderLeft: `4px solid ${hex}`,
-                      borderRadius: 10,
-                      padding: '14px 20px',
-                    }}
-                  >
-                    <div
-                      style={{
-                        width: 36,
-                        height: 36,
-                        borderRadius: '50%',
-                        background: hex,
-                        border: '2px solid #2d3f55',
-                        flexShrink: 0,
-                      }}
-                    />
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <Link href={`/colors/${colorToSlug(e.ext_color)}`} style={{ textDecoration: 'none' }}>
-                        <div style={{ fontWeight: 700, color: '#e2e8f0', fontSize: 15 }}>{e.ext_color}</div>
+                  <div key={e.id} className={styles.row} style={cssVars({ '--p': hex })}>
+                    <div className={styles.rowSwatch} />
+                    <div className={styles.rowBody}>
+                      <Link href={`/colors/${colorToSlug(e.ext_color)}`} className={styles.rowLink}>
+                        <div className={`${styles.rowColor} paint-name`}>{e.ext_color}</div>
                       </Link>
-                      <div style={{ color: '#64748b', fontSize: 13, marginTop: 2 }}>
+                      <div className={styles.rowMeta}>
                         {e.model_year} {e.body_style}
                         {e.competition ? ' Competition' : ''} · {e.drivetrain} · {e.transmission}
                         {location ? ` · ${location}` : ''}
                       </div>
                     </div>
                     {e.forum_username && (
-                      <div style={{ color: '#475569', fontSize: 12, flexShrink: 0 }}>
-                        {e.forum_username}
-                      </div>
+                      <div className={styles.rowUser}>{e.forum_username}</div>
                     )}
-                    <div style={{ color: '#374151', fontSize: 11, flexShrink: 0 }}>
+                    <div className={`${styles.rowDate} mono`}>
                       {new Date(e.created_at).toLocaleDateString('en-US', {
                         timeZone: 'UTC',
                         year: 'numeric',
@@ -327,11 +187,11 @@ export default async function HomePage() {
                 );
               })}
             </div>
-            <div style={{ display: 'flex', gap: 12, marginTop: 16, justifyContent: 'flex-end' }}>
-              <Link href="/entries" style={{ color: '#64748b', fontSize: 13, textDecoration: 'none', fontWeight: 500 }}>
+            <div className={styles.latestFoot}>
+              <Link href="/entries" className={styles.footMuted}>
                 Browse all entries →
               </Link>
-              <Link href="/colors" style={{ color: '#1C69D4', fontSize: 13, textDecoration: 'none', fontWeight: 600 }}>
+              <Link href="/colors" className={`link ${styles.footAccent}`}>
                 Explore all colors →
               </Link>
             </div>
