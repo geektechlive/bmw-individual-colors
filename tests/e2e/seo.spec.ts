@@ -40,6 +40,29 @@ test.describe('SEO routes', () => {
     expect(href).toContain('/colors/twilight-purple');
   });
 
+  test('site pages share the static 1200x630 image as a large card', async ({ page, request, baseURL }) => {
+    for (const path of ['/', '/entries', '/map']) {
+      await page.goto(path);
+      await expect(page.locator('meta[property="og:image"]')).toHaveAttribute('content', /\/og\.png$/);
+      await expect(page.locator('meta[name="twitter:card"]')).toHaveAttribute('content', 'summary_large_image');
+      await expect(page.locator('meta[name="twitter:image"]')).toHaveAttribute('content', /\/og\.png$/);
+    }
+    const img = await request.get(`${baseURL}/og.png`);
+    expect(img.status()).toBe(200);
+    expect(img.headers()['content-type']).toContain('image/png');
+  });
+
+  test('color pages keep their own card on Open Graph and X', async ({ page }) => {
+    await page.goto('/colors/twilight-purple');
+    await expect(page.locator('meta[property="og:image"]')).toHaveAttribute('content', /\/colors\/twilight-purple\/opengraph-image/);
+    await expect(page.locator('meta[name="twitter:image"]')).toHaveAttribute('content', /\/colors\/twilight-purple\/opengraph-image/);
+  });
+
+  test('the dev-only /og-hero source page is not part of the sitemap', async ({ request, baseURL }) => {
+    const res = await request.get(`${baseURL}/sitemap.xml`);
+    expect(await res.text()).not.toContain('/og-hero');
+  });
+
   test('/colors/twilight-purple/opengraph-image returns 200 image', async ({ request, baseURL }) => {
     const res = await request.get(`${baseURL}/colors/twilight-purple/opengraph-image`);
     expect(res.status()).toBe(200);

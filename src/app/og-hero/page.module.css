@@ -1,0 +1,121 @@
+/* Share image source (1200x630). Same tokens, fonts and wall lighting as the home page.
+   Font sizes are exempt from the type-scale rule below: this is a fixed 1200px canvas shown
+   at ~400px wide in chat apps, so its text must survive a 3x reduction (at least ~30px source
+   for ~10px displayed), which is above the site's type scale. */
+/* stylelint-disable declaration-property-value-allowed-list */
+
+.stage {
+  padding: var(--s-6);
+  overflow-x: auto;
+}
+
+.hero {
+  position: relative;
+  width: 1200px;
+  height: 630px;
+  box-sizing: border-box;
+  padding: 52px 64px 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background:
+    radial-gradient(60% 55% at 50% 100%, color-mix(in srgb, var(--light) 7%, transparent), transparent 70%),
+    var(--bg);
+}
+
+.top {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.stripe {
+  display: flex;
+  gap: 6px;
+  transform: skewX(-18deg);
+}
+
+.stripe i {
+  display: block;
+  width: 13px;
+  height: 46px;
+  border-radius: 2px;
+}
+
+.stripe i:nth-child(1) {
+  background: var(--m-blue);
+}
+
+.stripe i:nth-child(2) {
+  background: var(--m-violet);
+}
+
+.stripe i:nth-child(3) {
+  background: var(--m-red);
+}
+
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 34px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  color: var(--ink);
+}
+
+/* The hook: the platforms print the site name beside the card, so the image asks the question. */
+.hook {
+  margin: 26px 0 0;
+  font-family: var(--font-text);
+  font-size: 104px;
+  font-weight: 800;
+  font-stretch: 118%;
+  letter-spacing: -0.035em;
+  line-height: 0.95;
+  color: var(--ink);
+}
+
+.name {
+  margin: 18px 0 0;
+  font-family: var(--font-text);
+  font-size: 34px;
+  font-weight: 600;
+  font-stretch: 112%;
+  color: var(--ink-2);
+}
+
+/* The lit wall, full-bleed along the bottom, same light as the home page wall. Wider gaps
+   and a little more colour so the strips stay distinct when the image is shown small. */
+.wall {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 200px;
+  display: flex;
+  gap: 3px;
+  filter: saturate(1.2) brightness(1.06);
+}
+
+.wall::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--light) 34%, transparent) 0%,
+      color-mix(in srgb, var(--light) 12%, transparent) 26%,
+      color-mix(in srgb, var(--light) 4%, transparent) 47%,
+      color-mix(in srgb, var(--shade) 16%, transparent) 49%,
+      color-mix(in srgb, var(--shade) 5%, transparent) 68%,
+      transparent 88%
+    ),
+    radial-gradient(60% 40% at 50% 0%, color-mix(in srgb, var(--light) 22%, transparent), transparent 70%);
+}
+
+.strip {
+  flex: var(--n) 1 0;
+  min-width: 5px;
+  background: var(--p);
+}

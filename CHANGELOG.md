@@ -8,6 +8,10 @@ Run `npx tsx scripts/post-to-bimmerpost.ts` to publish pending items to the foru
 
 ## [Unreleased]
 
+- **Added:** share image leads with the hook, legible at chat sizes (#52)
+
+- **Added:** share image for links to the site, in the new design (#52)
+
 - **Fixed:** share-image cache no longer wiped by every deploy (#52, ADR 0006 addendum)
 
 - **Added:** one site name, look-alike paint names, form fixes, motion, grain and polish

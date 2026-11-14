@@ -52,13 +52,15 @@ export const metadata: Metadata = {
     url: '/',
     title: 'BMW M Individual Colors Registry',
     description: SITE_DESCRIPTION,
-    images: ['/icon.png'],
+    // Static share image (public/og.png): no render per request. Regenerate with
+    // scripts/render-og-hero.mjs after a visual change to the home page.
+    images: [{ url: '/og.png', width: 1200, height: 630, alt: 'BMW M Individual Colors Registry' }],
   },
   twitter: {
-    card: 'summary',
+    card: 'summary_large_image',
     title: 'BMW M Individual Colors Registry',
     description: SITE_DESCRIPTION,
-    images: ['/icon.png'],
+    images: ['/og.png'],
   },
   alternates: {
     canonical: '/',

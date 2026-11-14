@@ -67,6 +67,13 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
       description,
       images: [`/colors/${canonicalSlug}/opengraph-image`],
     },
+    // Its own card on X too, instead of inheriting the site-wide share image.
+    twitter: {
+      card: 'summary_large_image',
+      title: `${colorName} | BMW M Individual Colors Registry`,
+      description,
+      images: [`/colors/${canonicalSlug}/opengraph-image`],
+    },
   };
 }
 
