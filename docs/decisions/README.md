@@ -24,3 +24,4 @@ zone or resource IDs, email addresses, local paths or personal details. Start a 
 | [0015](0015-changelog-hook-and-forum-updates.md)           | User-visible changes go to CHANGELOG.md automatically and to the forum by script    |                 |
 | [0016](0016-design-refresh-mix-direction.md)               | A token-based design system: "Build Sheet" for data, lit paint where paint is the point | #38–#52     |
 | [0017](0017-duplicate-builds-are-a-hard-stop.md)           | A duplicate build is a hard stop with a link to edit the existing one              | #35, #51        |
+| [0018](0018-stay-on-supabase.md)                           | Stay on Supabase; don't move the data to Cloudflare D1                              |                 |
