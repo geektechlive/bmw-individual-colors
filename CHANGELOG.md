@@ -8,6 +8,18 @@ Run `npx tsx scripts/post-to-bimmerpost.ts` to publish pending items to the foru
 
 ## [Unreleased]
 
+- **Fixed:** the entries page has one loading state, so the footer can't jump (#63)
+
+- **Improved:** sweeping the mouse across the paint wall doesn't preload every strip (#62)
+
+- **Fixed:** pages no longer jump when they finish loading (#63)
+
+- **Improved:** paint pages load in the background only when you point at them (#62)
+
+- **Improved:** browsers keep the site's scripts and styles instead of re-checking them (#61)
+
+- **Improved:** submit and edit forms no longer download every city on Earth (#60)
+
 - **Docs:** ADR 0018, stay on Supabase rather than Cloudflare D1
 
 - **Added:** log why a submission or edit is turned away (#59)

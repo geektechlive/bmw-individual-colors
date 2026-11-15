@@ -2,7 +2,7 @@
 
 import { useRef, useState } from 'react';
 import type { MouseEvent, PointerEvent } from 'react';
-import Link from 'next/link';
+import IntentLink from '../IntentLink';
 import { cssVars } from '../../lib/css-vars';
 import styles from './PaintWall.module.css';
 
@@ -66,7 +66,7 @@ export default function PaintWall({ paints, ticks, totalPaints }: Props) {
         <ul className={styles.strips} aria-label="Top 40 registered paints, sorted by color">
           {paints.map((p) => (
             <li key={p.slug} className={styles.item} style={cssVars({ '--n': p.count, '--p': p.hex })}>
-              <Link
+              <IntentLink
                 href={`/colors/${p.slug}`}
                 className={styles.strip}
                 aria-label={`${p.color}, ${buildsText(p.count)}`}

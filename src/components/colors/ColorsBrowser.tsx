@@ -1,6 +1,6 @@
 'use client';
 
-import Link from 'next/link';
+import IntentLink from '../IntentLink';
 import { useId, useMemo, useState, useSyncExternalStore, ViewTransition } from 'react';
 import PaintSwatch from '../PaintSwatch';
 import { cssVars } from '../../lib/css-vars';
@@ -130,7 +130,7 @@ export default function ColorsBrowser({ colors }: { colors: BrowseColor[] }) {
         <ul className={styles.grid}>
           {visible.map((c, i) => (
             <li key={c.slug} className="rise" style={cssVars({ '--i': i })}>
-              <Link href={`/colors/${c.slug}`} className={styles.tile} style={cssVars({ '--p': c.hex })}>
+              <IntentLink href={`/colors/${c.slug}`} className={styles.tile} style={cssVars({ '--p': c.hex })}>
                 <ViewTransition name={`paint-${c.slug}`} share="morph" default="none">
                   <PaintSwatch name={c.name} hex={c.hex} size="tile" />
                 </ViewTransition>
@@ -140,7 +140,7 @@ export default function ColorsBrowser({ colors }: { colors: BrowseColor[] }) {
                     {c.count} build{c.count === 1 ? '' : 's'} · {c.rarity}
                   </span>
                 </span>
-              </Link>
+              </IntentLink>
             </li>
           ))}
         </ul>

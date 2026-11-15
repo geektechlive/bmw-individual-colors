@@ -133,6 +133,13 @@ body::after {
 .page--form { max-width: var(--w-form); }
 .page--narrow { max-width: var(--w-narrow); }
 
+/* A loading skeleton (loading.tsx) fills at least the screen, so the footer starts below
+   the fold instead of sitting on screen and jumping away when the page arrives (#63). */
+main[aria-busy='true'] {
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
 /* ---------- Type ---------- */
 .title {
   font-size: var(--t-title);

@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import IntentLink from './IntentLink';
 import { getColorHex, colorToSlug } from '../lib/colors';
 import { cityState, entryDate, interiorDetail, modelLabel } from '../lib/entry-display';
 import FlagButton from './FlagButton';
@@ -24,9 +25,9 @@ export default function EntryCard({ entry: e }: { entry: BmwEntry }) {
     <li className={`card ${styles.card}`}>
       <div className={styles.head}>
         <PaintSwatch name={e.ext_color} hex={getColorHex(e.ext_color)} />
-        <Link href={`/colors/${colorToSlug(e.ext_color)}`} className={`paint-name ${styles.paint}`}>
+        <IntentLink href={`/colors/${colorToSlug(e.ext_color)}`} className={`paint-name ${styles.paint}`}>
           {e.ext_color}
-        </Link>
+        </IntentLink>
         <div className={styles.actions}>
           <FlagButton id={e.id} />
           {/* No prefetch: /edit bypasses the edge cache (see EntryTable). */}

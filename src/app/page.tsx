@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import IntentLink from '../components/IntentLink';
 import { getEntries } from '../lib/queries';
 import { computeStats, computeColorCounts } from '../lib/analytics';
 import { colorToSlug } from '../lib/colors';
@@ -157,12 +158,12 @@ export default async function HomePage() {
                       <td>
                         <span className={styles.paintCell}>
                           <PaintSwatch name={e.ext_color} size="chip" />
-                          <Link
+                          <IntentLink
                             href={`/colors/${colorToSlug(e.ext_color)}`}
                             className={`${styles.paintLink} paint-name`}
                           >
                             {e.ext_color}
-                          </Link>
+                          </IntentLink>
                         </span>
                       </td>
                       <td className="mono">

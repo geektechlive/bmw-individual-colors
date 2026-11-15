@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import IntentLink from './IntentLink';
 import { getColorHex, colorToSlug } from '../lib/colors';
 import { cityState as formatCityState, interiorDetail, modelLabel } from '../lib/entry-display';
 import EntryCard from './EntryCard';
@@ -338,12 +339,12 @@ export default function EntryTable({ entries }: Props) {
                   <td className={styles.td}>
                     <div className={styles.colorCell}>
                       <PaintSwatch name={e.ext_color} hex={hex} />
-                      <Link
+                      <IntentLink
                         href={`/colors/${colorToSlug(e.ext_color)}`}
                         className={`paint-name ${styles.colorLink}`}
                       >
                         {e.ext_color}
-                      </Link>
+                      </IntentLink>
                     </div>
                   </td>
                   <td className={`${styles.td} mono`}>{e.model_year}</td>
