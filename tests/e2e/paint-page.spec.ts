@@ -59,3 +59,18 @@ test.describe('Paint page (direction B, unit b)', () => {
     expect(await top(page, 'dl[class*="tiles"]')).toBeGreaterThan(await top(page, '[class*="spray"]'));
   });
 });
+
+test.describe('Accented paint slug (#75)', () => {
+  // The real 308 (query kept) comes from worker.ts and is covered by tests/unit/legacy-slugs.test.ts.
+  // Under `next dev` there is no worker, and the page's redirect streams behind loading.tsx
+  // (status 200 plus a client redirect), so here we only check the browser ends on the new slug.
+  test('opening the old s-o-paulo-yellow URL lands on sao-paulo-yellow', async ({ page }) => {
+    await page.goto('/colors/s-o-paulo-yellow');
+    await expect(page).toHaveURL(/\/colors\/sao-paulo-yellow$/);
+  });
+
+  test('the new slug shows the paint', async ({ page }) => {
+    await gotoLoaded(page, '/colors/sao-paulo-yellow');
+    await expect(page.getByRole('heading', { level: 1 })).toContainText('São Paulo Yellow');
+  });
+});

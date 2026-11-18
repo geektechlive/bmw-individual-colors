@@ -40,6 +40,23 @@ test.describe('Nav current item (#80)', () => {
   });
 });
 
+test.describe('Nav order (#74)', () => {
+  const ORDER = ['Home', 'Colors', 'Entries', 'Map', 'Reports', 'Submit'];
+
+  test('desktop nav lists Colors before Entries and Reports last', async ({ page }) => {
+    await page.setViewportSize(DESKTOP);
+    await gotoLoaded(page, '/');
+    await expect(page.locator('nav.nav-desktop a')).toHaveText(ORDER);
+  });
+
+  test('mobile nav lists the same order', async ({ page }) => {
+    await page.setViewportSize(PHONE);
+    await gotoLoaded(page, '/');
+    await page.locator('button[aria-label="Menu"]').click();
+    await expect(page.locator('nav.nav-mobile--open a')).toHaveText(ORDER);
+  });
+});
+
 test.describe('Home latest builds on a phone (#85)', () => {
   test.use({ viewport: PHONE });
 

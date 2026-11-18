@@ -8,6 +8,12 @@ Run `npx tsx scripts/post-to-bimmerpost.ts` to publish pending items to the foru
 
 ## [Unreleased]
 
+- **Fixed:** São Paulo Yellow's page is /colors/sao-paulo-yellow, the old link still works (#75)
+
+- **Fixed:** the Comp filter is a simple on/off chip (#77)
+
+- **Fixed:** nav lists Colors before Reports (#74)
+
 - **Fixed:** paint page rows show a labelled Edit or report button on phones (#86)
 
 - **Fixed:** Tab out of the row menu returns focus to the trigger (#84)

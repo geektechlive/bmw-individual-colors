@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { ViewTransition } from 'react';
 import { getEntriesByColor, getEntries, resolveColorSlug } from '../../../lib/queries';
 import { computeRarityLabel, computeColorCounts } from '../../../lib/analytics';
+import { legacySlugTarget } from '../../../lib/legacy-slugs';
 import { getColorHex, getColorFamily, COLOR_ALIASES, aliasRedirectSlug, canonicalColorName, colorToSlug } from '../../../lib/colors';
 import { readablePaint, paintSurfaces } from '../../../lib/paint-accent';
 import { rankOf, rankNote, paintSummary } from '../../../lib/paint-summary';
@@ -89,6 +90,10 @@ export default async function ColorDetailPage({ params }: { params: Promise<{ sl
   // Alias names aren't listed colors (#35): send old links to the canonical page (#37).
   const aliasTarget = aliasRedirectSlug(slug);
   if (aliasTarget) permanentRedirect(`/colors/${aliasTarget}`);
+  // Slugs from before accents were transliterated (#75). Production redirects these in
+  // worker.ts first (keeping the query string); this covers dev and any path past it.
+  const legacyTarget = legacySlugTarget(slug);
+  if (legacyTarget) permanentRedirect(`/colors/${legacyTarget}`);
   const resolved = await resolveColorSlug(slug);
   if (!resolved) notFound();
   const colorName = canonicalColorName(resolved);

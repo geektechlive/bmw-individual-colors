@@ -15,6 +15,7 @@ import {
 } from './src/lib/edge-cache';
 import { handleOgImage, type OgStore } from './src/lib/og-cache';
 import { isMissingStaticAsset } from './src/lib/blocked-paths';
+import { legacySlugRedirect } from './src/lib/legacy-slugs';
 import { requestLogLine } from './src/lib/request-log';
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment -- must pass both before and after a build
@@ -40,6 +41,11 @@ let getVersion: (() => Promise<string | null>) | null = null;
 async function respond(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
   if (isMissingStaticAsset(new URL(request.url).pathname)) {
     return new Response('Not found', { status: 404, headers: { 'cache-control': 'no-store' } });
+  }
+  // Old accent-less slugs (#75) answer with a 308 here, before anything else loads.
+  const moved = legacySlugRedirect(request);
+  if (moved) {
+    return new Response(null, { status: 308, headers: { location: moved, 'cache-control': 'public, max-age=86400' } });
   }
   const cache = (caches as unknown as { default: EdgeCacheStore }).default;
   getVersion ??= createVersionSource(

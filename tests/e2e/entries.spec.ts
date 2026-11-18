@@ -38,6 +38,30 @@ test.describe('Entries page', () => {
     for (const m of models) expect(m).toMatch(/Comp/);
   });
 
+  test('Comp is a two-state toggle: pressed shows Comp only, a second click shows all (#77)', async ({ page }) => {
+    await gotoLoaded(page, '/entries');
+    const comp = page.locator('[data-filter-group="Model"]:visible').getByRole('button', { name: 'Comp' });
+    const models = () => page.locator('table tbody tr td:nth-child(3)').allInnerTexts();
+    await expect(comp).toHaveAttribute('aria-pressed', 'false');
+    const all = await models();
+    expect(all.some((m) => !/Comp/.test(m))).toBe(true);
+
+    await comp.click();
+    await expect(comp).toHaveAttribute('aria-pressed', 'true');
+    const only = await models();
+    expect(only.length).toBeGreaterThan(0);
+    for (const m of only) expect(m).toMatch(/Comp/);
+
+    await comp.click();
+    await expect(comp).toHaveAttribute('aria-pressed', 'false');
+    expect((await models()).some((m) => !/Comp/.test(m))).toBe(true);
+
+    await comp.click();
+    await comp.click();
+    await expect(comp).toHaveAttribute('aria-pressed', 'false');
+    expect((await models()).some((m) => !/Comp/.test(m))).toBe(true);
+  });
+
   test('the count reads "Showing 1–50 of N entries" on desktop', async ({ page }) => {
     await gotoLoaded(page, '/entries');
     await expect(page.getByText(/^Showing 1–50 of \d+ entries$/)).toBeVisible();

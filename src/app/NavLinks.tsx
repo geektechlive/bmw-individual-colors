@@ -7,10 +7,10 @@ import styles from './NavLinks.module.css';
 
 const NAV_LINKS = [
   { href: '/', label: 'Home' },
-  { href: '/entries', label: 'Entries' },
-  { href: '/reports', label: 'Reports' },
   { href: '/colors', label: 'Colors' },
+  { href: '/entries', label: 'Entries' },
   { href: '/map', label: 'Map' },
+  { href: '/reports', label: 'Reports' },
   { href: '/submit', label: 'Submit' },
 ];
 

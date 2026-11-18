@@ -1,3 +1,5 @@
+import { legacySlugTarget } from './legacy-slugs';
+
 // BMW Individual Program colors — G80/G82 M3/M4 era
 // Hex values are best-match approximations for visualization purposes.
 export const BMW_COLORS: Record<string, string> = {
@@ -293,14 +295,21 @@ function fnv1a(text: string): string {
  * slug instead (#55). Blank input stays "".
  */
 export function colorToSlug(colorName: string): string {
-  const slug = colorName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  // Accents become their plain letter ("São" -> "sao"), not a dropped one (#75).
+  const slug = colorName
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/\p{M}+/gu, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '');
   if (slug) return slug;
   const cleaned = cleanPaintName(colorName).toLowerCase();
   return cleaned ? `paint-${fnv1a(cleaned)}` : '';
 }
 
 export function slugToColor(slug: string): string | null {
-  const normalized = slug.toLowerCase();
+  // An old slug resolves to the same paint as its replacement (#75).
+  const normalized = legacySlugTarget(slug) ?? slug.toLowerCase();
   return Object.keys(BMW_COLORS).find(
     name => colorToSlug(name) === normalized
   ) ?? null;

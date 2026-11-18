@@ -114,11 +114,8 @@ export default function EntryTable({ entries }: Props) {
   }
 
   function toggleCompetition() {
-    setFilters((prev) => {
-      if (prev.competition === null) return { ...prev, competition: true };
-      if (prev.competition === true) return { ...prev, competition: false };
-      return { ...prev, competition: null };
-    });
+    // Two states: Comp only, or all. The chip is pressed exactly when the filter is on (#77).
+    setFilters((prev) => ({ ...prev, competition: prev.competition === true ? null : true }));
     resetPage();
   }
 
