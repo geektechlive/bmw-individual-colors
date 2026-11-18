@@ -61,3 +61,22 @@ test('no font size in the type scale is under 11px', () => {
   assert.ok(sizes.length >= 5, 'type scale tokens are present');
   assert.deepEqual(sizes.filter((px) => px < 11), []);
 });
+
+// ---- Direction B, unit (a): control borders and the spray sticker (#66) ----------------
+// WCAG 1.4.11: the boundary of an input, select, chip or toggle needs 3:1 against what it sits on.
+
+test('--rule-control reaches 3:1 on bg, panel and panel-2 (never put a control on panel-3)', () => {
+  const ratios = (['bg', 'panel', 'panel-2'] as const).map((surface) => ({
+    surface,
+    ratio: contrastRatio(TOKENS['rule-control'], TOKENS[surface]),
+  }));
+  assert.deepEqual(
+    ratios.filter((r) => r.ratio < 3).map((r) => `${r.surface}: ${r.ratio.toFixed(2)}`),
+    [],
+  );
+});
+
+test('the spray-card sticker text (bg on ink) is a tested pair at 4.5:1', () => {
+  assert.ok(TEXT_PAIRS.some((p) => p.text === 'bg' && p.surface === 'ink' && !p.over));
+  assert.ok(contrastRatio(TOKENS.bg, TOKENS.ink) >= MIN_TEXT_CONTRAST);
+});

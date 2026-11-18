@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { ViewTransition } from 'react';
 import { getEntriesByColor, getEntries, resolveColorSlug } from '../../../lib/queries';
 import { computeRarityLabel, computeColorCounts } from '../../../lib/analytics';
-import { getColorHex, getColorFamily, isLightColor, COLOR_ALIASES, aliasRedirectSlug, canonicalColorName, colorToSlug } from '../../../lib/colors';
+import { getColorHex, getColorFamily, COLOR_ALIASES, aliasRedirectSlug, canonicalColorName, colorToSlug } from '../../../lib/colors';
 import { readablePaint, paintSurfaces } from '../../../lib/paint-accent';
 import { rankOf, paintSummary } from '../../../lib/paint-summary';
 import FlagButton from '../../../components/FlagButton';
@@ -158,7 +158,7 @@ export default async function ColorDetailPage({ params }: { params: Promise<{ sl
 
         <div className={styles.cove} aria-hidden="true">
           <div className={styles.lamp} />
-          <div className={`${styles.spray} ${isLightColor(hex) ? styles.sprayLight : ''}`}>
+          <div className={`${styles.spray}`}>
             <ViewTransition name={`paint-${colorToSlug(colorName)}`} share="morph" default="none">
               <PaintSwatch name={colorName} hex={hex} size="fill" />
             </ViewTransition>

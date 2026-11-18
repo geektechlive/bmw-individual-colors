@@ -193,6 +193,7 @@ main[aria-busy='true'] {
   color: var(--accent-ink);
   text-decoration: none;
 }
+.link-target { display: inline-flex; align-items: center; min-height: 44px; }
 .link:hover {
   text-decoration: underline;
   text-underline-offset: 3px;
@@ -212,6 +213,7 @@ main[aria-busy='true'] {
   align-items: center;
   justify-content: center;
   gap: var(--s-2);
+  min-height: 44px;
   padding: var(--s-2) var(--s-4);
   border-radius: var(--r);
   border: 1px solid var(--rule-strong);
@@ -249,9 +251,13 @@ main[aria-busy='true'] {
 
 /* ---------- Filter chips (toggle buttons; state comes from aria-pressed) ---------- */
 .chip {
-  padding: var(--s-1) var(--s-3);
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 var(--s-4);
+  white-space: nowrap;
   border-radius: var(--r-pill);
-  border: 1px solid var(--rule-strong);
+  border: 1px solid var(--rule-control);
   background: var(--panel-2);
   color: var(--ink-2);
   font: inherit;
@@ -283,10 +289,11 @@ main[aria-busy='true'] {
   color: var(--ink-3);
 }
 .input {
+  min-height: 44px;
   width: 100%;
   padding: var(--s-2) var(--s-3);
   background: var(--bg);
-  border: 1px solid var(--rule-strong);
+  border: 1px solid var(--rule-control);
   border-radius: var(--r);
   color: var(--ink);
   font: inherit;
@@ -298,6 +305,7 @@ main[aria-busy='true'] {
 .input:focus-visible { outline: 2px solid var(--focus); outline-offset: 1px; border-color: var(--focus); }
 .input[aria-invalid="true"] { border-color: var(--danger); }
 select.input, input.input, textarea.input { color-scheme: dark; }
+select.input { height: 44px; }
 
 /* ---------- Alerts ---------- */
 .alert {
@@ -357,11 +365,11 @@ select.input, input.input, textarea.input { color-scheme: dark; }
     justify-content: center;
     align-items: center;
     gap: var(--s-1);
-    width: 36px;
-    height: 36px;
+    width: 44px;
+    height: 44px;
     flex-shrink: 0;
     background: transparent;
-    border: 1px solid var(--rule-strong);
+    border: 1px solid var(--rule-control);
     border-radius: var(--r);
     cursor: pointer;
   }

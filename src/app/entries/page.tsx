@@ -25,7 +25,7 @@ export default async function EntriesPage({
   return (
     <main className="page">
       <div className={styles.back}>
-        <Link href="/" className="link">
+        <Link href="/" className="link link-target">
           ← Home
         </Link>
       </div>

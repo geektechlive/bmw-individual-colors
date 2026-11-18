@@ -16,7 +16,7 @@ export default async function ReportsPage() {
   return (
     <main className="page">
       <div className={styles.back}>
-        <Link href="/" className="link">
+        <Link href="/" className="link link-target">
           ← Home
         </Link>
       </div>

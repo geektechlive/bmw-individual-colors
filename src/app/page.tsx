@@ -123,7 +123,7 @@ export default async function HomePage() {
       <section className={`${styles.latest} page page--wide`}>
         <div className={styles.latestHead}>
           <h2 className="label">Latest builds</h2>
-          <Link href="/entries" className="link">
+          <Link href="/entries" className="link link-target">
             View all →
           </Link>
         </div>

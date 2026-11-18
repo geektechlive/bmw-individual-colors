@@ -12,6 +12,7 @@ export const TOKENS = {
   // Lines (MARK-ONLY: never text)
   'rule': '#262b33',
   'rule-strong': '#3a414c',
+  'rule-control': '#616a78',
   // Text
   'ink': '#eceef1',
   'ink-2': '#a9b0ba',
@@ -54,6 +55,8 @@ const OPAQUE_SURFACES: TokenName[] = ['bg', 'panel', 'panel-2', 'panel-3'];
 
 /** Every text color allowed on every surface it is allowed on. */
 export const TEXT_PAIRS: TextPair[] = [
+  // The spray-card sticker on a paint page: dark text on an opaque light label (#66).
+  { text: 'bg', surface: 'ink' },
   ...TEXT_INKS.flatMap((text) => OPAQUE_SURFACES.map((surface) => ({ text, surface }))),
   { text: 'on-accent', surface: 'accent' },
   // Status text sits on its own wash, laid over a panel or the page.

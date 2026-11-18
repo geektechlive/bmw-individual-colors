@@ -11,7 +11,7 @@ export default function SubmitPage() {
   return (
     <main className="page page--form">
       <div className={styles.back}>
-        <Link href="/" className="link">
+        <Link href="/" className="link link-target">
           ← Back to Home
         </Link>
       </div>

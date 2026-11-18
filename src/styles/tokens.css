@@ -21,6 +21,7 @@
   /* Lines (MARK-ONLY) */
   --rule: #262b33;
   --rule-strong: #3a414c;
+  --rule-control: #616a78;  /* Control boundaries: input, select, chip, toggle borders. 3:1 on bg, panel, panel-2. */
 
   /* Text. Ratios: on --bg / on --panel-3 (worst surface) */
   --ink: #eceef1;          /* 16.7 / 13.2 */

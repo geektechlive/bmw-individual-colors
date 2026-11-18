@@ -27,7 +27,7 @@ export default async function ColorsPage() {
   return (
     <main className="page">
       <div className={styles.back}>
-        <Link href="/" className="link">← Home</Link>
+        <Link href="/" className="link link-target">← Home</Link>
       </div>
       <h1 className={`title ${styles.heading}`}>Individual Colors</h1>
       <p className={`muted ${styles.intro}`}>

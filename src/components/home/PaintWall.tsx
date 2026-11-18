@@ -69,6 +69,7 @@ export default function PaintWall({ paints, ticks, totalPaints }: Props) {
               <IntentLink
                 href={`/colors/${p.slug}`}
                 className={styles.strip}
+                data-wall-strip=""
                 aria-label={`${p.color}, ${buildsText(p.count)}`}
                 onPointerDown={onPointerDown}
                 onMouseEnter={() => setActive(p)}

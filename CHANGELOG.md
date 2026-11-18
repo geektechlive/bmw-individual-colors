@@ -8,6 +8,8 @@ Run `npx tsx scripts/post-to-bimmerpost.ts` to publish pending items to the foru
 
 ## [Unreleased]
 
+- **Added:** control borders, 44 px targets, opaque spray-card sticker (#66)
+
 - **Fixed:** the entries page has one loading state, so the footer can't jump (#63)
 
 - **Improved:** sweeping the mouse across the paint wall doesn't preload every strip (#62)
