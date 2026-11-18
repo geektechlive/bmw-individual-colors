@@ -4,12 +4,7 @@ import {
   rankedSummary,
   shareSummary,
   modelSummary,
-  competitionSummary,
-  driveMixSummary,
   trendSummary,
-  familySummary,
-  pairingSummary,
-  matrixSummary,
   growthSummary,
   NO_BUILDS,
 } from '../../src/lib/report-summaries';
@@ -62,25 +57,6 @@ test('modelSummary counts models and names the most common drivetrain', () => {
   assert.equal(modelSummary([]), NO_BUILDS);
 });
 
-test('competitionSummary reports the share per model', () => {
-  const es = [
-    entry({ body_style: 'M3', competition: true }), entry({ body_style: 'M3' }),
-    entry({ body_style: 'M4', competition: true }),
-  ];
-  assert.equal(competitionSummary(es), 'The Competition package is on 50% of M3 builds and 100% of M4 builds.');
-  assert.equal(
-    competitionSummary([entry({ body_style: 'M3', competition: true })]),
-    'The Competition package is on 100% of M3 builds. There are no M4 builds here.',
-  );
-  assert.equal(competitionSummary([]), NO_BUILDS);
-});
-
-test('driveMixSummary names the most common drivetrain and gearbox pair', () => {
-  const es = [...many(3, { drivetrain: 'RWD', transmission: '6MT' }), entry({ drivetrain: 'AWD', transmission: '8AT' })];
-  assert.equal(driveMixSummary(es), 'The most common pairing is RWD with 6MT, in 3 of 4 builds.');
-  assert.equal(driveMixSummary([]), NO_BUILDS);
-});
-
 const NO_LEADER = 'No paint clearly leads. The top spot is tied or changes from year to year.';
 
 test('trendSummary says so when a year is tied instead of crowning the alphabetical first (#56)', () => {
@@ -105,16 +81,6 @@ test('trendSummary ignores a tied year when one paint still wins another (#56)',
   assert.equal(trendSummary(es), 'A is the top paint in 1 of 2 model years.');
 });
 
-test('pairingSummary trims interiors and skips blank ones (#56)', () => {
-  const es = [
-    entry({ ext_color: 'A', interior_color: '   ' }),
-    entry({ ext_color: 'A', interior_color: '  Red ' }),
-    entry({ ext_color: 'A', interior_color: 'Red' }),
-  ];
-  assert.equal(pairingSummary(es), 'The most common pairing is A with Red interior, in 2 builds.');
-  assert.equal(pairingSummary([entry({ interior_color: '  ' })]), NO_BUILDS);
-});
-
 test('trendSummary names the paint that tops the most model years', () => {
   const es = [
     ...many(3, { model_year: 2022, ext_color: 'A' }), entry({ model_year: 2022, ext_color: 'B' }),
@@ -130,33 +96,11 @@ test('trendSummary names the paint that tops the most model years', () => {
   assert.equal(trendSummary([]), NO_BUILDS);
 });
 
-test('familySummary names the biggest color family', () => {
-  const rows = [
-    { year: 2022, Blues: 4, Greens: 1, 'Reds & Oranges': 0, Yellows: 0, Purples: 2, 'Greys & Blacks': 1, Other: 0 },
-    { year: 2023, Blues: 4, Greens: 0, 'Reds & Oranges': 0, Yellows: 0, Purples: 0, 'Greys & Blacks': 0, Other: 0 },
-  ];
-  assert.equal(familySummary(rows), 'Blues is the largest color family, with 8 builds (67%).');
-  assert.equal(familySummary([]), NO_BUILDS);
-});
-
-test('pairingSummary names the most common exterior and interior pairing', () => {
-  const es = [...many(3, { ext_color: 'A', interior_color: 'Red' }), entry({ ext_color: 'B', interior_color: 'Black' }), entry({ interior_color: null })];
-  assert.equal(pairingSummary(es), 'The most common pairing is A with Red interior, in 3 builds.');
-  assert.equal(pairingSummary([entry({ interior_color: null })]), NO_BUILDS);
-});
-
-test('matrixSummary counts paints and model years', () => {
-  const es = [entry({ ext_color: 'A', model_year: 2022 }), entry({ ext_color: 'B', model_year: 2023 }), entry({ ext_color: 'B', model_year: 2023 })];
-  assert.equal(matrixSummary(es), '2 paints across 2 model years. B has the most builds, with 2.');
-  assert.equal(matrixSummary([entry({ ext_color: 'A', model_year: 2022 })]), '1 paint across 1 model year. A has the most builds, with 1.');
-  assert.equal(matrixSummary([]), NO_BUILDS);
-});
-
 test('growthSummary gives the total and the latest month', () => {
   assert.equal(
-    growthSummary([{ month: 'Jan 2026', cumulative: 10 }, { month: 'Feb 2026', cumulative: 14 }]),
+    growthSummary([{ month: 'Jan 2026', t: Date.UTC(2026, 0, 1), cumulative: 10 }, { month: 'Feb 2026', t: Date.UTC(2026, 1, 1), cumulative: 14 }]),
     '14 builds so far, 4 of them added in Feb 2026.',
   );
-  assert.equal(growthSummary([{ month: 'Jan 2026', cumulative: 1 }]), '1 build so far, 1 of them added in Jan 2026.');
+  assert.equal(growthSummary([{ month: 'Jan 2026', t: Date.UTC(2026, 0, 1), cumulative: 1 }]), '1 build so far, 1 of them added in Jan 2026.');
   assert.equal(growthSummary([]), NO_BUILDS);
 });

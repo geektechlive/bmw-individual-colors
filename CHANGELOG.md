@@ -14,6 +14,8 @@ Run `npx tsx scripts/post-to-bimmerpost.ts` to publish pending items to the foru
 
 - **Fixed:** nav lists Colors before Reports (#74)
 
+- **Added:** reports keeps five charts, growth chart on a true time axis (#71)
+
 - **Fixed:** paint page rows show a labelled Edit or report button on phones (#86)
 
 - **Fixed:** Tab out of the row menu returns focus to the trigger (#84)

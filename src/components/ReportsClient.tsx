@@ -5,43 +5,27 @@ import dynamic from 'next/dynamic';
 import type { BmwEntry } from '../types';
 import {
   computeColorCounts,
-  computeModelYearMatrix,
-  computeInteriorCounts,
   computeRegistryGrowth,
-  computeColorFamilyByYear,
-  computeCompetitionAdoption,
   computeWheelCounts,
 } from '../lib/analytics';
 import {
   rankedSummary,
   shareSummary,
   modelSummary,
-  competitionSummary,
-  driveMixSummary,
   trendSummary,
-  familySummary,
-  pairingSummary,
-  matrixSummary,
   growthSummary,
 } from '../lib/report-summaries';
 
 import styles from './ReportsClient.module.css';
-import ColorMatrix from './charts/ColorMatrix';
-import ColorInteriorMatrix from './charts/ColorInteriorMatrix';
-import DrivetrainMatrix from './charts/DrivetrainMatrix';
+import ModelBreakdown from './charts/ModelBreakdown';
 
 const chartSkeleton = () => (
   <div className="skeleton skeleton--chart" aria-hidden="true" />
 );
 
-const ColorDonut = dynamic(() => import('./charts/ColorDonut'), { ssr: false, loading: chartSkeleton });
 const ColorTreemapLoader = dynamic(() => import('./charts/ColorTreemapLoader'), { ssr: false, loading: chartSkeleton });
-const InteriorBar = dynamic(() => import('./charts/InteriorBar'), { ssr: false, loading: chartSkeleton });
-const ModelBreakdown = dynamic(() => import('./charts/ModelBreakdown'), { ssr: false, loading: chartSkeleton });
 const YearTrend = dynamic(() => import('./charts/YearTrend'), { ssr: false, loading: chartSkeleton });
 const RegistryGrowth = dynamic(() => import('./charts/RegistryGrowth'), { ssr: false, loading: chartSkeleton });
-const CompetitionAdoption = dynamic(() => import('./charts/CompetitionAdoption'), { ssr: false, loading: chartSkeleton });
-const ColorFamilyTrends = dynamic(() => import('./charts/ColorFamilyTrends'), { ssr: false, loading: chartSkeleton });
 const WheelBar = dynamic(() => import('./charts/WheelBar'), { ssr: false, loading: chartSkeleton });
 
 interface Props {
@@ -94,29 +78,18 @@ export default function ReportsClient({ entries }: Props) {
   }, [entries, selectedYears, selectedBodyStyles, selectedDrivetrains]);
 
   const colorCounts = useMemo(() => computeColorCounts(filteredEntries), [filteredEntries]);
-  const matrixData = useMemo(() => computeModelYearMatrix(filteredEntries), [filteredEntries]);
-  const interiorCounts = useMemo(() => computeInteriorCounts(filteredEntries), [filteredEntries]);
   const wheelCounts = useMemo(() => computeWheelCounts(filteredEntries), [filteredEntries]);
   const growthData = useMemo(() => computeRegistryGrowth(entries), [entries]);
-  const familyTrendData = useMemo(() => computeColorFamilyByYear(filteredEntries), [filteredEntries]);
-  const competitionData = useMemo(() => computeCompetitionAdoption(filteredEntries), [filteredEntries]);
 
   const summaries = useMemo(
     () => ({
       growth: growthSummary(growthData),
-      distribution: rankedSummary(colorCounts, 'paint'),
-      treemap: shareSummary(colorCounts),
+      treemap: `${rankedSummary(colorCounts, 'paint')} ${shareSummary(colorCounts)}`,
       models: modelSummary(filteredEntries),
-      competition: competitionSummary(filteredEntries),
-      driveMix: driveMixSummary(filteredEntries),
       trends: trendSummary(filteredEntries),
-      families: familySummary(familyTrendData),
-      interiors: rankedSummary(interiorCounts, 'interior'),
       wheels: rankedSummary(wheelCounts, 'wheel package'),
-      pairings: pairingSummary(filteredEntries),
-      matrix: matrixSummary(filteredEntries),
     }),
-    [growthData, colorCounts, filteredEntries, familyTrendData, interiorCounts, wheelCounts]
+    [growthData, colorCounts, filteredEntries, wheelCounts]
   );
 
   const hasFilters = selectedYears.length > 0 || selectedBodyStyles.length > 0 || selectedDrivetrains.length > 0;
@@ -195,96 +168,26 @@ export default function ReportsClient({ entries }: Props) {
         ) : null}
       </div>
 
-      {/* Section jump nav */}
-      <nav className={styles.jumpNav} aria-label="Report sections">
-        <div className={styles.jumpList}>
-          {[
-            { label: 'Distribution', href: '#distribution' },
-            { label: 'Growth', href: '#growth' },
-            { label: 'Models', href: '#models' },
-            { label: 'Trends', href: '#trends' },
-            { label: 'Interiors', href: '#interiors' },
-            { label: 'Matrix', href: '#matrix' },
-          ].map(({ label, href }) => (
-            <a key={label} href={href} className={styles.jump}>
-              {label}
-            </a>
-          ))}
-        </div>
-      </nav>
-
       {/* Chart grid */}
       <div className={styles.grid}>
-        <ChartCard id="growth" full title="Registry growth" summary={summaries.growth} desc="Cumulative builds added to the registry over time">
+        <ChartCard id="growth" full title="Registry growth" summary={summaries.growth} desc="Cumulative builds added to the registry, on a true time scale">
           <RegistryGrowth data={growthData} />
         </ChartCard>
 
-        <ChartCard id="distribution" title="Color distribution" summary={summaries.distribution} desc="Top 20 Individual colors by build count">
-          <ColorDonut data={colorCounts} />
-        </ChartCard>
-
-        <ChartCard title="Color treemap" summary={summaries.treemap} desc="Each block's size is its build count, filled with the paint's own color">
+        <ChartCard id="distribution" full title="Paints by build count" summary={summaries.treemap} desc="Each block's size is its build count, filled with the paint's own color">
           <ColorTreemapLoader data={colorCounts} />
         </ChartCard>
 
-        <ChartCard
-          id="models"
-          full
-          title="Model, drivetrain & transmission breakdown" summary={summaries.models}
-          desc="Split by body style (M3/M4), drivetrain, and transmission"
-        >
+        <ChartCard id="models" title="M3 and M4, RWD and AWD" summary={summaries.models} desc="How the builds split by model and drivetrain">
           <ModelBreakdown entries={filteredEntries} />
-        </ChartCard>
-
-        <ChartCard
-          title="Competition package adoption" summary={summaries.competition}
-          desc="% of M3 and M4 builds with Competition package by year"
-        >
-          <CompetitionAdoption data={competitionData} />
-        </ChartCard>
-
-        <ChartCard
-          title="Drivetrain & transmission mix" summary={summaries.driveMix}
-          desc="Breakdown of RWD/AWD × Manual/Auto combinations"
-        >
-          <DrivetrainMatrix entries={filteredEntries} />
-        </ChartCard>
-
-        <ChartCard id="trends" full title="Color popularity by model year" summary={summaries.trends} desc="Top 8 colors tracked across model years">
-          <YearTrend entries={filteredEntries} />
-        </ChartCard>
-
-        <ChartCard
-          full
-          title="Color family trends by year" summary={summaries.families}
-          desc="Stacked breakdown of color families across model years"
-        >
-          <ColorFamilyTrends data={familyTrendData} />
-        </ChartCard>
-
-        <ChartCard id="interiors" title="Interior colors" summary={summaries.interiors} desc="Frequency of interior color selections">
-          <InteriorBar data={interiorCounts} />
         </ChartCard>
 
         <ChartCard title="Wheel popularity" summary={summaries.wheels} desc="Most common wheel packages in the registry">
           <WheelBar data={wheelCounts} />
         </ChartCard>
 
-        <ChartCard
-          full
-          title="Color × interior heatmap" summary={summaries.pairings}
-          desc="Top 15 exterior × top 8 interior color combinations"
-        >
-          <ColorInteriorMatrix entries={filteredEntries} />
-        </ChartCard>
-
-        <ChartCard
-          id="matrix"
-          full
-          title="Color × year × drivetrain matrix" summary={summaries.matrix}
-          desc="Detailed breakdown of each color by year, model, and drivetrain"
-        >
-          <ColorMatrix data={matrixData} />
+        <ChartCard id="trends" full title="Paint popularity by model year" summary={summaries.trends} desc="Top 8 paints tracked across model years">
+          <YearTrend entries={filteredEntries} />
         </ChartCard>
       </div>
     </>

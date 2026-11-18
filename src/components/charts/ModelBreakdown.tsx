@@ -1,65 +1,72 @@
-'use client';
-
-import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import type { BmwEntry } from '../../types';
-import {
-  DRIVETRAIN_COLORS,
-  MODEL_COLORS,
-  SLICE_STROKE,
-  TOOLTIP_STYLE,
-  TRANSMISSION_COLORS,
-} from './palette';
+import { cssVars } from '../../lib/css-vars';
 import shared from './charts.module.css';
+import styles from './ModelBreakdown.module.css';
 
 interface Props {
   entries: BmwEntry[];
 }
 
-interface Slice {
-  name: string;
-  value: number;
+interface Split {
+  title: string;
+  parts: { label: string; count: number; mark: string }[];
 }
 
-function countBy(entries: BmwEntry[], pick: (e: BmwEntry) => string): Slice[] {
-  const map = new Map<string, number>();
-  for (const e of entries) {
-    const key = pick(e);
-    map.set(key, (map.get(key) ?? 0) + 1);
-  }
-  return Array.from(map.entries()).map(([name, value]) => ({ name, value }));
+function buildSplits(entries: BmwEntry[]): Split[] {
+  const count = (pick: (e: BmwEntry) => string, value: string) => entries.filter((e) => pick(e) === value).length;
+  return [
+    {
+      title: 'Model',
+      parts: [
+        { label: 'M3', count: count((e) => e.body_style, 'M3'), mark: 'var(--accent)' },
+        { label: 'M4', count: count((e) => e.body_style, 'M4'), mark: 'var(--m-red)' },
+      ],
+    },
+    {
+      title: 'Drivetrain',
+      parts: [
+        { label: 'RWD', count: count((e) => e.drivetrain, 'RWD'), mark: 'var(--accent)' },
+        { label: 'AWD', count: count((e) => e.drivetrain, 'AWD'), mark: 'var(--ok)' },
+      ],
+    },
+  ];
 }
 
-const legendFormatter = (value: string) => <span className={shared.legendLabel}>{value}</span>;
-
-function BreakdownPie({ title, data, colors }: { title: string; data: Slice[]; colors: string[] }) {
-  return (
-    <div className={shared.pieCol}>
-      <p className={shared.pieTitle}>{title}</p>
-      <ResponsiveContainer width="100%" height={200}>
-        <PieChart>
-          <Pie data={data} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={70} paddingAngle={2} label={false}>
-            {data.map((_, i) => (
-              <Cell key={i} fill={colors[i % colors.length]} stroke={SLICE_STROKE} />
-            ))}
-          </Pie>
-          <Tooltip contentStyle={TOOLTIP_STYLE} formatter={(v) => [Number(v), 'Count']} />
-          <Legend formatter={legendFormatter} iconType="circle" iconSize={8} />
-        </PieChart>
-      </ResponsiveContainer>
-    </div>
-  );
-}
-
+/** Two plain split bars with the numbers written out, in place of the old three pies. */
 export default function ModelBreakdown({ entries }: Props) {
   if (entries.length === 0) {
     return <p className={shared.empty}>No data yet.</p>;
   }
 
   return (
-    <div className={shared.pieRow}>
-      <BreakdownPie title="Body Style" data={countBy(entries, (e) => e.body_style)} colors={MODEL_COLORS} />
-      <BreakdownPie title="Drivetrain" data={countBy(entries, (e) => e.drivetrain)} colors={DRIVETRAIN_COLORS} />
-      <BreakdownPie title="Transmission" data={countBy(entries, (e) => e.transmission)} colors={TRANSMISSION_COLORS} />
+    <div className={styles.splits}>
+      {buildSplits(entries).map((split) => {
+        const total = split.parts.reduce((sum, p) => sum + p.count, 0);
+        return (
+          <div key={split.title} className={styles.split}>
+            <p className={styles.title}>{split.title}</p>
+            <div className={styles.bar} aria-hidden="true">
+              {split.parts.map((p) => (
+                <span
+                  key={p.label}
+                  className={styles.part}
+                  style={cssVars({ '--w': total > 0 ? p.count / total : 0, '--mark': p.mark })}
+                />
+              ))}
+            </div>
+            <ul className={styles.legend}>
+              {split.parts.map((p) => (
+                <li key={p.label} className={styles.item}>
+                  <span className={styles.dot} style={cssVars({ '--mark': p.mark })} aria-hidden="true" />
+                  <span className={styles.label}>{p.label}</span>
+                  <span className="num">{p.count}</span>
+                  <span className={styles.pct}>({total > 0 ? Math.round((p.count / total) * 100) : 0}%)</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        );
+      })}
     </div>
   );
 }

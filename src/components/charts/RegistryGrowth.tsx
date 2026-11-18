@@ -9,7 +9,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from 'recharts';
-import type { GrowthPoint } from '../../lib/analytics';
+import { growthYearTicks, type GrowthPoint } from '../../lib/analytics';
 import { TOKENS } from '../../lib/design-tokens';
 import { AXIS_TICK, GRID_STROKE, TOOLTIP_STYLE } from './palette';
 import shared from './charts.module.css';
@@ -18,10 +18,15 @@ interface Props {
   data: GrowthPoint[];
 }
 
+const formatYear = (t: number) => String(new Date(t).getUTCFullYear());
+const formatMonth = (t: unknown) =>
+  new Date(Number(t)).toLocaleString('en-US', { month: 'short', year: 'numeric', timeZone: 'UTC' });
+
 export default function RegistryGrowth({ data }: Props) {
   if (data.length === 0) {
     return <p className={shared.emptyFaint}>No data yet.</p>;
   }
+  const ticks = growthYearTicks(data);
 
   return (
     <ResponsiveContainer width="100%" height={200}>
@@ -34,22 +39,26 @@ export default function RegistryGrowth({ data }: Props) {
         </defs>
         <CartesianGrid strokeDasharray="3 3" stroke={GRID_STROKE} />
         <XAxis
-          dataKey="month"
+          dataKey="t"
+          type="number"
+          scale="time"
+          domain={['dataMin', 'dataMax']}
+          ticks={ticks.length > 0 ? ticks : undefined}
+          tickFormatter={formatYear}
           tick={AXIS_TICK}
           axisLine={false}
           tickLine={false}
-          interval="preserveStartEnd"
         />
         <YAxis tick={AXIS_TICK} axisLine={false} tickLine={false} width={35} />
-        <Tooltip contentStyle={TOOLTIP_STYLE} />
+        <Tooltip contentStyle={TOOLTIP_STYLE} labelFormatter={formatMonth} />
         <Area
-          type="monotone"
+          type="stepAfter"
           dataKey="cumulative"
           stroke={TOKENS['accent']}
           strokeWidth={2}
           fill="url(#growthGrad)"
           dot={false}
-          name="Total Builds"
+          name="Total builds"
         />
       </AreaChart>
     </ResponsiveContainer>

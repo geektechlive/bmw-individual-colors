@@ -25,8 +25,7 @@
   gap: var(--s-2);
 }
 
-.clear:focus-visible,
-.jump:focus-visible {
+.clear:focus-visible {
   outline: 2px solid var(--focus);
   outline-offset: 1px;
 }
@@ -42,38 +41,6 @@
 }
 
 .clear:hover {
-  color: var(--ink);
-}
-
-.jumpNav {
-  position: sticky;
-  top: calc(var(--stripe-h) + var(--header-h));
-  z-index: var(--z-sticky);
-  background: var(--bg);
-  padding-bottom: var(--s-3);
-  margin-bottom: var(--s-2);
-}
-
-.jumpList {
-  display: flex;
-  gap: var(--s-2);
-  flex-wrap: wrap;
-}
-
-.jump {
-  padding: var(--s-1) 14px;
-  border-radius: var(--r-pill);
-  font-size: var(--t-13);
-  font-weight: 500;
-  color: var(--ink-2);
-  background: var(--panel-2);
-  border: 1px solid var(--rule-strong);
-  text-decoration: none;
-  transition: border-color var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease);
-}
-
-.jump:hover {
-  border-color: var(--ink-3);
   color: var(--ink);
 }
 
