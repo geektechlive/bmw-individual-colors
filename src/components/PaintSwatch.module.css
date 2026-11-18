@@ -76,20 +76,22 @@
     );
 }
 
-/* Frozen: matte. No highlight and no horizon, a soft fade and a faint grain. */
+/* Frozen: matte (#73). A broad soft falloff, lighter at the top left and darker toward the
+   bottom right (about 10% luminance end to end), plus a visible micro-grain. No highlight
+   band and no horizon: matte paint scatters light instead of reflecting it. */
 .frozen {
-  background: linear-gradient(
-    165deg,
-    color-mix(in oklab, var(--p), var(--light) 7%),
-    var(--p) 60%,
-    color-mix(in oklab, var(--p), var(--shade) 22%)
+  background: radial-gradient(
+    140% 130% at 12% 8%,
+    color-mix(in oklab, var(--p), var(--light) 9%),
+    var(--p) 50%,
+    color-mix(in oklab, var(--p), var(--shade) 11%)
   );
 }
 
 .frozen::after {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.5'/%3E%3C/svg%3E");
-  mix-blend-mode: soft-light;
-  opacity: 0.35;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.1' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  mix-blend-mode: overlay;
+  opacity: 0.6;
 }
 
 /* ---------- Studio lighting (tile and panel) ----------
@@ -119,8 +121,7 @@
 }
 
 .studio.frozen::before {
-  z-index: 1;
-  background: radial-gradient(90% 60% at 50% 0%, color-mix(in srgb, var(--light) 10%, transparent), transparent 70%);
+  display: none;
 }
 
 /* ---------- Sizes ---------- */

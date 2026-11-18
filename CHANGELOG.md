@@ -14,6 +14,10 @@ Run `npx tsx scripts/post-to-bimmerpost.ts` to publish pending items to the foru
 
 - **Fixed:** nav lists Colors before Reports (#74)
 
+- **Fixed:** frozen paint tiles get a soft falloff and visible grain (#73)
+
+- **Fixed:** the map opens on the registry's builds, so phones start on the US (#72)
+
 - **Added:** reports keeps five charts, growth chart on a true time axis (#71)
 
 - **Fixed:** paint page rows show a labelled Edit or report button on phones (#86)

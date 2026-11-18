@@ -10,6 +10,7 @@ import { useEffect, useMemo, useRef } from 'react';
 import { getColorHex } from '../lib/colors';
 import { TOKENS } from '../lib/design-tokens';
 import { buildPopupHtml, escapeHtml, type PopupClasses } from '../lib/map-popup';
+import { fitBox, shouldFitToData } from '../lib/map-fit';
 import { paintSwatchClassNames } from './PaintSwatch';
 import { tileUrl, TILE_ATTRIBUTION } from '../lib/map-tiles';
 import styles from './RegistryMap.module.css';
@@ -41,6 +42,9 @@ function makeIcon(hex: string): L.DivIcon {
 function markerLabel(entry: BmwEntry): string {
   return `${entry.ext_color}, ${entry.model_year} ${entry.body_style}`;
 }
+
+const FIT_PADDING: L.PointExpression = [32, 32];
+const FIT_MAX_ZOOM = 6;
 
 interface Props {
   entries: BmwEntry[];
@@ -107,6 +111,25 @@ export default function RegistryMap({ entries }: Props) {
     });
 
     map.addLayer(group);
+
+    // On a phone, open on the located builds (#72) so it starts on the data, not on empty
+    // ocean. Desktop keeps the world view, where every build is already on screen. No
+    // located builds keeps the world view; max zoom stops a lone build or a tight cluster
+    // from zooming to street level.
+    const box = shouldFitToData(map.getSize().x) && fitBox(
+      entries.flatMap((entry) =>
+        entry.location_lat == null || entry.location_lng == null
+          ? []
+          : [{ lat: entry.location_lat, lng: entry.location_lng }],
+      ),
+    );
+    if (box) {
+      map.fitBounds(L.latLngBounds([box.south, box.west], [box.north, box.east]), {
+        padding: FIT_PADDING,
+        maxZoom: FIT_MAX_ZOOM,
+        animate: false,
+      });
+    }
 
     // When a popup opens from the keyboard (Enter on a focused marker), move focus to its
     // link so the next Tab or Enter goes to "View paint". Mouse and touch keep their focus.

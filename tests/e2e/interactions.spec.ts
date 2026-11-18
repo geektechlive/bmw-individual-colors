@@ -203,13 +203,28 @@ test.describe('/map', () => {
     await gotoLoaded(page, '/map');
     await expect(page.locator('.leaflet-container')).toBeVisible();
 
-    const single = page.locator('.leaflet-marker-icon:not(.marker-cluster)');
-    for (let i = 0; i < 30 && (await single.count()) === 0; i++) {
-      await page.locator('.marker-cluster').first().click();
+    // Cluster badges carry a build count; single markers are an SVG dot with no text.
+    // Leaflet also renders markers just outside the view, so pick one that is on screen.
+    const icons = page.locator('.leaflet-marker-icon');
+    const mapBox = (await page.locator('.leaflet-container').boundingBox())!;
+    const onScreen = async (isCluster: boolean) => {
+      const wanted = isCluster ? icons.filter({ hasText: /^\d+$/ }) : icons.filter({ hasNotText: /^\d+$/ });
+      for (let n = 0; n < (await wanted.count()); n++) {
+        const box = await wanted.nth(n).boundingBox();
+        if (box && box.x > mapBox.x && box.y > mapBox.y && box.x + box.width < mapBox.x + mapBox.width && box.y + box.height < mapBox.y + mapBox.height) {
+          return wanted.nth(n);
+        }
+      }
+      return null;
+    };
+    let single = await onScreen(false);
+    for (let i = 0; i < 30 && !single; i++) {
+      await (await onScreen(true))!.click();
       await page.waitForTimeout(400); // the zoom animation; there is no event to await
+      single = await onScreen(false);
     }
-    await expect(single.first()).toBeVisible();
-    await single.first().click();
+    await expect(single!).toBeVisible();
+    await single!.click();
 
     const popup = page.locator('.leaflet-popup-content');
     await expect(popup).toBeVisible();
