@@ -66,6 +66,8 @@ Run `npx tsx scripts/post-to-bimmerpost.ts` to publish pending items to the foru
 
 - **Docs:** ADR 0018, stay on Supabase rather than Cloudflare D1
 
+## [2026-11-14] https://g80.bimmerpost.com/forums/showpost.php?p=33067899 (posted by hand)
+
 - **Added:** log why a submission or edit is turned away (#59)
 
 - **Added:** share image leads with the hook, legible at chat sizes (#52)
