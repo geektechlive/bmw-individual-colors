@@ -18,13 +18,7 @@ const SPEC_EXEMPT = '[data-wall-strip], p a';
 
 // TEMPORARY allowlist: controls that belong to later units. Each entry names the issue that
 // removes it; delete the entry in that issue's commit. Matched with Element.closest.
-const PENDING: ReadonlyArray<{ selector: string; issue: string; why: string }> = [
-  {
-    selector: 'table a',
-    issue: '#68',
-    why: 'Home "Latest builds" table: paint links are 17-34 px tall. Unit (c) restyles the home page.',
-  },
-];
+const PENDING: ReadonlyArray<{ selector: string; issue: string; why: string }> = [];
 
 interface Small {
   tag: string;

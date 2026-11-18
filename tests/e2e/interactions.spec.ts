@@ -97,7 +97,7 @@ test('/colors#sort=name applies the sort on load', async ({ page }) => {
 
 // ---------- Home wall ----------
 
-const STRIPS = 'ul[aria-label^="Top 40"] a';
+const STRIPS = '[data-wall-strip]';
 const readout = (page: Page) => page.locator('[aria-live="polite"]').filter({ hasText: /build|Hover or tap/ }).first();
 
 /** "San Marino Blue, 5 builds" -> the pieces the read-out shows. */

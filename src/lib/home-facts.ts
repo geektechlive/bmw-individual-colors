@@ -1,4 +1,4 @@
-// Pure helpers for the home page: the facts panel and the paint wall (#46).
+// Pure helpers for the home page: the facts panel, the paint wall and the single-build row (#46, #68).
 // Plain functions of the data the page already loads, so the edge-cached page costs no extra CPU.
 import { getColorFamily } from './colors';
 import { sortByHue } from './hue-sort';
@@ -24,37 +24,40 @@ export function rarePaintCount(counts: readonly ColorCount[]): number {
   return counts.filter((c) => c.count <= RARE_MAX_BUILDS).length;
 }
 
-/** The `limit` paints with the most builds (ties broken by name), ordered by hue. */
-export function topPaintsByHue(counts: readonly ColorCount[], limit: number): ColorCount[] {
-  const top = [...counts]
-    .sort((a, b) => b.count - a.count || a.color.localeCompare(b.color))
-    .slice(0, limit);
-  return sortByHue(top);
+/** Every paint, ordered by hue: the order of the wall. */
+export function wallPaintsByHue<T extends ColorCount>(counts: readonly T[]): T[] {
+  return sortByHue(counts);
 }
 
-export interface FamilyTick {
+export interface WallRun<T extends ColorCount = ColorCount> {
   family: string;
-  /** Where the family starts along the wall, 0 to 1 of all builds on the wall. */
-  start: number;
-  /** The family's share of all builds on the wall, 0 to 1. */
-  share: number;
+  /** The run's total builds: the weight of its tick and of its strip row. */
+  total: number;
+  paints: T[];
 }
 
-/** One tick per run of same-family paints in a hue-ordered wall, at the run's real start. */
-export function familyTicks(wall: readonly ColorCount[]): FamilyTick[] {
-  const total = wall.reduce((sum, p) => sum + p.count, 0);
-  if (total === 0) return [];
-  const ticks: Array<{ family: string; startCount: number; count: number }> = [];
-  let run = 0;
+/** Neighbouring same-family paints of a hue-ordered wall, grouped into runs. */
+export function wallRuns<T extends ColorCount>(wall: readonly T[]): WallRun<T>[] {
+  const runs: WallRun<T>[] = [];
   for (const p of wall) {
     const family = getColorFamily(p.color);
-    const last = ticks[ticks.length - 1];
+    const last = runs[runs.length - 1];
     if (last && last.family === family) {
-      ticks[ticks.length - 1] = { ...last, count: last.count + p.count };
+      runs[runs.length - 1] = { ...last, total: last.total + p.count, paints: [...last.paints, p] };
     } else {
-      ticks.push({ family, startCount: run, count: p.count });
+      runs.push({ family, total: p.count, paints: [p] });
     }
-    run += p.count;
   }
-  return ticks.map((t) => ({ family: t.family, start: t.startCount / total, share: t.count / total }));
+  return runs;
+}
+
+/** The paints with exactly one build, in hue order. */
+export function singleBuildPaints<T extends ColorCount>(counts: readonly T[]): T[] {
+  return sortByHue(counts.filter((c) => c.count === 1));
+}
+
+export function singleBuildLine(n: number): string {
+  return n === 1
+    ? '1 paint has one build registered so far.'
+    : `${n} paints have one build registered so far.`;
 }

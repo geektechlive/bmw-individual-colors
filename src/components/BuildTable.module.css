@@ -38,6 +38,9 @@
 }
 
 .paintLink {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
   font-size: var(--t-16);
   color: var(--ink);
   text-decoration: none;

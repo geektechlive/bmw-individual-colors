@@ -7,20 +7,21 @@ import {
   mostRegistered,
   newestEntry,
   rarePaintCount,
-  topPaintsByHue,
-  familyTicks,
+  wallPaintsByHue,
+  wallRuns,
+  singleBuildPaints,
+  singleBuildLine,
 } from '../lib/home-facts';
 import PaintSwatch from '../components/PaintSwatch';
 import PaintWall from '../components/home/PaintWall';
-import type { WallPaint, WallTick } from '../components/home/PaintWall';
+import PaintLookup from '../components/home/PaintLookup';
+import type { LookupPaint } from '../components/home/PaintLookup';
+import type { WallRun } from '../components/home/PaintWall';
 import styles from './page.module.css';
 import table from '../components/BuildTable.module.css';
 
 export const dynamic = 'force-dynamic';
 
-const WALL_SIZE = 40;
-/** A family narrower than this share of the wall gets a tick but no name. */
-const TICK_LABEL_MIN_SHARE = 0.06;
 const LATEST_COUNT = 8;
 
 const shortDate = (iso: string) =>
@@ -38,14 +39,13 @@ export default async function HomePage() {
   const newest = newestEntry(entries);
   const rareCount = rarePaintCount(colorCounts);
 
-  const wall = topPaintsByHue(colorCounts, WALL_SIZE);
-  const wallPaints: WallPaint[] = wall.map((p) => ({ ...p, slug: colorToSlug(p.color) }));
-  const wallTicks: WallTick[] = familyTicks(wall).map((t) => ({
-    family: t.family,
-    start: t.start,
-    share: t.share,
-    labelled: t.share >= TICK_LABEL_MIN_SHARE,
-  }));
+  // One small object per paint, four fields. The search list and the wall runs share these same
+  // objects, so each paint is serialized to the client once (CPU budget, CLAUDE.md).
+  const lookupPaints: LookupPaint[] = [...colorCounts]
+    .sort((a, b) => b.count - a.count || a.color.localeCompare(b.color))
+    .map((p) => ({ color: p.color, slug: colorToSlug(p.color), count: p.count, hex: p.hex }));
+  const wallRunList: WallRun[] = wallRuns(wallPaintsByHue(lookupPaints));
+  const singles = singleBuildPaints(lookupPaints);
 
   const statItems = [
     { label: 'Builds', value: stats.totalEntries },
@@ -61,18 +61,16 @@ export default async function HomePage() {
             <span className="label">G80 M3 · G82 M4 · BMW Individual paint</span>
             <h1 className={styles.title}>BMW M Individual Colors Registry</h1>
             <p className={styles.lede}>
-              Owners of G80 M3s and G82 M4s in BMW Individual paint list their cars here. Find your color to see how
-              many others have it, and add yours if it&apos;s missing.
+              Owners of G80 M3s and G82 M4s in BMW Individual paint list their cars here. Look up your paint to see
+              how many others have it, and add yours if it&apos;s missing.
             </p>
+            <PaintLookup paints={lookupPaints} />
             <div className={styles.actions}>
-              <Link href="/submit" className="btn btn--primary">
+              <Link href="/submit" className="btn">
                 Submit your build
               </Link>
               <Link href="/entries" className="btn">
                 Browse all builds
-              </Link>
-              <Link href="/reports" className="btn">
-                View reports
               </Link>
             </div>
           </div>
@@ -95,7 +93,7 @@ export default async function HomePage() {
               )}
               <div className={styles.fact}>
                 <dt className="label">Rarest</dt>
-                <dd className={`${styles.factValue} paint-name`}>
+                <dd className={`${styles.factValue} ${styles.factNumber}`}>
                   {rareCount} paint{rareCount === 1 ? '' : 's'}
                 </dd>
                 <dd className={`${styles.factNote} mono`}>1 or 2 builds each</dd>
@@ -103,11 +101,38 @@ export default async function HomePage() {
             </dl>
           )}
 
-          {wallPaints.length > 0 && (
+          {wallRunList.length > 0 && (
             <div className={styles.wallArea}>
               <div className={styles.lamp} aria-hidden="true" />
-              <PaintWall paints={wallPaints} ticks={wallTicks} totalPaints={stats.totalColors} />
+              <PaintWall runs={wallRunList} totalPaints={colorCounts.length} />
             </div>
+          )}
+
+          {singles.length > 0 && (
+            <section className={styles.singles} aria-labelledby="singles-heading">
+              <div className={styles.singlesHead}>
+                <h2 id="singles-heading" className="label">
+                  Paints with a single build
+                </h2>
+                <p>{singleBuildLine(singles.length)}</p>
+              </div>
+              <ul className={styles.ones}>
+                {singles.map((p) => (
+                  <li key={p.color}>
+                    <IntentLink href={`/colors/${p.slug}`} className={styles.one}>
+                      <PaintSwatch name={p.color} hex={p.hex} size="chip-sm" />
+                      <span className="paint-name">{p.color}</span>
+                    </IntentLink>
+                  </li>
+                ))}
+              </ul>
+              <p className={styles.singlesMore}>
+                Own one of these, or a paint that isn&apos;t listed?{' '}
+                <Link href="/submit" className={`link ${styles.singlesLink}`}>
+                  Submit your build →
+                </Link>
+              </p>
+            </section>
           )}
         </div>
       </section>

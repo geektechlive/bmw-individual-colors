@@ -1,11 +1,14 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useState } from 'react';
 import type { KeyboardEvent } from 'react';
 import PaintSwatch from '../PaintSwatch';
 import type { FieldErrorProps } from './field-error';
-import { optionToPick, stepActive } from './combobox-nav';
+import { optionToPick } from './combobox-nav';
+import { useComboboxList } from './useComboboxList';
 import styles from './form.module.css';
+
+const nameOf = (name: string) => name;
 
 interface Props {
   colors: string[];
@@ -28,48 +31,22 @@ export default function ColorCombobox({
 }: Props) {
   const [search, setSearch] = useState(initialValue);
   const [value, setValue] = useState(initialValue);
-  const [open, setOpen] = useState(false);
-  const [activeIndex, setActiveIndex] = useState(-1);
-  const listRef = useRef<HTMLDivElement>(null);
-
-  const filtered = useMemo(
-    () => colors.filter((c) => c.toLowerCase().includes(search.toLowerCase())),
-    [colors, search],
-  );
-  const isOpen = open && filtered.length > 0;
-
-  // Keep the keyboard-highlighted option in view inside the scrolling listbox.
-  useEffect(() => {
-    if (activeIndex < 0) return;
-    listRef.current?.children[activeIndex]?.scrollIntoView({ block: 'nearest' });
-  }, [activeIndex]);
+  const { matches: filtered, isOpen, setOpen, activeIndex, listRef, close, openFresh, handleNavKey } =
+    useComboboxList({ items: colors, getName: nameOf, query: search });
 
   function select(name: string) {
     setValue(name);
     setSearch(name);
-    setOpen(false);
-    setActiveIndex(-1);
-  }
-
-  function step(delta: 1 | -1) {
-    if (filtered.length === 0) return;
-    if (!open) setOpen(true);
-    setActiveIndex((i) => stepActive(i, delta, filtered.length, open));
+    close();
   }
 
   function handleKeyDown(e: KeyboardEvent<HTMLInputElement>) {
+    if (handleNavKey(e)) return;
     const picked = e.key === 'Enter' ? optionToPick(isOpen, activeIndex, filtered) : null;
-    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
-      e.preventDefault();
-      step(e.key === 'ArrowDown' ? 1 : -1);
-    } else if (picked !== null) {
+    if (picked !== null) {
       // Only a keyboard-highlighted option; with none, Enter keeps what was typed.
       e.preventDefault();
       select(picked);
-    } else if (e.key === 'Escape' && open) {
-      e.preventDefault();
-      setOpen(false);
-      setActiveIndex(-1);
     }
   }
 
@@ -101,11 +78,10 @@ export default function ColorCombobox({
             onChange={(e) => {
               setSearch(e.target.value);
               setValue(e.target.value);
-              setOpen(true);
-              setActiveIndex(-1);
+              openFresh();
             }}
             onFocus={() => setOpen(true)}
-            onBlur={() => { setOpen(false); setActiveIndex(-1); }}
+            onBlur={close}
             onKeyDown={handleKeyDown}
           />
         </div>

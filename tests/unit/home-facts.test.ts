@@ -4,8 +4,10 @@ import {
   mostRegistered,
   newestEntry,
   rarePaintCount,
-  topPaintsByHue,
-  familyTicks,
+  wallPaintsByHue,
+  wallRuns,
+  singleBuildPaints,
+  singleBuildLine,
 } from '../../src/lib/home-facts';
 import type { BmwEntry, ColorCount } from '../../src/types';
 
@@ -37,28 +39,53 @@ test('rarePaintCount counts paints with one or two builds', () => {
   assert.equal(rarePaintCount([]), 0);
 });
 
-test('topPaintsByHue keeps the most-built paints, then orders them by hue', () => {
-  const counts = [
-    cc('Blue', 10, '#1e4c8c'),
-    cc('Red', 8, '#a51c1c'),
-    cc('Grey', 6, '#808080'),
-    cc('Green', 1, '#1a6a2a'),
+const palette = [
+  cc('Blue', 10, '#1e4c8c'),
+  cc('Red', 8, '#a51c1c'),
+  cc('Grey', 6, '#808080'),
+  cc('Green', 1, '#1a6a2a'),
+  cc('Crimson', 1, '#c41c1c'),
+];
+
+test('wallPaintsByHue lists every paint, in hue order, one-build paints included', () => {
+  const wall = wallPaintsByHue(palette);
+  assert.equal(wall.length, palette.length);
+  assert.deepEqual(wall.map((p) => p.color), ['Red', 'Crimson', 'Green', 'Blue', 'Grey']);
+  assert.deepEqual(wallPaintsByHue([]), []);
+});
+
+test('wallPaintsByHue does not mutate its input', () => {
+  const input = [...palette];
+  wallPaintsByHue(input);
+  assert.deepEqual(input, palette);
+});
+
+test('wallRuns groups neighbouring same-family paints into runs that total their builds', () => {
+  const wall = [
+    cc('San Marino Blue', 6),
+    cc('Riviera Blue', 2),
+    cc('Twilight Purple', 2),
+    cc('Alpine White', 1, '#f2f2f2'),
   ];
-  assert.deepEqual(topPaintsByHue(counts, 3).map((p) => p.color), ['Red', 'Blue', 'Grey']);
+  const runs = wallRuns(wall);
+  assert.deepEqual(runs.map((r) => r.family), ['Blues', 'Purples', 'Greys & Blacks']);
+  assert.deepEqual(runs.map((r) => r.total), [8, 2, 1]);
+  assert.deepEqual(runs[0].paints.map((p) => p.color), ['San Marino Blue', 'Riviera Blue']);
+  assert.deepEqual(wallRuns([]), []);
 });
 
-test('topPaintsByHue breaks a tie at the cutoff by name so the result is stable', () => {
-  const counts = [cc('Zed', 2, '#a51c1c'), cc('Alpha', 2, '#1e4c8c')];
-  assert.deepEqual(topPaintsByHue(counts, 1).map((p) => p.color), ['Alpha']);
-  assert.deepEqual(topPaintsByHue([], 5), []);
+test('wallRuns keeps every paint exactly once', () => {
+  const runs = wallRuns(wallPaintsByHue(palette));
+  assert.equal(runs.reduce((n, r) => n + r.paints.length, 0), palette.length);
 });
 
-test('familyTicks marks where each family starts, as a share of all builds', () => {
-  const wall = [cc('San Marino Blue', 6), cc('Riviera Blue', 2), cc('Twilight Purple', 2)];
-  const ticks = familyTicks(wall);
-  assert.deepEqual(ticks.map((t) => t.family), ['Blues', 'Purples']);
-  assert.equal(ticks[0].start, 0);
-  assert.equal(ticks[1].start, 0.8);
-  assert.ok(Math.abs(ticks[0].share - 0.8) < 1e-9);
-  assert.deepEqual(familyTicks([]), []);
+test('singleBuildPaints is exactly the paints with one build, in hue order', () => {
+  assert.deepEqual(singleBuildPaints(palette).map((p) => p.color), ['Crimson', 'Green']);
+  assert.deepEqual(singleBuildPaints([cc('A', 2), cc('B', 3)]), []);
+});
+
+test('singleBuildLine uses the singular form for one paint', () => {
+  assert.equal(singleBuildLine(23), '23 paints have one build registered so far.');
+  assert.equal(singleBuildLine(2), '2 paints have one build registered so far.');
+  assert.equal(singleBuildLine(1), '1 paint has one build registered so far.');
 });

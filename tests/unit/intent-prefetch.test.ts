@@ -33,7 +33,14 @@ test('IntentLink turns prefetch off until the visitor shows intent', () => {
 
 test('paint-page links use IntentLink', () => {
   const files = tsxFiles(SRC).filter((file) => readFileSync(file, 'utf8').includes('/colors/${'));
-  const linking = files.filter((file) => !file.includes('opengraph-image') && !file.includes(join('colors', '[slug]', 'page.tsx')));
+  // PaintLookup (#68) has no links: its options are plain rows that call router.push on a
+  // choice, so nothing prefetches at all.
+  const linking = files.filter(
+    (file) =>
+      !file.includes('opengraph-image') &&
+      !file.includes(join('colors', '[slug]', 'page.tsx')) &&
+      !file.endsWith('PaintLookup.tsx'),
+  );
   assert.ok(linking.length >= 5, `expected the 5 linking components, found ${linking.length}`);
   for (const file of linking) assert.match(readFileSync(file, 'utf8'), /<IntentLink\b/, relative(SRC, file));
 });

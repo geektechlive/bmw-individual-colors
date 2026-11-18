@@ -73,6 +73,12 @@
   overflow-wrap: anywhere;
 }
 
+.factNumber {
+  font-family: var(--font-text);
+  font-weight: 800;
+  font-stretch: 110%;
+}
+
 .factNote {
   align-self: end;
   font-size: var(--t-13);
@@ -93,6 +99,76 @@
   border-radius: 4px;
   background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--light) 85%, transparent), transparent);
   box-shadow: 0 0 36px 6px color-mix(in srgb, var(--light) 14%, transparent);
+}
+
+/* ---------- Single-build row (#68) ---------- */
+
+.singles {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: var(--s-3);
+  padding-top: var(--s-5);
+  border-top: 1px solid var(--rule);
+}
+
+.singlesHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--s-3);
+  flex-wrap: wrap;
+}
+
+.singlesHead h2,
+.singlesHead p {
+  margin: 0;
+}
+
+.singlesHead p {
+  font-size: var(--t-13);
+  color: var(--ink-2);
+}
+
+.ones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.one {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2);
+  min-height: 44px;
+  padding: 0 var(--s-3) 0 var(--s-2);
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  border-radius: var(--r);
+  color: var(--ink);
+  text-decoration: none;
+  transition: border-color var(--dur-fast) var(--ease);
+}
+
+.one:hover {
+  border-color: var(--ink-3);
+}
+
+.one :global(.paint-name) {
+  font-size: var(--t-15);
+}
+
+.singlesMore {
+  margin: 0;
+  font-size: var(--t-14);
+}
+
+.singlesLink {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
 }
 
 /* ---------- Stats ---------- */
@@ -163,6 +239,20 @@
 
   .hero {
     padding-top: var(--s-6);
+  }
+
+  /* Two lines on a phone */
+  .title {
+    font-size: var(--t-32);
+    line-height: 1;
+  }
+
+  .lede {
+    font-size: var(--t-14);
+  }
+
+  .one :global(.paint-name) {
+    font-size: var(--t-14);
   }
 
   .stat {

@@ -23,7 +23,7 @@ async function cumulativeShift(page: Page, path: string): Promise<number> {
 test.describe('layout shift while pages load', () => {
   test.use({ viewport: { width: 1440, height: 900 } });
 
-  for (const path of ['/colors', '/entries', '/reports']) {
+  for (const path of ['/', '/colors', '/entries', '/reports']) {
     test(`${path} keeps CLS at 0.1 or less`, async ({ page, browserName }) => {
       test.skip(browserName !== 'chromium', 'layout-shift entries are Chromium-only');
       expect(await cumulativeShift(page, path)).toBeLessThanOrEqual(0.1);

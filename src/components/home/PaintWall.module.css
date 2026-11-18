@@ -3,24 +3,53 @@
    the read-out and the family ticks are on the page ground. */
 
 .wall {
+  --wall-h: 230px;
+  --strip-gap: 2px;
+
   position: relative;
-  height: 230px;
-  border-radius: var(--r-lg);
-  overflow: hidden;
 }
 
-.strips {
+/* One run per color family. Each run is as wide as its builds, and its tick sits under its own
+   strips, so the tick can't drift from them (#68). */
+.runs {
   display: flex;
-  gap: 2px;
-  height: 100%;
+  gap: var(--strip-gap);
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
+.run {
+  flex: var(--n) 1 0;
+  min-width: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.strips {
+  display: flex;
+  gap: var(--strip-gap);
+  height: var(--wall-h);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  overflow: hidden;
+}
+
+/* Round the wall's outer corners: the first run's left side and the last run's right side. */
+.run:first-child .strips {
+  border-top-left-radius: var(--r-lg);
+  border-bottom-left-radius: var(--r-lg);
+}
+
+.run:last-child .strips {
+  border-top-right-radius: var(--r-lg);
+  border-bottom-right-radius: var(--r-lg);
+}
+
 .item {
   flex: var(--n) 1 0;
-  min-width: 4px;
+  min-width: 6px;
   display: flex;
 }
 
@@ -46,7 +75,9 @@
 .wall::after {
   content: "";
   position: absolute;
-  inset: 0;
+  inset: 0 0 auto;
+  height: var(--wall-h);
+  border-radius: var(--r-lg);
   pointer-events: none;
   z-index: 3;
   background:
@@ -66,7 +97,10 @@
 .wall::before {
   content: "";
   position: absolute;
-  inset: 0;
+  inset: 0 0 auto;
+  height: var(--wall-h);
+  border-radius: var(--r-lg);
+  overflow: hidden;
   z-index: 4;
   pointer-events: none;
   background: linear-gradient(
@@ -100,19 +134,10 @@
 
 /* ---------- Family ticks ---------- */
 
-.ticks {
-  position: relative;
+.tick {
+  align-self: stretch;
   height: 28px;
   margin-top: var(--s-1);
-  overflow: hidden;
-}
-
-.tick {
-  position: absolute;
-  top: 0;
-  left: var(--x);
-  width: var(--w);
-  height: 100%;
   box-sizing: border-box;
   padding: 14px 0 0 6px;
   overflow: hidden;
@@ -172,6 +197,34 @@
 
 @media (max-width: 720px) {
   .wall {
-    height: 150px;
+    --wall-h: 150px;
+    --strip-gap: 1px;
+  }
+
+  .item {
+    min-width: 3px;
+  }
+
+  /* The tap target on a phone is the single-build list, not the strips. */
+  .hint {
+    display: none;
+  }
+}
+
+/* Narrow phones: 71 strips at 3px plus gaps no longer fit in 320 minus the gutters. Let runs
+   shrink below their content and keep each strip at 1px, so the wall can't push the page wide. */
+@media (max-width: 360px) {
+  .run {
+    min-width: 0;
+  }
+
+  .item {
+    min-width: 1px;
+  }
+}
+
+@media (max-width: 720px) {
+  .read {
+    font-size: var(--t-12);
   }
 }

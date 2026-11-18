@@ -9,6 +9,30 @@ export function optionToPick(isOpen: boolean, activeIndex: number, options: read
   return options[activeIndex] ?? null;
 }
 
+/**
+ * The option the home paint search opens on Enter, as an index into `names`, or -1 for none.
+ * A highlighted option wins; otherwise the exact name match (ignoring case), else the first
+ * match. `names` are the already-filtered options, so an empty list means nothing to open.
+ * With nothing typed and nothing highlighted there is no paint to guess at, so it is -1 too.
+ */
+export function enterIndex(activeIndex: number, query: string, names: readonly string[]): number {
+  if (names.length === 0) return -1;
+  if (activeIndex >= 0 && activeIndex < names.length) return activeIndex;
+  const typed = query.trim().toLowerCase();
+  if (typed === '') return -1;
+  const exact = names.findIndex((n) => n.toLowerCase() === typed);
+  return exact >= 0 ? exact : 0;
+}
+
+/**
+ * True while an IME is composing text (Japanese, Chinese, Korean input), where the arrow keys
+ * pick candidates and must not drive the list. Used for the arrows only: Enter is not guarded,
+ * because Android keyboards report Enter as keyCode 229 or composing right after a Latin word.
+ */
+export function isComposing(e: { keyCode: number; nativeEvent: { isComposing: boolean } }): boolean {
+  return e.nativeEvent.isComposing || e.keyCode === 229;
+}
+
 /** The next keyboard-highlighted index after an arrow key. `-1` means none. */
 export function stepActive(current: number, delta: 1 | -1, count: number, isOpen: boolean): number {
   if (count === 0) return -1;
