@@ -10,6 +10,15 @@
   align-items: center;
 }
 
+/* No chevron: the home list is a glance, so the second line runs to the edge (#85). */
+.top.flat {
+  grid-template-columns: 22px minmax(0, 1fr) auto;
+}
+
+.sub.flat {
+  margin-right: 0;
+}
+
 .paint {
   display: flex;
   align-items: center;

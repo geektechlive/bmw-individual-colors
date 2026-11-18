@@ -8,6 +8,20 @@ Run `npx tsx scripts/post-to-bimmerpost.ts` to publish pending items to the foru
 
 ## [Unreleased]
 
+- **Fixed:** paint page rows show a labelled Edit or report button on phones (#86)
+
+- **Fixed:** Tab out of the row menu returns focus to the trigger (#84)
+
+- **Fixed:** home Latest builds fits a phone as two-line rows (#85)
+
+- **Fixed:** nav marks Colors and Entries current on their sub-pages (#80)
+
+- **Fixed:** build table rows are 52 px, not 65 (#78)
+
+- **Fixed:** phone filter, search and sort controls are 16 px so iOS does not zoom (#81)
+
+- **Fixed:** the M stripe no longer collapses to 0 px on long pages (#79)
+
 - **Fixed:** home search announces how many paints match (#83)
 
 - **Fixed:** home search highlights the first match as the list opens (#88)

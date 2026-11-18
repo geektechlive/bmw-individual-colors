@@ -29,6 +29,32 @@
   outline-offset: 1px;
 }
 
+/* Phone text button (#86): the same task as /entries' labelled expand actions. The accessible
+   name stays "Edit or report this build" and contains the visible words (WCAG 2.5.3). */
+.text {
+  display: none;
+}
+
+@media (max-width: 719px) {
+  .labelled {
+    width: auto;
+    padding: 0 var(--s-3);
+    border-color: var(--rule-control);
+    color: var(--ink-2);
+    font-size: var(--t-13);
+    letter-spacing: normal;
+    white-space: nowrap;
+  }
+
+  .labelled .glyph {
+    display: none;
+  }
+
+  .labelled .text {
+    display: inline;
+  }
+}
+
 /* Top layer, placed by RowActions through --menu-x and --menu-y. */
 .popover {
   position: fixed;

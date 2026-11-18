@@ -1,4 +1,6 @@
 .topStripe {
+  /* body is a 100%-tall flex column; without this the empty stripe shrinks to 0 (#79). */
+  flex-shrink: 0;
   position: sticky;
   top: 0;
   z-index: var(--z-stripe);

@@ -24,7 +24,9 @@
 }
 
 .table td {
-  padding: 10px;
+  /* The 44px paint link sets the row; vertical padding on top of it made rows 65px (#78). */
+  padding: 0 10px;
+  height: 52px;
   border-bottom: 1px solid var(--rule);
   font-size: var(--t-13);
   color: var(--ink-2);

@@ -16,8 +16,11 @@ export default function RowActions({
   id,
   reported: reportedProp,
   onReported,
+  phoneLabel = false,
 }: {
   id: string;
+  /** On phones show the words "Edit or report" instead of the bare ··· (paint page, #86). */
+  phoneLabel?: boolean;
   /** Lifted by a list that renders the same build twice (/entries); local state otherwise. */
   reported?: boolean;
   onReported?: () => void;
@@ -98,7 +101,9 @@ export default function RowActions({
       e.preventDefault();
       document.activeElement.click();
     } else if (e.key === 'Tab') {
-      closeMenu(false);
+      // Focus the trigger first and leave the key's default alone: Tab then moves on from the
+      // trigger. Closing alone unmounts the focused item and focus drops to body (#84, WCAG 2.4.3).
+      closeMenu(true);
     } else if (e.key === 'ArrowDown' || e.key === 'ArrowUp' || e.key === 'Home' || e.key === 'End') {
       e.preventDefault();
       if (items.length === 0) return;
@@ -115,7 +120,7 @@ export default function RowActions({
         ref={buttonRef}
         id={buttonId}
         type="button"
-        className={styles.trigger}
+        className={phoneLabel ? `${styles.trigger} ${styles.labelled}` : styles.trigger}
         aria-haspopup="menu"
         aria-expanded={open}
         aria-controls={open ? menuId : undefined}
@@ -128,7 +133,8 @@ export default function RowActions({
           }
         }}
       >
-        <span aria-hidden="true">···</span>
+        <span aria-hidden="true" className={styles.glyph}>···</span>
+        {phoneLabel && <span className={styles.text}>Edit or report</span>}
       </button>
       {open && (
         <div ref={menuRef} id={menuId} popover="manual" className={styles.popover} onKeyDown={onMenuKeyDown}>

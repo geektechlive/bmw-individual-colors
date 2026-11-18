@@ -207,6 +207,8 @@
 
 .latest {
   display: grid;
+  /* minmax(0, ...) so the nowrap second line of a phone row can't widen the track (#85) */
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--s-3);
   border-top: 1px solid var(--rule);
   padding-top: var(--s-5);
@@ -230,6 +232,25 @@
 
 .foot {
   margin: 0;
+}
+
+/* Table on desktop, two-line rows on phones; 719px matches /entries (#85). */
+.phoneList {
+  display: none;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--rule);
+}
+
+@media (max-width: 719px) {
+  .phoneList {
+    display: block;
+  }
+
+  .deskTable {
+    display: none;
+  }
 }
 
 @media (max-width: 720px) {

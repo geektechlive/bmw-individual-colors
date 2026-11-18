@@ -246,6 +246,7 @@
   height: calc(100% + 2px);
   opacity: 0;
   cursor: pointer;
+  font-size: var(--t-16); /* under 16px iOS zooms on focus (#81); the label above is what shows */
 }
 
 @media (max-width: 719px) {

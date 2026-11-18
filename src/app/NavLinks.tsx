@@ -30,7 +30,9 @@ export default function NavLinks() {
   }, [isOpen]);
 
   const renderLink = (href: string, label: string, isMobile: boolean) => {
-    const isActive = pathname === href;
+    // A sub-page (/colors/violet-blue) keeps its section current; "/" matches only itself.
+    const isExact = pathname === href;
+    const isActive = isExact || (href !== '/' && pathname.startsWith(`${href}/`));
 
     if (href === '/submit') {
       const className = isMobile ? `${styles.cta} ${styles.ctaMobile}` : styles.cta;
@@ -51,7 +53,7 @@ export default function NavLinks() {
         href={href}
         onClick={() => setIsOpen(false)}
         className={className}
-        aria-current={isActive ? 'page' : undefined}
+        aria-current={isExact ? 'page' : isActive ? 'true' : undefined}
       >
         {label}
       </Link>

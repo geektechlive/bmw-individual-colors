@@ -13,6 +13,7 @@ import {
   singleBuildLine,
 } from '../lib/home-facts';
 import PaintSwatch from '../components/PaintSwatch';
+import EntryPhoneRow from '../components/EntryPhoneRow';
 import PaintWall from '../components/home/PaintWall';
 import PaintLookup from '../components/home/PaintLookup';
 import type { LookupPaint } from '../components/home/PaintLookup';
@@ -163,7 +164,14 @@ export default async function HomePage() {
             .
           </p>
         ) : (
-          <div className={table.wrap}>
+          <>
+          {/* Phones get the two-line rows from /entries, without the expand (#85). */}
+          <ul className={styles.phoneList} aria-label="Latest builds">
+            {latest.map((e) => (
+              <EntryPhoneRow key={e.id} entry={e} expandable={false} />
+            ))}
+          </ul>
+          <div className={`${table.wrap} ${styles.deskTable}`}>
             <table className={table.table}>
               <thead>
                 <tr>
@@ -207,6 +215,7 @@ export default async function HomePage() {
               </tbody>
             </table>
           </div>
+          </>
         )}
 
         <p className={styles.foot}>

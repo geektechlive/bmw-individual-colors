@@ -306,6 +306,10 @@ main[aria-busy='true'] {
 .input[aria-invalid="true"] { border-color: var(--danger); }
 select.input, input.input, textarea.input { color-scheme: dark; }
 select.input { height: 44px; }
+/* iOS Safari zooms the page when a control under 16px takes focus (#81). */
+@media (max-width: 719px) {
+  .input { font-size: var(--t-16); }
+}
 
 /* ---------- Alerts ---------- */
 .alert {
