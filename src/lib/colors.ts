@@ -293,7 +293,11 @@ function fnv1a(text: string): string {
  * slug instead (#55). Blank input stays "".
  */
 export function colorToSlug(colorName: string): string {
-  const slug = colorName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  // #75: NFD splits accented letters into a base ASCII letter plus a combining
+  // mark; stripping the marks keeps "São Paulo" readable as "sao-paulo".
+  // Non-Latin scripts have no ASCII base and still fall through to the hash below.
+  const ascii = colorName.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  const slug = ascii.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
   if (slug) return slug;
   const cleaned = cleanPaintName(colorName).toLowerCase();
   return cleaned ? `paint-${fnv1a(cleaned)}` : '';
