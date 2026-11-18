@@ -1,21 +1,142 @@
-.chips {
+/* /entries (#69): filters, the Build Sheet table (base rules in BuildTable.module.css),
+   phone rows (EntryPhoneRow.module.css) and pagination. */
+
+/* ---------- Filters ---------- */
+.filters {
   display: flex;
-  gap: var(--s-2);
   flex-wrap: wrap;
-  margin-bottom: var(--s-3);
   align-items: center;
+  gap: var(--s-2);
+  margin-bottom: var(--s-3);
 }
 
-.chipLabel {
-  font-size: var(--t-11);
+.fgroup {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2);
+}
+
+.fgroup + .fgroup {
+  margin-left: var(--s-4);
+  padding-left: var(--s-4);
+  border-left: 1px solid var(--rule);
+}
+
+.fgroupLabel {
+  margin-right: var(--s-1);
+}
+
+/* ---------- Search and count ---------- */
+.search {
+  margin-bottom: var(--s-4);
+}
+
+.searchInput {
+  max-width: 420px;
+}
+
+.summary {
+  margin-left: var(--s-3);
+  color: var(--ink-2);
+  font-family: var(--font-mono);
+  font-size: var(--t-13);
+}
+
+.controls {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ---------- Table (desktop) ---------- */
+.bs thead th {
+  padding: 0 10px;
+  border-bottom: 1px solid var(--rule-strong);
+  white-space: nowrap;
+}
+
+.bs th[aria-sort='ascending'],
+.bs th[aria-sort='descending'] {
+  color: var(--ink);
+}
+
+.bs tbody td {
+  height: 52px;
+  color: var(--ink-2);
+}
+
+.bs tbody tr:hover td {
+  background: var(--panel);
+}
+
+.sortBtn {
+  display: inline-flex;
+  align-items: center;
+  min-width: 44px;
+  min-height: 44px;
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  cursor: pointer;
+}
+
+.sortBtn:hover {
+  color: var(--ink);
+}
+
+.sortBtn:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 1px;
+}
+
+.bs .paintLink {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+}
+
+.year {
+  font-family: var(--font-mono);
+  color: var(--ink);
+}
+
+.two {
+  display: grid;
+  line-height: 1.35;
+}
+
+.detail {
   color: var(--ink-3);
-  align-self: center;
+  font-size: var(--t-12);
 }
 
-.chipLabelGap {
-  margin-left: var(--s-1);
+.forumTag {
+  display: inline-block;
+  margin-right: 6px;
+  padding: 1px 6px;
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--r);
+  color: var(--ink-2);
+  font-size: var(--t-11);
 }
 
+.bs tbody td.act {
+  width: 56px;
+  padding: 0 4px;
+  text-align: right;
+}
+
+.tdEmpty {
+  padding: var(--s-6);
+  text-align: center;
+  color: var(--ink-3);
+}
+
+/* ---------- Pagination ---------- */
 .pageBtn {
   min-width: 44px;
   min-height: 44px;
@@ -36,8 +157,7 @@
   color: var(--ink);
 }
 
-.pageBtn:focus-visible,
-.sortBtn:focus-visible {
+.pageBtn:focus-visible {
   outline: 2px solid var(--focus);
   outline-offset: 1px;
 }
@@ -53,167 +173,6 @@
   cursor: not-allowed;
 }
 
-.search {
-  margin-bottom: var(--s-4);
-}
-
-.searchInput {
-  max-width: 420px;
-}
-
-.summary {
-  margin-left: var(--s-3);
-  color: var(--ink-3);
-  font-size: var(--t-13);
-}
-
-.table {
-  border-collapse: collapse;
-  width: 100%;
-  font-size: var(--t-13);
-}
-
-.headRow {
-  border-bottom: 2px solid var(--accent);
-}
-
-.th {
-  padding: 0;
-  text-align: left;
-  color: var(--ink-2);
-  font-weight: 600;
-  font-size: var(--t-12);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  border: 1px solid var(--rule-strong);
-  user-select: none;
-  white-space: nowrap;
-  background: var(--panel-2);
-}
-
-.thPlain {
-  padding: 10px var(--s-3);
-}
-
-.thFlag {
-  width: 36px;
-}
-
-.thEdit {
-  width: 48px;
-}
-
-.sortBtn {
-  display: block;
-  width: 100%;
-  padding: 10px var(--s-3);
-  margin: 0;
-  background: transparent;
-  border: none;
-  color: inherit;
-  font: inherit;
-  text-transform: inherit;
-  letter-spacing: inherit;
-  text-align: left;
-  cursor: pointer;
-}
-
-.sortBtn:hover {
-  color: var(--ink);
-}
-
-.row:nth-child(odd) {
-  background: var(--panel);
-}
-
-.row:nth-child(even) {
-  background: var(--panel-2);
-}
-
-.td {
-  padding: 10px var(--s-3);
-  border: 1px solid var(--rule-strong);
-  color: var(--ink);
-  font-size: var(--t-13);
-  vertical-align: middle;
-}
-
-.tdEmpty {
-  padding: var(--s-6);
-  text-align: center;
-  color: var(--ink-3);
-}
-
-.tdCenter {
-  text-align: center;
-  padding: 6px var(--s-1);
-}
-
-.colorCell {
-  display: flex;
-  align-items: center;
-  gap: var(--s-2);
-}
-
-.colorLink {
-  color: var(--ink);
-  text-decoration: none;
-}
-
-.colorLink:hover {
-  color: var(--accent-ink);
-}
-
-.interiorDetail {
-  color: var(--ink-3);
-  font-size: var(--t-11);
-  margin-left: var(--s-1);
-}
-
-.wheels,
-.city {
-  color: var(--ink-2);
-}
-
-.country {
-  color: var(--ink-3);
-  font-size: var(--t-11);
-}
-
-.countryGap {
-  margin-left: var(--s-1);
-}
-
-.forumTag {
-  display: inline-block;
-  background: var(--panel-2);
-  border: 1px solid var(--rule-strong);
-  border-radius: var(--r);
-  padding: 1px 5px;
-  font-size: var(--t-11);
-  color: var(--ink-3);
-  margin-right: 5px;
-  vertical-align: middle;
-}
-
-.username {
-  color: var(--accent-ink);
-  font-weight: 500;
-}
-
-.editLink {
-  color: var(--accent-ink);
-  font-size: var(--t-15);
-  text-decoration: none;
-  padding: var(--s-2);
-  display: inline-block;
-  line-height: 1;
-}
-
-.editLink:hover {
-  color: var(--ink);
-}
-
 .pagination {
   display: flex;
   gap: 6px;
@@ -227,29 +186,17 @@
   padding: 0 var(--s-1);
 }
 
-/* Phone layout (#42): one card per build instead of the wide table. */
-.sortBar,
+/* ---------- Phone ---------- */
+.phoneBar,
 .cardView {
   display: none;
 }
 
-.sortBar {
-  align-items: center;
-  flex-wrap: wrap;
-  gap: var(--s-2) var(--s-3);
-  margin-bottom: var(--s-3);
-}
-
-.sortSelect {
-  width: auto;
-  min-width: 0;
-}
-
-.cards {
-  display: grid;
-  gap: var(--s-3);
+.rows {
   margin: 0;
   padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--rule);
 }
 
 .empty {
@@ -259,16 +206,67 @@
   color: var(--ink-3);
 }
 
+.sortSel {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2);
+  min-height: 44px;
+  padding: 0 36px 0 var(--s-3);
+  background: var(--panel);
+  border: 1px solid var(--rule-control);
+  border-radius: var(--r);
+  color: var(--ink);
+  font-size: var(--t-14);
+  white-space: nowrap;
+}
+
+.sortSel::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: 14px;
+  width: 7px;
+  height: 7px;
+  border-right: 2px solid var(--ink-2);
+  border-bottom: 2px solid var(--ink-2);
+  transform: translateY(-70%) rotate(45deg);
+}
+
+.sortSel:focus-within {
+  outline: 2px solid var(--focus);
+  outline-offset: 1px;
+}
+
+/* The native select sits invisibly over the whole control, so a tap opens the system picker. */
+.sortNative {
+  position: absolute;
+  inset: -1px;
+  width: calc(100% + 2px);
+  height: calc(100% + 2px);
+  opacity: 0;
+  cursor: pointer;
+}
+
 @media (max-width: 719px) {
-  .sortBar {
+  .phoneBar {
     display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--s-3);
+    margin: var(--s-3) 0 var(--s-2);
+  }
+
+  .phoneBar .summary {
+    margin: 0;
   }
 
   .cardView {
     display: block;
   }
 
-  .tableView {
+  .tableView,
+  .countDesktop {
     display: none;
   }
 
@@ -276,8 +274,44 @@
     max-width: none;
   }
 
-  .summary {
-    display: block;
-    margin: var(--s-2) 0 0;
+  /* Phone order: search first, then the chips. */
+  .search {
+    order: -1;
+    margin-bottom: var(--s-3);
+  }
+
+  /* All seven chips in one sideways-scrolling row, groups split by a thin rule. */
+  .filters {
+    position: relative; /* keeps the hidden group labels inside the scrolling row */
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+    margin-right: calc(var(--gutter) * -1);
+    padding-right: var(--gutter);
+  }
+
+  .filters::-webkit-scrollbar {
+    display: none;
+  }
+
+  .fgroup {
+    flex: none;
+  }
+
+  .fgroup + .fgroup {
+    margin-left: var(--s-1);
+    padding-left: var(--s-3);
+    border-left-color: var(--rule-strong);
+  }
+
+  .fgroupLabel {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
   }
 }

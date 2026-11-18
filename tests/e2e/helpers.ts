@@ -1,4 +1,4 @@
-import { expect, type Page } from '@playwright/test';
+import { expect, type Locator, type Page } from '@playwright/test';
 
 /**
  * Navigate, then wait until the route's loading skeleton (`loading.tsx`, #43) has been
@@ -12,5 +12,17 @@ export async function gotoLoaded(page: Page, url: string): Promise<void> {
   });
 }
 
-/** Edit links the user can see. /entries renders the table and the phone cards; CSS hides one. */
-export const VISIBLE_EDIT_LINKS = 'a[href*="/edit/"]:visible';
+/**
+ * The first "Edit this build" link a visitor can reach on /entries, with its row action
+ * opened: the ··· menu on desktop, the chevron on a phone (#69). The edit link lives behind
+ * one of them in both layouts. /entries renders the table and the phone rows; CSS hides one.
+ */
+export async function openFirstEditLink(page: Page): Promise<Locator> {
+  const chevron = page.locator('button[aria-label="More about this build"]:visible').first();
+  if (await chevron.count()) {
+    await chevron.click();
+    return page.locator('a[href*="/edit/"]:visible').first();
+  }
+  await page.locator('button[aria-label="Edit or report this build"]:visible').first().click();
+  return page.getByRole('menuitem', { name: 'Edit this build' });
+}

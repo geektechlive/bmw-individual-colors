@@ -6,7 +6,8 @@ import { computeRarityLabel, computeColorCounts } from '../../../lib/analytics';
 import { getColorHex, getColorFamily, COLOR_ALIASES, aliasRedirectSlug, canonicalColorName, colorToSlug } from '../../../lib/colors';
 import { readablePaint, paintSurfaces } from '../../../lib/paint-accent';
 import { rankOf, rankNote, paintSummary } from '../../../lib/paint-summary';
-import FlagButton from '../../../components/FlagButton';
+import RowActions from '../../../components/RowActions';
+import { forumTagLabel } from '../../../lib/entry-display';
 import PaintSwatch from '../../../components/PaintSwatch';
 import type { Metadata } from 'next';
 import { cssVars } from '../../../lib/css-vars';
@@ -261,14 +262,14 @@ export default async function ColorDetailPage({ params }: { params: Promise<{ sl
                   </div>
                   {e.forum_username && (
                     <div className={styles.rowUser}>
-                      {e.source_forum ? <span className={styles.rowForum}>[{e.source_forum}] </span> : null}
+                      {forumTagLabel(e.source_forum) ? <span className={styles.rowForum}>[{forumTagLabel(e.source_forum)}] </span> : null}
                       {e.forum_username}
                     </div>
                   )}
                   <div className={`${styles.rowDate} mono`}>
                     {new Date(entryDate(e)).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric', timeZone: 'UTC' })}
                   </div>
-                  <FlagButton id={e.id} />
+                  <RowActions id={e.id} />
                 </div>
               );
             })}

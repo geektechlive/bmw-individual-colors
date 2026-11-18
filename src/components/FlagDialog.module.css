@@ -1,0 +1,24 @@
+/* The report dialog (#31, #69): a native modal <dialog>, so focus is trapped and Escape closes it. */
+.dialog {
+  margin: auto;
+  width: min(340px, calc(100vw - 2 * var(--gutter)));
+  padding: var(--s-4);
+  color: var(--ink);
+  background: var(--panel-3);
+  border: 1px solid var(--rule-control);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-2);
+}
+
+.dialog::backdrop {
+  background: color-mix(in srgb, var(--bg) 72%, transparent);
+}
+
+.done { margin: 0; color: var(--ink); font-size: var(--t-14); }
+.panel { display: flex; flex-direction: column; gap: var(--s-2); align-items: flex-start; }
+.panelLabel { color: var(--ink-2); font-size: var(--t-13); }
+.field { width: 100%; font-size: var(--t-13); }
+.note { resize: vertical; }
+.error { color: var(--danger-ink); font-size: var(--t-12); }
+.actions { display: flex; gap: var(--s-2); align-items: center; }
+.small { min-height: 44px; padding: 0 var(--s-4); font-size: var(--t-13); }

@@ -1,0 +1,94 @@
+/* The ··· row action and its menu (#69). */
+.trigger {
+  display: inline-grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--r);
+  color: var(--ink-3);
+  font: inherit;
+  font-size: var(--t-18);
+  line-height: 1;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  transition: color var(--dur-fast) var(--ease), background var(--dur-fast) var(--ease);
+}
+
+.trigger:hover,
+.trigger[aria-expanded='true'] {
+  color: var(--ink);
+  border-color: var(--rule-control);
+  background: var(--panel-2);
+}
+
+.trigger:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 1px;
+}
+
+/* Top layer, placed by RowActions through --menu-x and --menu-y. */
+.popover {
+  position: fixed;
+  inset: auto;
+  top: var(--menu-y, 0);
+  left: var(--menu-x, 0);
+  margin: 0;
+  min-width: 220px;
+  padding: var(--s-1) 0;
+  overflow: visible;
+  color: var(--ink);
+  background: var(--panel-3);
+  border: 1px solid var(--rule-control);
+  border-radius: var(--r);
+  box-shadow: var(--shadow-2);
+  text-align: left;
+}
+
+.menu {
+  display: flex;
+  flex-direction: column;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: 44px;
+  padding: 0 var(--s-4);
+  background: transparent;
+  border: 0;
+  color: var(--ink);
+  font: inherit;
+  font-size: var(--t-14);
+  text-align: left;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.item:hover,
+.item:focus-visible {
+  background: var(--panel-2);
+}
+
+.item:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: -2px;
+}
+
+.item[aria-disabled='true'] {
+  color: var(--ink-2);
+  cursor: default;
+}
+
+.hint {
+  max-width: 260px;
+  margin: 0;
+  padding: var(--s-1) var(--s-4) var(--s-2);
+  border-top: 1px solid var(--rule-strong);
+  color: var(--ink-2);
+  font-size: var(--t-12);
+}

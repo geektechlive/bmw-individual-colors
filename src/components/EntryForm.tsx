@@ -13,7 +13,7 @@ import styles from './EntryForm.module.css';
 
 // Cloudflare Turnstile attaches a global widget API and invokes our named
 // callbacks via the data-callback/data-*-callback attributes. This is a
-// local, self-contained type — deliberately not shared with FlagButton's
+// local, self-contained type — deliberately not shared with FlagDialog's
 // global Window augmentation, so this component doesn't depend on it.
 interface TurnstileWindow {
   __entryFormTsSuccess?: (token: string) => void;

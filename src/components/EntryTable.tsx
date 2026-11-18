@@ -2,13 +2,14 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import Link from 'next/link';
 import IntentLink from './IntentLink';
 import { getColorHex, colorToSlug } from '../lib/colors';
-import { cityState as formatCityState, interiorDetail, modelLabel } from '../lib/entry-display';
-import EntryCard from './EntryCard';
-import FlagButton from './FlagButton';
+import { cityState as formatCityState, forumTagLabel, interiorDetail, modelLabel } from '../lib/entry-display';
+import { SORT_CHOICES, choiceById, choiceFor, type SortDir, type SortKey } from '../lib/entry-sort';
+import EntryPhoneRow from './EntryPhoneRow';
+import RowActions from './RowActions';
 import PaintSwatch from './PaintSwatch';
+import table from './BuildTable.module.css';
 import styles from './EntryTable.module.css';
 import type { BmwEntry } from '../types';
 
@@ -16,23 +17,35 @@ interface Props {
   entries: BmwEntry[];
 }
 
-type SortKey = keyof Pick<
-  BmwEntry,
-  'ext_color' | 'model_year' | 'body_style' | 'drivetrain' | 'interior_color' | 'location_state' | 'forum_username'
->;
+type ArrayFilter = 'bodyStyle' | 'drivetrain' | 'transmission';
 
 const PAGE_SIZE = 50;
 const NUMERIC_SORT_KEYS: SortKey[] = ['model_year'];
 
-// Sort choices for the phone card list, which has no column headers.
-const SORT_OPTIONS: { key: SortKey; label: string }[] = [
-  { key: 'ext_color', label: 'Color' },
-  { key: 'model_year', label: 'Year' },
-  { key: 'body_style', label: 'Model' },
-  { key: 'drivetrain', label: 'Drive' },
-  { key: 'interior_color', label: 'Interior' },
-  { key: 'location_state', label: 'Location' },
-  { key: 'forum_username', label: 'Forum user' },
+// The filter groups, in order. Comp is a model, so it sits with M3 and M4.
+const FILTER_GROUPS: { label: string; chips: { value: string; filter: ArrayFilter | 'competition' }[] }[] = [
+  {
+    label: 'Model',
+    chips: [
+      { value: 'M3', filter: 'bodyStyle' },
+      { value: 'M4', filter: 'bodyStyle' },
+      { value: 'Comp', filter: 'competition' },
+    ],
+  },
+  {
+    label: 'Drive',
+    chips: [
+      { value: 'RWD', filter: 'drivetrain' },
+      { value: 'AWD', filter: 'drivetrain' },
+    ],
+  },
+  {
+    label: 'Trans',
+    chips: [
+      { value: '8AT', filter: 'transmission' },
+      { value: '6MT', filter: 'transmission' },
+    ],
+  },
 ];
 
 function getPageNumbers(current: number, total: number): (number | 'ellipsis')[] {
@@ -60,7 +73,10 @@ export default function EntryTable({ entries }: Props) {
 
   const [filter, setFilter] = useState('');
   const [sortKey, setSortKey] = useState<SortKey>('model_year');
-  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
+  const [sortDir, setSortDir] = useState<SortDir>('desc');
+  // Builds reported this visit, shared by the table and the phone rows and kept across pages.
+  const [reported, setReported] = useState<ReadonlySet<string>>(new Set());
+  const markReported = (id: string) => setReported((prev) => new Set(prev).add(id));
   const [filters, setFilters] = useState<{
     bodyStyle: string[];
     drivetrain: string[];
@@ -86,7 +102,7 @@ export default function EntryTable({ entries }: Props) {
 
   const resetPage = useCallback(() => setPage(1), [setPage]);
 
-  function toggleArrayFilter(key: 'bodyStyle' | 'drivetrain' | 'transmission', value: string) {
+  function toggleArrayFilter(key: ArrayFilter, value: string) {
     setFilters((prev) => {
       const arr = prev[key];
       return {
@@ -168,25 +184,25 @@ export default function EntryTable({ entries }: Props) {
     resetPage();
   }
 
+  function handleSortSelect(id: string) {
+    const choice = choiceById(id);
+    if (!choice) return;
+    setSortKey(choice.key);
+    setSortDir(choice.dir);
+    resetPage();
+  }
+
   const arrow = (key: SortKey) =>
     sortKey === key ? (sortDir === 'asc' ? ' ↑' : ' ↓') : '';
 
   const ariaSort = (key: SortKey): React.AriaAttributes['aria-sort'] =>
     sortKey === key ? (sortDir === 'asc' ? 'ascending' : 'descending') : 'none';
 
-
   const pageBtnClass = (active: boolean) =>
     active ? `${styles.pageBtn} ${styles.pageBtnActive}` : styles.pageBtn;
 
-  function handleSortSelect(key: SortKey) {
-    if (key === sortKey) return;
-    setSortKey(key);
-    setSortDir('asc');
-    resetPage();
-  }
-
   const sortHeader = (key: SortKey, label: string) => (
-    <th className={styles.th} aria-sort={ariaSort(key)}>
+    <th scope="col" aria-sort={ariaSort(key)}>
       <button type="button" className={styles.sortBtn} onClick={() => handleSort(key)}>
         {label}
         {arrow(key)}
@@ -194,54 +210,33 @@ export default function EntryTable({ entries }: Props) {
     </th>
   );
 
+  const chipPressed = (filter: ArrayFilter | 'competition', value: string) =>
+    filter === 'competition' ? filters.competition === true : filters[filter].includes(value);
+
+  const choice = choiceFor(sortKey, sortDir);
+  const sortOptions = SORT_CHOICES.some((c) => c.id === choice.id) ? SORT_CHOICES : [...SORT_CHOICES, choice];
+
   return (
     <div>
-      {/* Filter chips */}
-      <div className={styles.chips}>
-        <span className={styles.chipLabel}>Body:</span>
-        {['M3', 'M4'].map((v) => (
-          <button
-            key={v}
-            type="button"
-            onClick={() => toggleArrayFilter('bodyStyle', v)}
-            className="chip"
-            aria-pressed={filters.bodyStyle.includes(v)}
-          >
-            {v}
-          </button>
+      {/* Filters: Model, Drive, Trans. One sideways-scrolling row on phones. */}
+      <div className={styles.controls}>
+      <div role="group" aria-label="Filter builds" className={styles.filters}>
+        {FILTER_GROUPS.map((group) => (
+          <span key={group.label} data-filter-group={group.label} className={styles.fgroup}>
+            <span className={`label ${styles.fgroupLabel}`}>{group.label}</span>
+            {group.chips.map((c) => (
+              <button
+                key={c.value}
+                type="button"
+                onClick={() => (c.filter === 'competition' ? toggleCompetition() : toggleArrayFilter(c.filter, c.value))}
+                className="chip"
+                aria-pressed={chipPressed(c.filter, c.value)}
+              >
+                {c.value}
+              </button>
+            ))}
+          </span>
         ))}
-        <span className={`${styles.chipLabel} ${styles.chipLabelGap}`}>Drive:</span>
-        {['RWD', 'AWD'].map((v) => (
-          <button
-            key={v}
-            type="button"
-            onClick={() => toggleArrayFilter('drivetrain', v)}
-            className="chip"
-            aria-pressed={filters.drivetrain.includes(v)}
-          >
-            {v}
-          </button>
-        ))}
-        <span className={`${styles.chipLabel} ${styles.chipLabelGap}`}>Trans:</span>
-        {['8AT', '6MT'].map((v) => (
-          <button
-            key={v}
-            type="button"
-            onClick={() => toggleArrayFilter('transmission', v)}
-            className="chip"
-            aria-pressed={filters.transmission.includes(v)}
-          >
-            {v}
-          </button>
-        ))}
-        <button
-          type="button"
-          onClick={toggleCompetition}
-          className="chip"
-          aria-pressed={filters.competition === true}
-        >
-          Comp
-        </button>
       </div>
 
       <div className={styles.search}>
@@ -256,139 +251,116 @@ export default function EntryTable({ entries }: Props) {
           }}
           className={`input ${styles.searchInput}`}
         />
-        <span className={`num ${styles.summary}`}>
+        <span className={`num ${styles.summary} ${styles.countDesktop}`}>
           {totalCount === 0
             ? 'No entries'
             : `Showing ${startIdx + 1}–${endIdx} of ${totalCount} ${totalCount === 1 ? 'entry' : 'entries'}`}
         </span>
       </div>
 
-      <div className={styles.sortBar}>
-        <label htmlFor="entry-sort" className="label">
-          Sort by
+      </div>
+
+      <div className={styles.phoneBar}>
+        <span className={`num ${styles.summary}`}>
+          {totalCount === 0 ? 'No entries' : `${startIdx + 1}–${endIdx} of ${totalCount}`}
+        </span>
+        <label className={styles.sortSel}>
+          <span className="label">Sort</span>
+          <span>{choice.label}</span>
+          <select
+            aria-label="Sort builds"
+            className={styles.sortNative}
+            value={choice.id}
+            onChange={(e) => handleSortSelect(e.target.value)}
+          >
+            {sortOptions.map((o) => (
+              <option key={o.id} value={o.id}>
+                {o.label}
+              </option>
+            ))}
+          </select>
         </label>
-        <select
-          id="entry-sort"
-          className={`input ${styles.sortSelect}`}
-          value={sortKey}
-          onChange={(e) => handleSortSelect(e.target.value as SortKey)}
-        >
-          {SORT_OPTIONS.map((o) => (
-            <option key={o.key} value={o.key}>
-              {o.label}
-            </option>
-          ))}
-        </select>
-        <button
-          type="button"
-          className="chip"
-          onClick={() => {
-            setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'));
-            resetPage();
-          }}
-        >
-          {sortDir === 'asc' ? 'Ascending ↑' : 'Descending ↓'}
-        </button>
       </div>
 
       <div className={styles.cardView}>
         {pageEntries.length === 0 ? (
           <p className={styles.empty}>No entries found.</p>
         ) : (
-          <ul className={styles.cards} aria-label="Builds">
+          <ul className={styles.rows} aria-label="Builds">
             {pageEntries.map((e) => (
-              <EntryCard key={e.id} entry={e} />
+              <EntryPhoneRow key={e.id} entry={e} reported={reported.has(e.id)} onReported={() => markReported(e.id)} />
             ))}
           </ul>
         )}
       </div>
 
-      <div className={`scroll-x ${styles.tableView}`}>
-        <table className={styles.table}>
+      <div className={`${table.wrap} ${styles.tableView}`}>
+        <table className={`${table.table} ${styles.bs}`}>
           <thead>
-            <tr className={styles.headRow}>
+            <tr>
               {sortHeader('ext_color', 'Color')}
               {sortHeader('model_year', 'Year')}
               {sortHeader('body_style', 'Model')}
               {sortHeader('drivetrain', 'Drive')}
-              <th className={`${styles.th} ${styles.thPlain}`}>Trans</th>
+              <th scope="col">Trans</th>
               {sortHeader('interior_color', 'Interior')}
-              <th className={`${styles.th} ${styles.thPlain}`}>Wheels</th>
+              <th scope="col">Wheels</th>
               {sortHeader('location_state', 'Location')}
               {sortHeader('forum_username', 'Forum User')}
-              <th className={`${styles.th} ${styles.thPlain} ${styles.thFlag}`}><span className="sr-only">Report</span></th>
-              <th className={`${styles.th} ${styles.thPlain} ${styles.thEdit}`}><span className="sr-only">Edit</span></th>
+              <th scope="col">
+                <span className="sr-only">Edit or report</span>
+              </th>
             </tr>
           </thead>
           <tbody>
             {sorted.length === 0 && (
               <tr>
-                <td colSpan={11} className={`${styles.td} ${styles.tdEmpty}`}>
+                <td colSpan={10} className={styles.tdEmpty}>
                   No entries found.
                 </td>
               </tr>
             )}
             {pageEntries.map((e) => {
-              const hex = getColorHex(e.ext_color);
-              const cityState = formatCityState(e);
-              const model = modelLabel(e);
+              const place = formatCityState(e);
               const detail = interiorDetail(e);
+              const tag = forumTagLabel(e.source_forum);
 
               return (
-                <tr key={e.id} className={styles.row}>
-                  <td className={styles.td}>
-                    <div className={styles.colorCell}>
-                      <PaintSwatch name={e.ext_color} hex={hex} />
+                <tr key={e.id}>
+                  <td>
+                    <span className={table.paintCell}>
+                      <PaintSwatch name={e.ext_color} hex={getColorHex(e.ext_color)} />
                       <IntentLink
                         href={`/colors/${colorToSlug(e.ext_color)}`}
-                        className={`paint-name ${styles.colorLink}`}
+                        className={`${table.paintLink} paint-name ${styles.paintLink}`}
                       >
                         {e.ext_color}
                       </IntentLink>
-                    </div>
+                    </span>
                   </td>
-                  <td className={`${styles.td} mono`}>{e.model_year}</td>
-                  <td className={styles.td}>{model}</td>
-                  <td className={styles.td}>{e.drivetrain}</td>
-                  <td className={styles.td}>{e.transmission}</td>
-                  <td className={styles.td}>
-                    {e.interior_color && (
-                      <span>
-                        {e.interior_color}
-                        {detail ? <span className={styles.interiorDetail}>({detail})</span> : null}
-                      </span>
-                    )}
+                  <td className={styles.year}>{e.model_year}</td>
+                  <td>{modelLabel(e)}</td>
+                  <td>{e.drivetrain}</td>
+                  <td>{e.transmission}</td>
+                  <td>
+                    <span className={styles.two}>
+                      <span>{e.interior_color ?? ''}</span>
+                      {detail ? <span className={styles.detail}>{detail}</span> : null}
+                    </span>
                   </td>
-                  <td className={`${styles.td} ${styles.wheels}`}>{e.wheels ?? ''}</td>
-                  <td className={styles.td}>
-                    {cityState && <span className={styles.city}>{cityState}</span>}
-                    {e.location_country && (
-                      <span className={cityState ? `${styles.country} ${styles.countryGap}` : styles.country}>
-                        {e.location_country}
-                      </span>
-                    )}
+                  <td>{e.wheels ?? ''}</td>
+                  <td>
+                    <span className={styles.two}>
+                      <span>{place || e.location_country || ''}</span>
+                      {place && e.location_country ? <span className={styles.detail}>{e.location_country}</span> : null}
+                    </span>
                   </td>
-                  <td className={styles.td}>
-                    {e.source_forum ? (
-                      <span className={styles.forumTag}>{e.source_forum}</span>
-                    ) : null}
-                    <span className={styles.username}>{e.forum_username ?? ''}</span>
+                  <td>
+                    {tag ? <span className={styles.forumTag}>{tag}</span> : null}
+                    {e.forum_username ?? ''}
                   </td>
-                  <td className={`${styles.td} ${styles.tdCenter}`}>
-                    <FlagButton id={e.id} />
-                  </td>
-                  <td className={`${styles.td} ${styles.tdCenter}`}>
-                    {/* No prefetch: /edit bypasses the edge cache, so prefetching one
-                        per visible row fired bursts of full renders that tripped the
-                        Workers Free CPU limit. Edits are rare; load on click. */}
-                    <Link
-                      href={`/edit/${e.id}`}
-                      prefetch={false}
-                      className={styles.editLink}
-                      title="Edit this entry"
-                    >
-                      ✏
-                    </Link>
+                  <td className={styles.act}>
+                    <RowActions id={e.id} reported={reported.has(e.id)} onReported={() => markReported(e.id)} />
                   </td>
                 </tr>
               );
@@ -440,4 +412,3 @@ export default function EntryTable({ entries }: Props) {
     </div>
   );
 }
-

@@ -57,7 +57,7 @@ export default async function EntriesPage({
       {/* No inner Suspense: the page renders per request, so EntryTable's useSearchParams
           has the real params on the server, and a second loading state made the footer
           jump when the table streamed in (#63). loading.tsx is the only loading state. */}
-      <div className={`card ${styles.tableCard}`}>
+      <div>
         <EntryTable entries={entries} />
       </div>
     </main>

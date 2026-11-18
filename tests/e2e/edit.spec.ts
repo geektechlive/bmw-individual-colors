@@ -1,17 +1,15 @@
 import { test, expect, devices } from '@playwright/test';
-import { gotoLoaded, VISIBLE_EDIT_LINKS } from './helpers';
+import { gotoLoaded, openFirstEditLink } from './helpers';
 
 test.describe('Edit button — desktop', () => {
   test('edit link is present in the entries table', async ({ page }) => {
     await gotoLoaded(page, '/entries');
-    const editLinks = page.locator(VISIBLE_EDIT_LINKS);
-    const count = await editLinks.count();
-    expect(count).toBeGreaterThan(0);
+    await expect(await openFirstEditLink(page)).toBeVisible();
   });
 
   test('edit link navigates to the verify page', async ({ page }) => {
     await gotoLoaded(page, '/entries');
-    const firstEditLink = page.locator(VISIBLE_EDIT_LINKS).first();
+    const firstEditLink = await openFirstEditLink(page);
     await firstEditLink.click();
     await expect(page).toHaveURL(/\/edit\//);
     await expect(page.getByText(/Verify you/i)).toBeVisible();
@@ -19,7 +17,7 @@ test.describe('Edit button — desktop', () => {
 
   test('edit verify page shows username input and bot check', async ({ page }) => {
     await gotoLoaded(page, '/entries');
-    const href = await page.locator(VISIBLE_EDIT_LINKS).first().getAttribute('href');
+    const href = await (await openFirstEditLink(page)).getAttribute('href');
     await page.goto(href!);
     await expect(page.locator('input[name="forum_username"]')).toBeVisible();
     await expect(page.getByRole('button', { name: /verify/i })).toBeVisible();
@@ -27,7 +25,7 @@ test.describe('Edit button — desktop', () => {
 
   test('wrong username shows error', async ({ page }) => {
     await gotoLoaded(page, '/entries');
-    const href = await page.locator(VISIBLE_EDIT_LINKS).first().getAttribute('href');
+    const href = await (await openFirstEditLink(page)).getAttribute('href');
     await page.goto(href!);
     await page.locator('input[name="forum_username"]').fill('__definitely_not_the_owner__');
     // Can't complete Turnstile in test — just verify form is functional
@@ -65,23 +63,23 @@ test.describe('Edit button — mobile (375px)', () => {
     expect(text).toMatch(/M3|M4/);
   });
 
-  test('phones get one card per build instead of the table', async ({ page }) => {
-    // #42: below 720px the table is hidden and each build is a card with its own edit link.
+  test('phones get two-line rows instead of the table', async ({ page }) => {
+    // #42, #69: below 720px the table is hidden and each build is a row; its edit link
+    // appears when the row is expanded.
     await gotoLoaded(page, '/entries');
     await expect(page.locator('table')).toBeHidden();
-    await expect(page.locator(VISIBLE_EDIT_LINKS).first()).toBeVisible();
+    await expect(await openFirstEditLink(page)).toBeVisible();
   });
 
-  test('edit links exist on mobile', async ({ page }) => {
+  test('every phone row carries an edit link', async ({ page }) => {
     await gotoLoaded(page, '/entries');
-    const editLinks = page.locator(VISIBLE_EDIT_LINKS);
-    const count = await editLinks.count();
+    const count = await page.locator('a[href*="/edit/"]').count();
     expect(count).toBeGreaterThan(0);
   });
 
   test('edit verify page is usable on mobile', async ({ page }) => {
     await gotoLoaded(page, '/entries');
-    const href = await page.locator(VISIBLE_EDIT_LINKS).first().getAttribute('href');
+    const href = await (await openFirstEditLink(page)).getAttribute('href');
     await page.goto(href!);
     const usernameInput = page.locator('input[name="forum_username"]');
     await expect(usernameInput).toBeVisible();
@@ -110,7 +108,7 @@ test('iPhone 14 — verify form inputs are full-width', async ({ browser }) => {
   const context = await browser.newContext({ ...devices['iPhone 14'] });
   const page = await context.newPage();
   await gotoLoaded(page, '/entries');
-  const href = await page.locator(VISIBLE_EDIT_LINKS).first().getAttribute('href');
+  const href = await (await openFirstEditLink(page)).getAttribute('href');
   await page.goto(href!);
   const input = page.locator('input[name="forum_username"]');
   await expect(input).toBeVisible();

@@ -95,19 +95,27 @@ test.describe('Submit form page', () => {
   });
 });
 
-test.describe('Flag button', () => {
-  test('flag button appears on entries page', async ({ page }) => {
+test.describe('Row action (report a problem)', () => {
+  const ACTION = 'button[aria-label="Edit or report this build"]';
+
+  test('the row action appears on the entries page', async ({ page }) => {
     await page.goto('/entries');
-    const flagBtns = page.locator('button[title="Flag this entry as incorrect"]');
-    const count = await flagBtns.count();
-    expect(count).toBeGreaterThan(0);
+    expect(await page.locator(ACTION).count()).toBeGreaterThan(0);
   });
 
-  test('flag button appears on color detail page', async ({ page }) => {
+  test('the row action appears on the color detail page, and no red flag does', async ({ page }) => {
     await page.goto('/colors/san-marino-blue');
-    const flagBtns = page.locator('button[title="Flag this entry as incorrect"]');
-    const count = await flagBtns.count();
-    expect(count).toBeGreaterThan(0);
+    expect(await page.locator(ACTION).count()).toBeGreaterThan(0);
+    await expect(page.locator('button[title="Flag this entry as incorrect"]')).toHaveCount(0);
+    await expect(page.getByText('🚩')).toHaveCount(0);
+  });
+
+  test('on a paint page, the menu opens the reason picker', async ({ page }) => {
+    await page.goto('/colors/san-marino-blue');
+    await page.locator(ACTION).first().click();
+    await expect(page.getByRole('menuitem', { name: 'Edit this build' })).toHaveAttribute('href', /\/edit\//);
+    await page.getByRole('menuitem', { name: 'Report a problem' }).click();
+    await expect(page.getByRole('dialog').getByLabel("What's wrong with this entry?")).toBeVisible();
   });
 });
 

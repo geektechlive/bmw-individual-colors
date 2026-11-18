@@ -14,6 +14,7 @@ import PaintSwatch from '../components/PaintSwatch';
 import PaintWall from '../components/home/PaintWall';
 import type { WallPaint, WallTick } from '../components/home/PaintWall';
 import styles from './page.module.css';
+import table from '../components/BuildTable.module.css';
 
 export const dynamic = 'force-dynamic';
 
@@ -137,8 +138,8 @@ export default async function HomePage() {
             .
           </p>
         ) : (
-          <div className={styles.tableWrap}>
-            <table className={styles.table}>
+          <div className={table.wrap}>
+            <table className={table.table}>
               <thead>
                 <tr>
                   <th scope="col">Paint</th>
@@ -156,11 +157,11 @@ export default async function HomePage() {
                   return (
                     <tr key={e.id}>
                       <td>
-                        <span className={styles.paintCell}>
+                        <span className={table.paintCell}>
                           <PaintSwatch name={e.ext_color} size="chip" />
                           <IntentLink
                             href={`/colors/${colorToSlug(e.ext_color)}`}
-                            className={`${styles.paintLink} paint-name`}
+                            className={`${table.paintLink} paint-name`}
                           >
                             {e.ext_color}
                           </IntentLink>

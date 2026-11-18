@@ -24,16 +24,6 @@ const PENDING: ReadonlyArray<{ selector: string; issue: string; why: string }> =
     issue: '#68',
     why: 'Home "Latest builds" table: paint links are 17-34 px tall. Unit (c) restyles the home page.',
   },
-  {
-    selector: 'ul[aria-label="Builds"] a, ul[aria-label="Builds"] button',
-    issue: '#69',
-    why: '/entries phone cards: paint link, flag button and Edit link. Unit (d) replaces them with two-line rows and the ... menu.',
-  },
-  {
-    selector: 'button[title="Flag this entry as incorrect"]',
-    issue: '#67',
-    why: 'Paint page build rows: the flag button. Unit (b) (with (d)) swaps it for the shared RowActions button.',
-  },
 ];
 
 interface Small {

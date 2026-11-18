@@ -1,0 +1,50 @@
+/* The Build Sheet table (#69): no cell boxes, no stripes, a hairline under every row.
+   Shared by the home "Latest builds" table and /entries; /entries adds its own row height,
+   hover and sort buttons in EntryTable.module.css. */
+.wrap {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  min-width: 600px;
+  border-collapse: collapse;
+}
+
+.table th {
+  padding: var(--s-2) 10px;
+  border-bottom: 1px solid var(--rule);
+  text-align: left;
+  font-family: var(--font-mono);
+  font-size: var(--t-11);
+  font-weight: 500;
+  letter-spacing: var(--track-label);
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+.table td {
+  padding: 10px;
+  border-bottom: 1px solid var(--rule);
+  font-size: var(--t-13);
+  color: var(--ink-2);
+  vertical-align: middle;
+}
+
+.paintCell {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-3);
+}
+
+.paintLink {
+  font-size: var(--t-16);
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.paintLink:hover,
+.paintLink:focus-visible {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}

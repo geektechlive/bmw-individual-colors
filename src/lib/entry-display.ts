@@ -29,3 +29,26 @@ export function entryDate(e: Pick<BmwEntry, 'posted_at' | 'created_at'>): string
 export function modelLabel(e: Pick<BmwEntry, 'body_style' | 'competition'>): string {
   return `${e.body_style}${e.competition ? ' Comp' : ''}`;
 }
+
+/** "2027 M3 Comp": the year and model on a phone row. */
+export function carLabel(e: Pick<BmwEntry, 'model_year' | 'body_style' | 'competition'>): string {
+  return `${e.model_year} ${modelLabel(e)}`;
+}
+
+const DEFAULT_FORUM = 'BimmerPost';
+
+/**
+ * The forum tag next to a username, or null for none. BimmerPost is where nearly every build
+ * comes from, so it is not worth a tag; the stored value "Other" reads as "Other forum".
+ */
+export function forumTagLabel(sourceForum: string | null): string | null {
+  if (!sourceForum || sourceForum === DEFAULT_FORUM) return null;
+  return sourceForum === 'Other' ? 'Other forum' : sourceForum;
+}
+
+/** Line 2 of a phone row: "AWD · 8AT · 826M · Hampton Roads, Virginia", the country when there is no city or state. */
+export function phoneSubline(
+  e: Pick<BmwEntry, 'drivetrain' | 'transmission' | 'wheels' | 'location_city' | 'location_state' | 'location_country'>
+): string {
+  return [e.drivetrain, e.transmission, e.wheels, cityState(e) || e.location_country].filter(Boolean).join(' · ');
+}

@@ -1,6 +1,6 @@
 /**
  * Flag reasons (#31). A flag must say what is wrong so the owner can act on
- * it at /admin; a bare count could only be guessed at. Shared by FlagButton
+ * it at /admin; a bare count could only be guessed at. Shared by FlagDialog
  * (labels) and the flagEntry Server Action (validation). The DB mirrors these
  * rules with CHECK constraints on public.bmwic_flags (schema.sql).
  *

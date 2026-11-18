@@ -8,6 +8,8 @@ Run `npx tsx scripts/post-to-bimmerpost.ts` to publish pending items to the foru
 
 ## [Unreleased]
 
+- **Added:** entries as a Build Sheet table, two-line phone rows, one quiet row action (#69)
+
 - **Added:** paint pages show ties, newest builds first, phone stats above the card (#67)
 
 - **Added:** control borders, 44 px targets, opaque spray-card sticker (#66)
