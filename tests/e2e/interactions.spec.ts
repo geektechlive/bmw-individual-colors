@@ -16,8 +16,8 @@ test.describe('/colors controls', () => {
     await expect(chip(page, 'Most builds')).toHaveAttribute('aria-pressed', 'true');
     const byBuilds = await names(page);
 
-    await chip(page, 'Name').click();
-    await expect(chip(page, 'Name')).toHaveAttribute('aria-pressed', 'true');
+    await chip(page, 'Name, A to Z').click();
+    await expect(chip(page, 'Name, A to Z')).toHaveAttribute('aria-pressed', 'true');
     await expect(chip(page, 'Most builds')).toHaveAttribute('aria-pressed', 'false');
     await expect(page).toHaveURL(/#sort=name$/);
     const byName = await names(page);
@@ -90,7 +90,7 @@ test.describe('/colors controls', () => {
 
 test('/colors#sort=name applies the sort on load', async ({ page }) => {
   await gotoLoaded(page, '/colors#sort=name');
-  await expect(chip(page, 'Name')).toHaveAttribute('aria-pressed', 'true');
+  await expect(chip(page, 'Name, A to Z')).toHaveAttribute('aria-pressed', 'true');
   const byName = await names(page);
   expect(byName).toEqual([...byName].sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' })));
 });

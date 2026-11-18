@@ -7,19 +7,18 @@ import { cssVars } from '../../lib/css-vars';
 import {
   browseColors,
   parseSortHash,
+  parseSortKey,
   sortHash,
+  sortLabel,
+  SORT_SELECT_ORDER,
   type BrowseColor,
   type SortKey,
 } from '../../lib/colors-browse';
 import type { Finish } from '../../lib/paint-finish';
 import styles from './ColorsBrowser.module.css';
 
-const SORT_OPTIONS: ReadonlyArray<{ key: SortKey; label: string }> = [
-  { key: 'builds', label: 'Most builds' },
-  { key: 'color', label: 'By color' },
-  { key: 'rarity', label: 'Rarest' },
-  { key: 'name', label: 'Name' },
-];
+// Desktop chip order; the phone select has its own (SORT_SELECT_ORDER). Labels are shared.
+const SORT_CHIP_ORDER: readonly SortKey[] = ['builds', 'color', 'rarity', 'name'];
 
 const FINISH_OPTIONS: ReadonlyArray<{ key: Finish; label: string }> = [
   { key: 'metallic', label: 'Metallic' },
@@ -93,33 +92,52 @@ export default function ColorsBrowser({ colors }: { colors: BrowseColor[] }) {
             id={searchId}
             type="search"
             className="input"
+            placeholder="Search paints, e.g. Frozen"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             autoComplete="off"
           />
         </div>
-        <div className={styles.chips} role="group" aria-label="Sort">
-          {SORT_OPTIONS.map((o) => (
-            <Chip key={o.key} label={o.label} pressed={sort === o.key} onPress={() => chooseSort(o.key)} />
+        <div className={`${styles.chips} ${styles.sortChips}`} role="group" aria-label="Sort">
+          {SORT_CHIP_ORDER.map((key) => (
+            <Chip key={key} label={sortLabel(key)} pressed={sort === key} onPress={() => chooseSort(key)} />
           ))}
         </div>
-        <div className={styles.chips} role="group" aria-label="Filter by color family">
-          {families.map((f) => (
-            <Chip key={f} label={f} pressed={family === f} onPress={() => setFamily(family === f ? null : f)} />
-          ))}
+        <div className={styles.bar}>
+          <p className={`mono ${styles.count}`} aria-live="polite">
+            {visible.length === colors.length
+              ? `${colors.length} paints`
+              : `${visible.length} of ${colors.length} paints`}
+          </p>
+          <label className={styles.sortSel}>
+            <span className="label">Sort</span>
+            <span>{sortLabel(sort)}</span>
+            <select
+              aria-label="Sort paints"
+              className={styles.sortNative}
+              value={sort}
+              onChange={(e) => chooseSort(parseSortKey(e.target.value))}
+            >
+              {SORT_SELECT_ORDER.map((key) => (
+                <option key={key} value={key}>{sortLabel(key)}</option>
+              ))}
+            </select>
+          </label>
         </div>
-        <div className={styles.chips} role="group" aria-label="Filter by finish">
-          {FINISH_OPTIONS.map((o) => (
-            <Chip key={o.key} label={o.label} pressed={finish === o.key} onPress={() => setFinish(finish === o.key ? null : o.key)} />
-          ))}
+        <div className={styles.filters} role="group" aria-label="Filter by color family and finish">
+          <div className={styles.chips}>
+            {families.map((f) => (
+              <Chip key={f} label={f} pressed={family === f} onPress={() => setFamily(family === f ? null : f)} />
+            ))}
+          </div>
+          <span className={styles.sep} aria-hidden="true" />
+          <div className={styles.chips}>
+            {FINISH_OPTIONS.map((o) => (
+              <Chip key={o.key} label={o.label} pressed={finish === o.key} onPress={() => setFinish(finish === o.key ? null : o.key)} />
+            ))}
+          </div>
         </div>
       </div>
-
-      <p className={`mono ${styles.count}`} aria-live="polite">
-        {visible.length === colors.length
-          ? `${colors.length} paints`
-          : `${visible.length} of ${colors.length} paints`}
-      </p>
 
       {visible.length === 0 ? (
         <div className={styles.empty}>
@@ -137,7 +155,9 @@ export default function ColorsBrowser({ colors }: { colors: BrowseColor[] }) {
                 <span className={styles.meta}>
                   <span className={`paint-name ${styles.name}`}>{c.name}</span>
                   <span className={`mono ${styles.detail}`}>
-                    {c.count} build{c.count === 1 ? '' : 's'} · {c.rarity}
+                    <span>{c.count} build{c.count === 1 ? '' : 's'}</span>
+                    <span aria-hidden="true" className={styles.dot}> · </span>
+                    <span>{c.rarity}</span>
                   </span>
                 </span>
               </IntentLink>

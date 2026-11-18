@@ -77,7 +77,7 @@ const RULE_CONTROL = 'rgb(97, 106, 120)';
 test('input and chip borders use --rule-control', async ({ page }) => {
   await gotoLoaded(page, '/colors');
   const input = page.locator('input.input').first();
-  const chip = page.locator('button.chip[aria-pressed="false"]').first();
+  const chip = page.locator('button.chip[aria-pressed="false"]:visible').first();
   await expect(input).toBeVisible();
   await expect(chip).toBeVisible();
   await expect(input).toHaveCSS('border-top-color', RULE_CONTROL);

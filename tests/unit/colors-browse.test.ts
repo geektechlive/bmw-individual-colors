@@ -1,6 +1,9 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { browseColors, parseSortHash, sortHash, type BrowseColor } from '../../src/lib/colors-browse';
+import {
+  browseColors, parseSortHash, sortHash, sortLabel, parseSortKey, SORT_SELECT_ORDER, SORT_KEYS,
+  type BrowseColor,
+} from '../../src/lib/colors-browse';
 
 const c = (name: string, count: number, hex: string, family = 'Blues', finish: BrowseColor['finish'] = 'solid'): BrowseColor => ({
   name, slug: name.toLowerCase().replace(/ /g, '-'), hex, count, rarity: 'Common', family, finish,
@@ -14,6 +17,30 @@ const SAMPLE = [
 ];
 const NONE = { family: null, finish: null, query: '' };
 const names = (l: readonly BrowseColor[]) => l.map((x) => x.name);
+
+// Unit (e), #70: the phone select and the desktop chips share one set of labels.
+test('sort labels are the approved strings, in the select order', () => {
+  assert.deepEqual(
+    SORT_SELECT_ORDER.map((k) => sortLabel(k)),
+    ['Most builds', 'Rarest', 'By color', 'Name, A to Z'],
+  );
+});
+
+test('the select lists every sort key exactly once', () => {
+  assert.deepEqual([...SORT_SELECT_ORDER].sort(), [...SORT_KEYS].sort());
+});
+
+test('a select value maps back to the same key, and the hash round-trips it', () => {
+  for (const key of SORT_SELECT_ORDER) {
+    assert.equal(parseSortKey(key), key);
+    assert.equal(parseSortHash(sortHash(parseSortKey(key))), key);
+  }
+});
+
+test('an unknown select value falls back to the default sort', () => {
+  assert.equal(parseSortKey('constructor'), 'builds');
+  assert.equal(parseSortKey(''), 'builds');
+});
 
 test('builds sort puts the most builds first, ties by name', () => {
   assert.deepEqual(names(browseColors(SAMPLE, { ...NONE, sort: 'builds' })), ['Alpine White', 'Imola Red', 'Frozen Grey', 'Zandvoort Blue']);

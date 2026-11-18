@@ -16,10 +16,28 @@
   gap: var(--s-2);
 }
 
+.filters {
+  display: grid;
+  gap: var(--s-3);
+}
+
+.sep {
+  display: none;
+}
+
+/* Desktop: the count closes the controls. The select is phone-only. */
+.bar {
+  order: 3;
+}
+
 .count {
   font-size: var(--t-12);
   color: var(--ink-3);
-  margin-bottom: var(--s-4);
+  margin: 0;
+}
+
+.sortSel {
+  display: none;
 }
 
 .grid {
@@ -70,6 +88,11 @@
   color: var(--ink-3);
 }
 
+/* A phrase never breaks in the middle ("Very common"). */
+.detail > span {
+  white-space: nowrap;
+}
+
 .empty {
   display: grid;
   justify-items: start;
@@ -79,4 +102,127 @@
   border: 1px solid var(--rule);
   border-radius: var(--r-lg);
   color: var(--ink-2);
+}
+
+/* Phone: 2-up grid, one sort select beside the count, one sideways-scrolling filter row.
+   719px matches the entries table, so 720px and wider keep the desktop layout. */
+@media (max-width: 719px) {
+  .controls {
+    gap: 0;
+    margin-bottom: 0;
+  }
+
+  .sortChips {
+    display: none;
+  }
+
+  .bar {
+    order: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--s-3);
+    margin: var(--s-3) 0;
+  }
+
+  .count {
+    font-size: var(--t-13);
+    color: var(--ink-2);
+  }
+
+  .sortSel {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--s-2);
+    min-height: 44px;
+    padding: 0 36px 0 var(--s-3);
+    background: var(--panel);
+    border: 1px solid var(--rule-control);
+    border-radius: var(--r);
+    color: var(--ink);
+    font-size: var(--t-14);
+    white-space: nowrap;
+  }
+
+  .sortSel::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    right: 14px;
+    width: 7px;
+    height: 7px;
+    border-right: 2px solid var(--ink-2);
+    border-bottom: 2px solid var(--ink-2);
+    transform: translateY(-70%) rotate(45deg);
+  }
+
+  .sortSel:focus-within {
+    outline: 2px solid var(--focus);
+    outline-offset: 1px;
+  }
+
+  /* The native select sits invisibly over the whole control, so a tap opens the system picker. */
+  .sortNative {
+    position: absolute;
+    inset: -1px;
+    width: calc(100% + 2px);
+    height: calc(100% + 2px);
+    opacity: 0;
+    cursor: pointer;
+  }
+
+  /* Family chips, a separator, finish chips: one row that scrolls sideways. No scrollbar, no
+     fade mask (rule 6). It bleeds to the screen edges so chips scroll under the gutter. */
+  .filters {
+    order: 2;
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: var(--s-2);
+    overflow-x: auto;
+    scrollbar-width: none;
+    margin: 0 calc(var(--gutter) * -1);
+    padding: 0 var(--gutter);
+  }
+
+  .filters::-webkit-scrollbar {
+    display: none;
+  }
+
+  .filters .chips {
+    display: contents;
+  }
+
+  .sep {
+    display: block;
+    flex: none;
+    align-self: stretch;
+    width: 1px;
+    background: var(--rule-strong);
+    margin: var(--s-2) 2px;
+  }
+
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--s-3);
+    margin-top: var(--s-4);
+  }
+
+  .meta {
+    gap: 2px;
+    padding: var(--s-2) 10px 10px;
+  }
+
+  .name {
+    font-size: var(--t-15);
+  }
+
+  .detail {
+    display: grid;
+  }
+
+  .dot {
+    display: none;
+  }
 }

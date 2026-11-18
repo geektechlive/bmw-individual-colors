@@ -8,6 +8,8 @@ Run `npx tsx scripts/post-to-bimmerpost.ts` to publish pending items to the foru
 
 ## [Unreleased]
 
+- **Added:** colors on a phone, 2-up grid and compact controls (#70)
+
 - **Added:** home paint search, every paint on the wall, single-build row (#68)
 
 - **Added:** entries as a Build Sheet table, two-line phone rows, one quiet row action (#69)
