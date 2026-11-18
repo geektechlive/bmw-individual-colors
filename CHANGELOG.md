@@ -8,6 +8,8 @@ Run `npx tsx scripts/post-to-bimmerpost.ts` to publish pending items to the foru
 
 ## [Unreleased]
 
+- **Added:** paint pages show ties, newest builds first, phone stats above the card (#67)
+
 - **Added:** control borders, 44 px targets, opaque spray-card sticker (#66)
 
 - **Fixed:** the entries page has one loading state, so the footer can't jump (#63)

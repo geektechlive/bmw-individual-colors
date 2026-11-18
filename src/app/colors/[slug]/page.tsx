@@ -5,7 +5,7 @@ import { getEntriesByColor, getEntries, resolveColorSlug } from '../../../lib/qu
 import { computeRarityLabel, computeColorCounts } from '../../../lib/analytics';
 import { getColorHex, getColorFamily, COLOR_ALIASES, aliasRedirectSlug, canonicalColorName, colorToSlug } from '../../../lib/colors';
 import { readablePaint, paintSurfaces } from '../../../lib/paint-accent';
-import { rankOf, paintSummary } from '../../../lib/paint-summary';
+import { rankOf, rankNote, paintSummary } from '../../../lib/paint-summary';
 import FlagButton from '../../../components/FlagButton';
 import PaintSwatch from '../../../components/PaintSwatch';
 import type { Metadata } from 'next';
@@ -13,6 +13,12 @@ import { cssVars } from '../../../lib/css-vars';
 import styles from './page.module.css';
 
 export const dynamic = 'force-dynamic';
+
+/** Charts need enough builds to say something; below this the tiles and list are the whole story (#67). */
+const MIN_CHART_BUILDS = 3;
+
+/** The date a build row shows (entryDate): the forum post date when known, else when it was added. */
+const entryDate = (e: { posted_at: string | null; created_at: string }) => e.posted_at ?? e.created_at;
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
@@ -103,6 +109,8 @@ export default async function ColorDetailPage({ params }: { params: Promise<{ sl
   const colorCounts = computeColorCounts(allEntries);
   const rank = rankOf(colorCounts, colorName);
   const summary = paintSummary(colorCounts, colorName);
+  const tieNote = rankNote(colorCounts, colorName);
+  const newestFirst = [...colorEntries].sort((a, b) => Date.parse(entryDate(b)) - Date.parse(entryDate(a)));
 
   const countBy = (pick: (e: (typeof colorEntries)[number]) => string) =>
     colorEntries.reduce<Record<string, number>>((acc, e) => ({ ...acc, [pick(e)]: (acc[pick(e)] ?? 0) + 1 }), {});
@@ -179,6 +187,7 @@ export default async function ColorDetailPage({ params }: { params: Promise<{ sl
         <div>
           <dt className="label">Rank</dt>
           <dd className="num">{rank ? `#${rank} of ${colorCounts.length}` : '–'}</dd>
+          {tieNote && <dd className={styles.tie}>{tieNote}</dd>}
         </div>
         <div>
           <dt className="label">Countries</dt>
@@ -190,7 +199,7 @@ export default async function ColorDetailPage({ params }: { params: Promise<{ sl
         </div>
       </dl>
 
-      {totalBuilds > 0 && (
+      {totalBuilds >= MIN_CHART_BUILDS && (
         <div className={styles.charts}>
           <section aria-labelledby="by-year">
             <h2 id="by-year" className={styles.chartTitle}>Builds by model year</h2>
@@ -225,10 +234,11 @@ export default async function ColorDetailPage({ params }: { params: Promise<{ sl
       ) : (
         <div className={styles.buildList}>
           <h2 className={`label ${styles.buildsTitle}`}>
-            All Builds ({totalBuilds})
+            All builds ({totalBuilds})
+            {totalBuilds >= 2 && <span className={styles.sort}> · newest first</span>}
           </h2>
           <div className={styles.builds}>
-            {colorEntries.map((e) => {
+            {newestFirst.map((e) => {
               const location = [e.location_city, e.location_state, e.location_country].filter(Boolean).join(', ');
               return (
                 <div key={e.id} className={styles.row}>
@@ -256,7 +266,7 @@ export default async function ColorDetailPage({ params }: { params: Promise<{ sl
                     </div>
                   )}
                   <div className={`${styles.rowDate} mono`}>
-                    {new Date(e.posted_at ?? e.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric', timeZone: 'UTC' })}
+                    {new Date(entryDate(e)).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric', timeZone: 'UTC' })}
                   </div>
                   <FlagButton id={e.id} />
                 </div>

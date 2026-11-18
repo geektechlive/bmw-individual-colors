@@ -4,7 +4,7 @@ import { contrastRatio, hexToRgb, composite } from '../../src/lib/contrast';
 import { TOKENS, MIN_TEXT_CONTRAST } from '../../src/lib/design-tokens';
 import { BMW_COLORS } from '../../src/lib/colors';
 import { readablePaint, paintSurfaces, PAINT_WASH_ALPHA } from '../../src/lib/paint-accent';
-import { rankOf, paintSummary } from '../../src/lib/paint-summary';
+import { rankOf, paintSummary, rankNote } from '../../src/lib/paint-summary';
 
 // ---- readable paint accent (#45) --------------------------------------------------------
 
@@ -40,6 +40,7 @@ test('every catalog paint: hero text, paint ink and the pill all reach 4.5:1 on 
     const pairs: [string, string, string][] = [
       ['ink on wash', TOKENS['ink'], wash],
       ['ink-2 on wash', TOKENS['ink-2'], wash],
+      ['ink-3 on wash (phone tile labels)', TOKENS['ink-3'], wash],
       ['paint ink on wash', ink, wash],
       ['ground on paint ink (pill)', TOKENS['bg'], ink],
       ['ink on panel-2 (split)', TOKENS['ink'], TOKENS['panel-2']],
@@ -100,12 +101,42 @@ test('summary, tied for first', () => {
   assert.equal(paintSummary(three, 'A'), '5 builds are registered in A, tied with 2 other paints for the most.');
 });
 
-test('summary, lower down: counts the paints with more', () => {
-  assert.equal(paintSummary(COUNTS, 'Voodoo Blue'), '12 builds are registered in Voodoo Blue. 2 paints have more.');
+test('summary, lower down: names the tied paint, then counts the paints with more', () => {
+  assert.equal(paintSummary(COUNTS, 'Voodoo Blue'), '12 builds are registered in Voodoo Blue, tied with Laguna Seca Blue. 2 paints have more.');
 });
 
-test('summary, a single build', () => {
-  assert.equal(paintSummary(COUNTS, 'Velvet Blue'), '1 build is registered in Velvet Blue. 5 paints have more.');
+test('summary, a sole single build is fewer than any other paint', () => {
+  assert.equal(paintSummary(COUNTS, 'Velvet Blue'), '1 build is registered in Velvet Blue, fewer than any other paint.');
+});
+
+// The spec's 11-row table (docs/design/2026-11-direction-b.md, unit (b)).
+const make = (spec: string) =>
+  spec.split(' ').map((s) => ({ color: s[0], count: Number(s.slice(1)), hex: '' }));
+const LONG = 'A26 B17 C12 D12 E7 F5 G5 H5 I1 J1';
+const TABLE: [string, string, number, string | null, string][] = [
+  [LONG, 'A', 1, null, '26 builds are registered in A, more than any other paint.'],
+  [LONG, 'B', 2, null, '17 builds are registered in B. Only A has more.'],
+  [LONG, 'C', 3, 'Tied with 1 other paint', '12 builds are registered in C, tied with D. 2 paints have more.'],
+  [LONG, 'E', 5, null, '7 builds are registered in E. 4 paints have more.'],
+  [LONG, 'F', 6, 'Tied with 2 other paints', '5 builds are registered in F, tied with 2 other paints. 5 paints have more.'],
+  [LONG, 'I', 9, 'Tied with 1 other paint', '1 build is registered in I, tied with J for the fewest.'],
+  ['A26 B17 C17 D3', 'B', 2, 'Tied with 1 other paint', '17 builds are registered in B, tied with C. Only A has more.'],
+  ['A9 B3 C1', 'C', 3, null, '1 build is registered in C, fewer than any other paint.'],
+  ['A5 B5 D1', 'A', 1, 'Tied with 1 other paint', '5 builds are registered in A, tied with B for the most.'],
+  ['A5 B5 C5 D1', 'A', 1, 'Tied with 2 other paints', '5 builds are registered in A, tied with 2 other paints for the most.'],
+  ['A4 B1 C1 D1', 'B', 2, 'Tied with 2 other paints', '1 build is registered in B, tied with 2 other paints for the fewest.'],
+];
+for (const [spec, color, rank, note, summary] of TABLE) {
+  test(`spec table: ${spec} / ${color}`, () => {
+    const counts = make(spec);
+    assert.equal(rankOf(counts, color), rank);
+    assert.equal(rankNote(counts, color), note);
+    assert.equal(paintSummary(counts, color), summary);
+  });
+}
+
+test('rankNote, unknown paint is null', () => {
+  assert.equal(rankNote(make('A1'), 'Nope'), null);
 });
 
 test('summary, unknown paint is null', () => {

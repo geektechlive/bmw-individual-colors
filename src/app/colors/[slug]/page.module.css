@@ -189,6 +189,7 @@
 
 .tiles > div {
   display: grid;
+  align-content: start;
   gap: var(--s-1);
   padding: var(--s-4) var(--s-5) var(--s-4) 0;
 }
@@ -199,6 +200,15 @@
   font-weight: 800;
   font-stretch: 110%;
   color: var(--ink);
+}
+
+/* Second line under the rank: "Tied with 3 other paints". Beats `.tiles dd` on specificity. */
+.tiles .tie {
+  font-family: var(--font-mono);
+  font-size: var(--t-12);
+  font-weight: 500;
+  font-stretch: 100%;
+  color: var(--ink-2);
 }
 
 /* Opaque pill: ground-colored text on the readable paint (same pair as paint-ink on --bg). */
@@ -306,6 +316,10 @@
   margin-bottom: var(--s-4);
 }
 
+.sort {
+  color: var(--ink-3);
+}
+
 .builds {
   display: flex;
   flex-direction: column;
@@ -360,17 +374,52 @@
 /* ---------- Phone ---------- */
 
 @media (max-width: 720px) {
+  /* Reading order on a phone: text, then the stat tiles, then the spray card, as one paint-washed
+     band (#67). The card is aria-hidden, so moving it changes nothing for focus or reading order. */
+  .page {
+    display: flex;
+    flex-direction: column;
+  }
+
   .hero {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 0;
+    display: contents;
+  }
+
+  .heroText,
+  .tiles,
+  .cove {
+    margin-inline: calc(var(--s-5) * -1);
+    padding-inline: var(--s-5);
+    /* Opaque wash, same value as the desktop hero (PAINT_WASH_ALPHA in the tests). */
+    background-color: color-mix(in srgb, var(--p) 14%, var(--bg));
   }
 
   .heroText {
+    order: 1;
+    padding-top: var(--s-6);
     padding-bottom: var(--s-4);
   }
 
+  .tiles {
+    order: 2;
+    margin-block: 0;
+    border-top: 1px solid color-mix(in srgb, var(--p) 40%, var(--rule));
+    border-bottom: 0;
+  }
+
   .cove {
+    order: 3;
     min-height: 260px;
+    margin-bottom: var(--s-6);
+    border-bottom: 1px solid color-mix(in srgb, var(--p) 40%, var(--rule));
+    /* The floor glow stays, layered over the wash. */
+    background-image: radial-gradient(70% 45% at 50% 100%, color-mix(in srgb, var(--light) 6%, transparent), transparent 70%);
+  }
+
+  .charts,
+  .buildList,
+  .empty {
+    order: 4;
   }
 
   .name {
