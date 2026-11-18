@@ -70,12 +70,50 @@ test.describe('Paint search', () => {
     await expect(page.getByRole('option').nth(1)).toBeVisible();
     // textContent, not innerText: the paint face upper-cases what innerText returns.
     const second = ((await page.getByRole('option').nth(1).textContent()) ?? '').replace(/\d+ builds?$/, '').trim();
-    await searchBox(page).press('ArrowDown');
+    // The first option is already highlighted as the list opens (#88), so one ArrowDown moves to the second.
     await searchBox(page).press('ArrowDown');
     await expect(page.getByRole('option').nth(1)).toHaveAttribute('aria-selected', 'true');
     await searchBox(page).press('Enter');
     await expect(page).toHaveURL(/\/colors\/[a-z0-9-]+$/);
     await expect(page.getByRole('heading', { level: 1 })).toHaveText(second, { ignoreCase: true });
+  });
+
+  test('typing highlights the first option, and it is the one Enter opens (#88)', async ({ page }) => {
+    await gotoLoaded(page, '/');
+    await searchBox(page).fill('bl');
+    const first = page.getByRole('option').first();
+    await expect(first).toHaveAttribute('aria-selected', 'true');
+    const id = await first.getAttribute('id');
+    await expect(searchBox(page)).toHaveAttribute('aria-activedescendant', id!);
+    await expect(page.locator('[role=option][aria-selected=true]')).toHaveCount(1);
+    const name = ((await first.textContent()) ?? '').replace(/\d+ builds?$/, '').trim();
+    await searchBox(page).press('Enter');
+    await expect(page).toHaveURL(/\/colors\/[a-z0-9-]+$/);
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText(name, { ignoreCase: true });
+  });
+
+  test('the highlight comes back when the list reopens after Escape (#88)', async ({ page }) => {
+    await gotoLoaded(page, '/');
+    await searchBox(page).fill('bl');
+    await expect(page.getByRole('option').first()).toHaveAttribute('aria-selected', 'true');
+    await searchBox(page).press('Escape');
+    await expect(page.getByRole('option')).toHaveCount(0);
+    await searchBox(page).press('Enter');
+    await expect(page.getByRole('option').first()).toHaveAttribute('aria-selected', 'true');
+  });
+
+  test('typing a full paint name puts that paint first, so Enter opens it (#88)', async ({ page }) => {
+    await gotoLoaded(page, '/');
+    await searchBox(page).fill('bl');
+    const options = page.getByRole('option');
+    await expect(options.nth(5)).toBeVisible();
+    // A paint that is not first for "bl", chosen from further down the list.
+    const name = ((await options.last().textContent()) ?? '').replace(/\d+ builds?$/, '').trim();
+    await searchBox(page).fill(name);
+    await expect(options.first()).toContainText(name, { ignoreCase: true });
+    await expect(options.first()).toHaveAttribute('aria-selected', 'true');
+    await searchBox(page).press('Enter');
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText(name, { ignoreCase: true });
   });
 
   test('clicking an option opens its paint page', async ({ page }) => {
@@ -111,7 +149,7 @@ test.describe('Paint search', () => {
     await page.getByRole('listbox').click({ position: { x: 4, y: 1 }, force: true });
     await expect(searchBox(page)).toBeFocused();
     await searchBox(page).press('ArrowDown');
-    await expect(page.getByRole('option').first()).toHaveAttribute('aria-selected', 'true');
+    await expect(page.getByRole('option').nth(1)).toHaveAttribute('aria-selected', 'true');
   });
 
   test('arrows are ignored while an IME is composing', async ({ page }) => {
@@ -119,7 +157,9 @@ test.describe('Paint search', () => {
     await searchBox(page).fill('green');
     await expect(page.getByRole('option').first()).toBeVisible();
     await searchBox(page).dispatchEvent('keydown', { key: 'ArrowDown', isComposing: true, bubbles: true });
-    await expect(page.locator('[role=option][aria-selected=true]')).toHaveCount(0);
+    // Still on the first option: the arrow did nothing.
+    await expect(page.getByRole('option').first()).toHaveAttribute('aria-selected', 'true');
+    await expect(page.getByRole('option').nth(1)).toHaveAttribute('aria-selected', 'false');
   });
 
   // Android keyboards (Gboard) report Enter as keyCode 229 / composing right after a typed word.
@@ -141,6 +181,31 @@ test.describe('Paint search', () => {
     await searchBox(page).fill('   ');
     await expect(page.getByRole('option')).toHaveCount(0);
     await expect(searchBox(page)).toHaveAttribute('aria-expanded', 'false');
+  });
+
+  test('the status announces the match count, and a single match reads "1 paint" (#83)', async ({ page }) => {
+    await gotoLoaded(page, '/');
+    const status = page.locator('[role=status]').filter({ has: page.locator('.sr-only') });
+    await searchBox(page).fill('bl');
+    const n = await page.getByRole('option').count();
+    expect(n).toBeGreaterThan(1);
+    await expect(status).toHaveText(`${n} paints`);
+    // The longest option name matches only itself.
+    const name = ((await page.getByRole('option').last().textContent()) ?? '').replace(/\d+ builds?$/, '').trim();
+    await searchBox(page).fill(name);
+    const matches = await page.getByRole('option').count();
+    await expect(status).toHaveText(matches === 1 ? '1 paint' : `${matches} paints`);
+    await searchBox(page).fill('');
+    await expect(status).toHaveText('');
+  });
+
+  test('the count is announced about 300 ms after typing stops, not on every key (#83)', async ({ page }) => {
+    await gotoLoaded(page, '/');
+    const status = page.locator('[role=status]').filter({ has: page.locator('.sr-only') });
+    await searchBox(page).fill('bl');
+    // Read at once, well inside the debounce: nothing is announced yet.
+    expect(await status.textContent()).toBe('');
+    await expect(status).toHaveText(/^\d+ paints?$/);
   });
 
   test('typing "zzzz" shows the no-match panel with a /submit link, and Enter does nothing', async ({ page }) => {

@@ -40,3 +40,15 @@ export function stepActive(current: number, delta: 1 | -1, count: number, isOpen
   if (delta === 1) return (current + 1) % count;
   return current <= 0 ? count - 1 : current - 1;
 }
+
+/**
+ * `items` with the one whose name equals the query (ignoring case and outer spaces) moved to the
+ * front, the rest keeping their order. The home search highlights its first option, so typing a
+ * full paint name must put that paint first (#88). Returns a new array.
+ */
+export function exactFirst<T>(items: readonly T[], getName: (item: T) => string, query: string): T[] {
+  const typed = query.trim().toLowerCase();
+  const at = typed === '' ? -1 : items.findIndex((item) => getName(item).toLowerCase() === typed);
+  if (at <= 0) return [...items];
+  return [items[at], ...items.slice(0, at), ...items.slice(at + 1)];
+}

@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { optionToPick, stepActive, enterIndex, isComposing } from '../../src/components/form/combobox-nav';
+import { optionToPick, stepActive, enterIndex, isComposing, exactFirst } from '../../src/components/form/combobox-nav';
 
 const options = ['Black Blue', 'Blue Ridge', 'Blue Sky'];
 
@@ -58,4 +58,30 @@ test('isComposing is true for an IME composition event or the legacy 229 key cod
   assert.equal(isComposing({ keyCode: 13, nativeEvent: { isComposing: true } }), true);
   assert.equal(isComposing({ keyCode: 229, nativeEvent: { isComposing: false } }), true);
   assert.equal(isComposing({ keyCode: 13, nativeEvent: { isComposing: false } }), false);
+});
+
+const byName = (n: string) => n;
+
+test('exactFirst moves the exact name match to the top and keeps the rest in order (#88)', () => {
+  const names = ['British Racing Green', 'Irish Green', 'Green', 'Green Mist'];
+  assert.deepEqual(exactFirst(names, byName, 'green'), ['Green', 'British Racing Green', 'Irish Green', 'Green Mist']);
+  assert.deepEqual(exactFirst(names, byName, '  IRISH GREEN '), [
+    'Irish Green',
+    'British Racing Green',
+    'Green',
+    'Green Mist',
+  ]);
+});
+
+test('exactFirst leaves the order alone with no exact match, or nothing typed (#88)', () => {
+  const names = ['Black Blue', 'Blue Ridge'];
+  assert.deepEqual(exactFirst(names, byName, 'blue'), names);
+  assert.deepEqual(exactFirst(names, byName, ''), names);
+  assert.deepEqual(exactFirst([], byName, 'blue'), []);
+});
+
+test('exactFirst does not change its input (#88)', () => {
+  const names = ['A Blue', 'Blue'];
+  exactFirst(names, byName, 'blue');
+  assert.deepEqual(names, ['A Blue', 'Blue']);
 });

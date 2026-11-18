@@ -160,6 +160,35 @@ test.describe('Home wall (touch)', () => {
     await strip.tap();
     await expect(page).toHaveURL(new RegExp(`${href}$`));
   });
+
+  // #87: strips are 3-7 px wide, so the read-out is the real tap target.
+  test('tapping a strip turns the read-out into a 44 px "Open <paint>" link that opens that paint', async ({
+    page,
+  }) => {
+    await gotoLoaded(page, '/');
+    const strips = page.locator(STRIPS);
+    await expect(strips.first()).toBeVisible();
+    await expect(page.getByRole('link', { name: /^Open .* →$/ })).toHaveCount(0);
+    const strip = strips.nth(Math.floor((await strips.count()) / 3));
+    const info = await stripInfo(strip);
+    const href = await strip.getAttribute('href');
+
+    const headingTop = () =>
+      page.evaluate(() => document.getElementById('singles-heading')!.getBoundingClientRect().top + window.scrollY);
+    const before = await headingTop();
+    await strip.tap({ force: true });
+    const link = page.getByRole('link', { name: `Open ${info.color} →` });
+    await expect(link).toBeVisible();
+    await expect(link).toHaveAttribute('href', href!);
+    const box = (await link.boundingBox())!;
+    expect(box.height).toBeGreaterThanOrEqual(44);
+    // The read-out's height was reserved, so the tap did not move what is below it.
+    expect(Math.abs((await headingTop()) - before)).toBeLessThanOrEqual(1);
+    await expect(page).toHaveURL(/\/$/);
+
+    await link.tap();
+    await expect(page).toHaveURL(new RegExp(`${href}$`));
+  });
 });
 
 // ---------- Map ----------

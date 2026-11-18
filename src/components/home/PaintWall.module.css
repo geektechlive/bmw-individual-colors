@@ -228,3 +228,34 @@
     font-size: var(--t-12);
   }
 }
+
+/* The read-out names the hovered or tapped paint and links to it (#87). On a phone the strips
+   are 3-7 px wide, so this link is the real tap target: at least 44 px tall. */
+.open {
+  margin-left: var(--s-3);
+  color: var(--accent-ink);
+  text-decoration: none;
+}
+
+.open:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+@media (max-width: 720px) {
+  .open {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    margin-left: 0;
+  }
+
+  /* Reserve the tapped state's height (the name line plus the 44 px link) so tapping a strip
+     doesn't push the page down. */
+  .read > span:first-child {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: calc(44px + 1.6em);
+  }
+}

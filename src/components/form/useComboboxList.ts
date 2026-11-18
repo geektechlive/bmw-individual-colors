@@ -2,13 +2,19 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { KeyboardEvent } from 'react';
-import { isComposing, stepActive } from './combobox-nav';
+import { exactFirst, isComposing, stepActive } from './combobox-nav';
 
 interface Options<T> {
   items: readonly T[];
   /** Must be a stable function (declare it at module level) so the filter memoises. */
   getName: (item: T) => string;
   query: string;
+  /**
+   * Highlight the first option whenever the list opens, and move an exact name match to the
+   * top so it is the one Enter opens (the home search, #88). Off for the submit form, where
+   * Enter must keep the typed text unless an option was chosen.
+   */
+  highlightFirst?: boolean;
 }
 
 /**
@@ -17,15 +23,16 @@ interface Options<T> {
  * Enter and what a pick does differ (the submit form fills a text field, the home search
  * opens a page), so each component keeps its own Enter handling.
  */
-export function useComboboxList<T>({ items, getName, query }: Options<T>) {
+export function useComboboxList<T>({ items, getName, query, highlightFirst = false }: Options<T>) {
   const [open, setOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
   const listRef = useRef<HTMLDivElement>(null);
 
   const matches = useMemo(() => {
     const needle = query.toLowerCase();
-    return items.filter((item) => getName(item).toLowerCase().includes(needle));
-  }, [items, getName, query]);
+    const found = items.filter((item) => getName(item).toLowerCase().includes(needle));
+    return highlightFirst ? exactFirst(found, getName, query) : found;
+  }, [items, getName, query, highlightFirst]);
   const isOpen = open && matches.length > 0;
 
   // Keep the keyboard-highlighted option in view inside the scrolling listbox.
@@ -39,11 +46,11 @@ export function useComboboxList<T>({ items, getName, query }: Options<T>) {
     setActiveIndex(-1);
   }, []);
 
-  /** Open the list for new typing, with nothing highlighted. */
+  /** Open the list for new typing: nothing highlighted, or the first option with `highlightFirst`. */
   const openFresh = useCallback(() => {
     setOpen(true);
-    setActiveIndex(-1);
-  }, []);
+    setActiveIndex(highlightFirst ? 0 : -1);
+  }, [highlightFirst]);
 
   /** Handles ArrowUp, ArrowDown and Escape. Returns true when the key was used. */
   function handleNavKey(e: KeyboardEvent<HTMLInputElement>): boolean {

@@ -1,12 +1,13 @@
 'use client';
 
-import { useId, useState } from 'react';
+import { useEffect, useId, useState } from 'react';
 import type { FocusEvent, KeyboardEvent } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import PaintSwatch from '../PaintSwatch';
 import { enterIndex } from '../form/combobox-nav';
 import { useComboboxList } from '../form/useComboboxList';
+import { matchCountText } from '../../lib/paint-count';
 import styles from './PaintLookup.module.css';
 
 /** Just what the lookup needs; the home page builds this from the counts it already has. */
@@ -21,6 +22,9 @@ interface Props {
   /** Already sorted by build count, most first: that is the order of the list. */
   paints: LookupPaint[];
 }
+
+/** How long typing must pause before the match count is announced. */
+const COUNT_ANNOUNCE_MS = 300;
 
 const nameOf = (p: LookupPaint) => p.color;
 const buildsText = (n: number) => `${n} build${n === 1 ? '' : 's'}`;
@@ -45,9 +49,17 @@ export default function PaintLookup({ paints }: Props) {
 
   const [query, setQuery] = useState('');
   const typed = query.trim();
-  const { matches, isOpen, open, setOpen, activeIndex, listRef, close, openFresh, handleNavKey } =
-    useComboboxList({ items: paints, getName: nameOf, query: typed });
+  const { matches, isOpen, open, activeIndex, listRef, close, openFresh, handleNavKey } =
+    useComboboxList({ items: paints, getName: nameOf, query: typed, highlightFirst: true });
   const showNone = open && typed !== '' && matches.length === 0;
+
+  // The match count goes to screen readers once typing pauses (#83), not on every key.
+  const countText = isOpen ? matchCountText(matches.length) : '';
+  const [spoken, setSpoken] = useState('');
+  useEffect(() => {
+    const timer = setTimeout(() => setSpoken(countText), COUNT_ANNOUNCE_MS);
+    return () => clearTimeout(timer);
+  }, [countText]);
 
   function go(paint: LookupPaint) {
     close();
@@ -60,7 +72,7 @@ export default function PaintLookup({ paints }: Props) {
     e.preventDefault();
     // With the list closed (after Escape, or on refocus) Enter reopens it; it never navigates.
     if (!isOpen) {
-      if (typed) setOpen(true);
+      if (typed) openFresh();
       return;
     }
     const at = enterIndex(activeIndex, typed, matches.map(nameOf));
@@ -103,11 +115,12 @@ export default function PaintLookup({ paints }: Props) {
             if (e.target.value.trim()) openFresh();
             else close();
           }}
+          // Reopening starts on the first option again; an open list keeps the highlight it has.
           onFocus={() => {
-            if (typed) setOpen(true);
+            if (typed && !open) openFresh();
           }}
           onClick={() => {
-            if (typed) setOpen(true);
+            if (typed && !open) openFresh();
           }}
           onKeyDown={handleKeyDown}
         />
@@ -151,6 +164,7 @@ export default function PaintLookup({ paints }: Props) {
         </div>
 
         <div role="status">
+          <span className="sr-only">{isOpen ? spoken : ''}</span>
           {showNone && (
             <div className={styles.none} onMouseDown={(e) => e.preventDefault()}>
               No paint called “{typed}” is registered yet. Check the spelling, or{' '}

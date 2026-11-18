@@ -87,6 +87,9 @@ export default function RootLayout({
           src="https://challenges.cloudflare.com/turnstile/v0/api.js"
           strategy="afterInteractive"
         />
+        <a href="#main-content" className={styles.skip}>
+          Skip to main content
+        </a>
         <div className={`stripe ${styles.topStripe}`} aria-hidden="true">
           <span />
           <span />
@@ -110,7 +113,7 @@ export default function RootLayout({
           </div>
         </header>
 
-        <div className={styles.main}>{children}</div>
+        <div id="main-content" tabIndex={-1} className={styles.main}>{children}</div>
 
         <footer className={styles.footer}>
           BMW M Individual Colors Registry. A community project, not affiliated with BMW AG.

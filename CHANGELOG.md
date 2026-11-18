@@ -8,6 +8,14 @@ Run `npx tsx scripts/post-to-bimmerpost.ts` to publish pending items to the foru
 
 ## [Unreleased]
 
+- **Fixed:** home search announces how many paints match (#83)
+
+- **Fixed:** home search highlights the first match as the list opens (#88)
+
+- **Fixed:** wall read-out is a 44 px link to the tapped paint (#87)
+
+- **Fixed:** skip link and one tab stop for the paint wall (#82)
+
 - **Added:** colors on a phone, 2-up grid and compact controls (#70)
 
 - **Added:** home paint search, every paint on the wall, single-build row (#68)

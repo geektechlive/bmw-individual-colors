@@ -80,3 +80,30 @@
   .logoFull { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
   .logoShort { display: inline; }
 }
+
+/* Skip link (#82, WCAG 2.4.1): hidden until it takes keyboard focus, then above the header. */
+.skip {
+  position: absolute;
+  left: var(--s-2);
+  top: var(--s-2);
+  z-index: calc(var(--z-stripe) + 1);
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 var(--s-4);
+  background: var(--panel);
+  color: var(--ink);
+  border: 2px solid var(--focus);
+  border-radius: var(--r);
+  font-weight: 700;
+  text-decoration: none;
+  transform: translateY(-200%);
+}
+
+.skip:focus {
+  transform: none;
+}
+
+.main:focus {
+  outline: none;
+}
