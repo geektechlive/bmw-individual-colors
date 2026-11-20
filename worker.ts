@@ -14,6 +14,7 @@ import {
   type EdgeCacheStore,
 } from './src/lib/edge-cache';
 import { handleOgImage, type OgStore } from './src/lib/og-cache';
+import { createPageKv, type PageKv } from './src/lib/page-kv';
 import { isMissingStaticAsset } from './src/lib/blocked-paths';
 import { legacySlugRedirect } from './src/lib/legacy-slugs';
 import { requestLogLine } from './src/lib/request-log';
@@ -37,6 +38,8 @@ interface ExecutionContext {
 }
 
 let getVersion: (() => Promise<string | null>) | null = null;
+// One per isolate: holds the KV write backoff state (src/lib/page-kv.ts).
+let pageKv: PageKv | null = null;
 
 async function respond(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
   if (isMissingStaticAsset(new URL(request.url).pathname)) {
@@ -57,6 +60,9 @@ async function respond(request: Request, env: Env, ctx: ExecutionContext): Promi
   const tracker = renderFailureTracker(ctx);
   const origin = (req: Request) => openNextWorker.fetch(req, env, tracker.ctx);
 
+  // Global page cache in the same free KV namespace as the cards (ADR 0020).
+  pageKv ??= env.OG_CACHE ? createPageKv(env.OG_CACHE) : null;
+
   const edgeCached = (req: Request) =>
     handleWithEdgeCache(req, {
       cache,
@@ -65,6 +71,7 @@ async function respond(request: Request, env: Env, ctx: ExecutionContext): Promi
       origin,
       waitUntil: (promise) => ctx.waitUntil(promise),
       renderFailed: tracker.failed,
+      kv: pageKv ?? undefined,
     });
 
   // OG cards: global KV first; misses render through the per-colo page cache,

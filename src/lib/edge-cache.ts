@@ -13,8 +13,13 @@
  * renders fresh and is cached. The Cache API is per data center, so "renders
  * once" means once per data center that serves the page.
  *
+ * Global layer (ADR 0020): on a colo miss, deps.kv (src/lib/page-kv.ts) is
+ * consulted before rendering, and renders are written to both. KV is optional
+ * and fails open.
+ *
  * Pure: no Next.js or Workers-runtime imports, so it is unit-testable in Node.
  */
+import { isKvEligiblePath, pageKvKey, sha256Hex, type PageKv } from './page-kv';
 
 /** Set by mutating server actions; requests carrying it skip the edge cache. */
 export const FRESH_COOKIE = 'mc_fresh';
@@ -44,7 +49,7 @@ const RSC_VARY_HEADERS = [
 ];
 const BROWSER_CACHE_CONTROL = 'private, no-cache, no-store, max-age=0, must-revalidate';
 
-type CacheStatus = 'HIT' | 'MISS' | 'BYPASS';
+type CacheStatus = 'HIT' | 'HIT-KV' | 'MISS' | 'BYPASS';
 
 export interface EdgeCacheStore {
   match(key: Request): Promise<Response | undefined>;
@@ -66,6 +71,8 @@ export interface EdgeCacheDeps {
    * because the status line is committed before the render finishes.
    */
   renderFailed?: () => boolean;
+  /** Global page cache (free KV). Absent means colo cache only. */
+  kv?: PageKv;
 }
 
 const RENDER_FAILED = Symbol.for('mcolors.edge-cache.render-failed');
@@ -115,6 +122,11 @@ export function hasFreshCookie(request: Request): boolean {
   return cookie.split(';').some((part) => part.trim().startsWith(`${FRESH_COOKIE}=`));
 }
 
+/** Any RSC router header or the `_rsc` cache-buster marks a client-navigation (flight data) request. */
+function isRscRequest(request: Request): boolean {
+  return RSC_VARY_HEADERS.some((name) => request.headers.has(name)) || new URL(request.url).searchParams.has('_rsc');
+}
+
 export function isCacheableRequest(request: Request): boolean {
   if (request.method !== 'GET' && request.method !== 'HEAD') return false;
   if (request.headers.has('next-action')) return false;
@@ -126,11 +138,6 @@ export function isCacheableRequest(request: Request): boolean {
     if (!IGNORED_QUERY_PARAMS.has(name) && !name.startsWith('utm_')) return false;
   }
   return true;
-}
-
-async function sha256Hex(text: string): Promise<string> {
-  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
-  return Array.from(new Uint8Array(digest), (b) => b.toString(16).padStart(2, '0')).join('');
 }
 
 export interface KeyVersion {
@@ -199,13 +206,30 @@ export async function handleWithEdgeCache(request: Request, deps: EdgeCacheDeps)
     return withStatus(served, 'HIT', BROWSER_CACHE_CONTROL);
   }
 
+  // KV is for full HTML pages only. RSC keys hash the router-state header, which varies with the
+  // page the visitor came from: many distinct keys (KV writes) that rarely hit globally (ADR 0020).
+  const kvKey =
+    deps.kv && !isRscRequest(request) && isKvEligiblePath(new URL(request.url).pathname)
+      ? await pageKvKey(key, { build: deps.buildId, data })
+      : null;
+  if (deps.kv && kvKey) {
+    const fromKv = await deps.kv.read(kvKey);
+    if (fromKv) {
+      const stored = () => new Response(fromKv.body, { status: fromKv.status, headers: fromKv.headers });
+      // Next time this colo answers locally.
+      deps.waitUntil(deps.cache.put(key, toStoredResponse(stored())).catch(() => undefined));
+      const served = request.method === 'HEAD' ? new Response(null, stored()) : stored();
+      return withStatus(served, 'HIT-KV', BROWSER_CACHE_CONTROL);
+    }
+  }
+
   // A HEAD miss renders as GET so the result can be stored; otherwise uptime
   // monitors (HEAD every few minutes) re-render the page forever (#22).
   const isHead = request.method === 'HEAD';
   const renderRequest = isHead ? new Request(request, { method: 'GET' }) : request;
   const response = await deps.origin(renderRequest);
   if (isStorable(renderRequest, response)) {
-    deps.waitUntil(storeWhenComplete(key, response.clone(), deps));
+    deps.waitUntil(storeWhenComplete(key, kvKey, response.clone(), deps));
   }
   return withStatus(isHead ? new Response(null, response) : response, 'MISS');
 }
@@ -216,11 +240,19 @@ export interface VersionFallback {
 }
 
 /** Buffers the full body first, so a failure flagged late in the render still blocks the store. */
-async function storeWhenComplete(key: Request, copy: Response, deps: EdgeCacheDeps): Promise<void> {
+async function storeWhenComplete(
+  key: Request,
+  kvKey: string | null,
+  copy: Response,
+  deps: EdgeCacheDeps
+): Promise<void> {
   const body = await copy.arrayBuffer();
   if (deps.renderFailed?.()) return;
   const complete = new Response(body, { status: copy.status, statusText: copy.statusText, headers: copy.headers });
-  await deps.cache.put(key, toStoredResponse(complete));
+  const stored = toStoredResponse(complete);
+  // The KV write never throws; only 200s are written (page-kv.ts).
+  const kvWrite = deps.kv && kvKey ? deps.kv.write(kvKey, stored.status, stored.headers, body) : Promise.resolve();
+  await Promise.all([deps.cache.put(key, stored), kvWrite]);
 }
 
 /**

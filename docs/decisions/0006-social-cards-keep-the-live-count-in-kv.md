@@ -55,3 +55,7 @@ while the card design is the same, and it means a card changed on a preview woul
 production's cache. So any change to a card's layout or content bumps `OG_DESIGN_VERSION` in the
 same commit; the preview then writes new keys and production keeps reading the old ones until
 the change lands.
+
+## Addendum, 2026-11-20: the namespace is shared with the page cache
+
+The volume note above ("a few KV writes a week") no longer holds on its own. [ADR 0020](0020-global-kv-page-cache.md) stores rendered pages in the same namespace under `page:` keys, and both share the 1,000 writes a day free limit. Card writes can now fail on a day the page cache has used the quota. Card keys are unchanged.

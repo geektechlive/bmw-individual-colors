@@ -8,6 +8,8 @@ Run `npx tsx scripts/post-to-bimmerpost.ts` to publish pending items to the foru
 
 ## [Unreleased]
 
+- **Improved:** first visits reuse a page rendered anywhere, not just at their data center (#21)
+
 - **Fixed:** Fire Orange builds all show on the Fire Orange III page (#91)
 
 - **Fixed:** submit and edit forms work after an in-app link (#90)
