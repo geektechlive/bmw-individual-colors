@@ -62,7 +62,7 @@ test.describe('Report dialog while sending', () => {
 
 test.describe('Paint page forum tag', () => {
   test('no row shows "[BimmerPost]"', async ({ page }) => {
-    await gotoLoaded(page, '/colors/san-marino-blue');
+    await gotoLoaded(page, '/colors/san-marino-blue-metallic');
     await expect(page.locator('main')).not.toContainText('BimmerPost');
   });
 

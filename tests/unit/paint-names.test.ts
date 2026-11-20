@@ -14,7 +14,7 @@ test('cleanPaintName strips zero-width, bidi and control characters, then trims 
 
 test('snapColorName snaps hyphen, underscore and invisible look-alikes to the catalog (#55)', () => {
   for (const raw of ['Twilight-Purple', 'twilight_purple', 'Twilight​ Purple', 'TWILIGHT  PURPLE', 'Twilight Purple!']) {
-    assert.equal(snapColorName(raw), 'Twilight Purple', raw);
+    assert.equal(snapColorName(raw), 'Twilight Purple Pearl effect', raw);
   }
   assert.equal(snapColorName('Enzian-Blue'), 'Gentian Blue');
 });
@@ -24,8 +24,8 @@ test('an unknown paint keeps its own text, minus invisible characters (#55)', ()
 });
 
 test('canonicalColorName also folds look-alikes already stored (#55)', () => {
-  assert.equal(canonicalColorName('Twilight-Purple'), 'Twilight Purple');
-  assert.equal(canonicalColorName('Twilight​ Purple'), 'Twilight Purple');
+  assert.equal(canonicalColorName('Twilight-Purple'), 'Twilight Purple Pearl effect');
+  assert.equal(canonicalColorName('Twilight​ Purple'), 'Twilight Purple Pearl effect');
 });
 
 test('names with no ASCII letters or digits get a stable, non-empty, distinct slug (#55)', () => {
@@ -64,8 +64,8 @@ test('no two catalog or alias names share a slug unless they are the same paint'
 });
 
 test('pickNameForSlug prefers the catalog name over a look-alike (#55)', () => {
-  assert.equal(pickNameForSlug('twilight-purple', ['Twilight-Purple', 'Twilight Purple']), 'Twilight Purple');
-  assert.equal(pickNameForSlug('twilight-purple', ['Twilight-Purple']), 'Twilight Purple');
+  assert.equal(pickNameForSlug('twilight-purple-pearl-effect', ['Twilight-Purple', 'Twilight Purple']), 'Twilight Purple Pearl effect');
+  assert.equal(pickNameForSlug('twilight-purple-pearl-effect', ['Twilight-Purple']), 'Twilight Purple Pearl effect');
   assert.equal(pickNameForSlug('gentian-blue', []), 'Gentian Blue');
   assert.equal(pickNameForSlug('nothing-here', ['Other']), null);
   assert.equal(pickNameForSlug('constructor', ['Other']), null);
@@ -77,7 +77,7 @@ test('mergePaintNames gives every slug exactly one display name, independent of 
   const backward = mergePaintNames([...rows].reverse());
   assert.equal(forward.get('Foo-Bar'), 'Foo Bar');
   assert.equal(forward.get('Foo Bar'), 'Foo Bar');
-  assert.equal(forward.get('Twilight-Purple'), 'Twilight Purple');
+  assert.equal(forward.get('Twilight-Purple'), 'Twilight Purple Pearl effect');
   assert.equal(forward.get('Zed'), 'Zed');
   assert.deepEqual([...forward.entries()].sort(), [...backward.entries()].sort());
   const display = new Set(forward.values());

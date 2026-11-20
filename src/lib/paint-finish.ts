@@ -9,21 +9,11 @@
 export const FINISHES = ['solid', 'metallic', 'pearl', 'frozen'] as const;
 export type Finish = (typeof FINISHES)[number];
 
+// Since #93 paint names follow BMW, and most BMW names already say Metallic or Pearl, so only
+// names that don't need an entry (the unverified ones the owner is sure are metallic).
 export const PAINT_FINISH: Readonly<Record<string, Finish>> = {
-  'Daytona Violet': 'metallic',
-  'Isle of Man Green': 'metallic',
-  'Jerez Black': 'metallic',
-  'Marina Bay Blue': 'metallic',
-  'Portimao Blue': 'metallic',
-  'San Marino Blue': 'metallic',
-  'Sepang Bronze': 'metallic',
   'Snapper Rocks Blue': 'metallic',
   'Sunset Orange': 'metallic',
-  'Tanzanite Blue': 'metallic',
-  'Tanzanite Blue II': 'metallic',
-  'Twilight Purple': 'metallic',
-  'Velvet Blue': 'metallic',
-  'Wildberry': 'metallic',
 };
 
 const normalize = (name: string) => name.trim().replace(/\s+/g, ' ').toLowerCase();

@@ -1,7 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { BMW_COLORS, COLOR_ALIASES, colorToSlug, slugToColor } from '../../src/lib/colors';
+import { readFileSync } from 'node:fs';
 import { LEGACY_SLUGS, legacySlugRedirect, legacySlugTarget, oldColorToSlug } from '../../src/lib/legacy-slugs';
+import { PAINT_SLUG_REDIRECTS } from '../../src/lib/paint-redirects';
 
 // ---- #75 accents are transliterated in slugs ---------------------------------------------
 
@@ -78,4 +80,49 @@ test('other URLs and methods are not redirected (#75)', () => {
   assert.equal(legacySlugRedirect(new Request(url('colors/s-o-paulo-yellow/extra'))), null);
   assert.equal(legacySlugRedirect(new Request(url('entries?x=s-o-paulo-yellow'))), null);
   assert.equal(legacySlugRedirect(new Request(url('colors/s-o-paulo-yellow'), { method: 'POST' })), null);
+});
+
+// ---- alias slugs answer in the Worker too (#89, #93) ------------------------------------------
+
+test('an old name URL (page and OG card) redirects before the Next server loads (#89)', () => {
+  assert.equal(
+    legacySlugRedirect(new Request(url('colors/twilight-purple?a=1'))),
+    'https://mcolors.example/colors/twilight-purple-pearl-effect?a=1'
+  );
+  assert.equal(
+    legacySlugRedirect(new Request(url('colors/ENZIAN-BLUE/opengraph-image'))),
+    'https://mcolors.example/colors/gentian-blue/opengraph-image'
+  );
+  assert.equal(
+    legacySlugRedirect(new Request(url('colors/santorini-blue'), { method: 'HEAD' })),
+    'https://mcolors.example/colors/santorin-blue-ii'
+  );
+});
+
+test('the Worker redirect table is exactly the alias table, slug for slug (#89)', () => {
+  const derived = Object.fromEntries(Object.entries(COLOR_ALIASES).map(([a, c]) => [colorToSlug(a), colorToSlug(c)]));
+  assert.deepEqual({ ...PAINT_SLUG_REDIRECTS }, derived);
+});
+
+test('no redirect target is itself redirected, and every target is a listed color (#89)', () => {
+  const listed = new Set(Object.keys(BMW_COLORS).map(colorToSlug));
+  for (const [from, to] of Object.entries(PAINT_SLUG_REDIRECTS)) {
+    assert.equal(Object.hasOwn(PAINT_SLUG_REDIRECTS, to), false, `${from} -> ${to}`);
+    assert.equal(Object.hasOwn(LEGACY_SLUGS, to), false, `${from} -> ${to}`);
+    assert.ok(listed.has(to), `${from} -> ${to}`);
+  }
+});
+
+test('current paint pages are never redirected (#89)', () => {
+  for (const name of Object.keys(BMW_COLORS)) {
+    assert.equal(legacySlugRedirect(new Request(url(`colors/${colorToSlug(name)}`))), null, name);
+  }
+});
+
+test('legacy-slugs.ts imports only the generated redirect table, never the catalog (#89)', () => {
+  const source = readFileSync(new URL('../../src/lib/legacy-slugs.ts', import.meta.url), 'utf8');
+  const imports = [...source.matchAll(/^import .* from '(.+)';$/gm)].map((m) => m[1]);
+  assert.deepEqual(imports, ['./paint-redirects']);
+  const table = readFileSync(new URL('../../src/lib/paint-redirects.ts', import.meta.url), 'utf8');
+  assert.equal(/^import /m.test(table), false);
 });

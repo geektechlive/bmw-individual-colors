@@ -10,6 +10,7 @@ import { updateErrorMessage, validateEntryInput, type EntryInput } from '../lib/
 import { FRESH_COOKIE, FRESH_COOKIE_MAX_AGE_S } from '../lib/edge-cache';
 import { endAdminSession, flagReporterHash, hasAdminSession, isAdminLoginConfigured, startAdminSession } from '../lib/admin-auth';
 import { moderate } from '../lib/moderation';
+import { paintNameSpellings } from '../lib/colors';
 import { submitFlag, type FlagResult } from '../lib/flagging';
 import { logRejection, validationReason } from '../lib/submit-log';
 
@@ -149,7 +150,8 @@ export async function submitEntry(
     .from('bmwic_entries')
     .select('id')
     .eq('forum_username', value.forum_username)
-    .eq('ext_color', value.ext_color)
+    // Rows saved before a paint was renamed keep the old name (ADR 0019), so match every spelling.
+    .in('ext_color', paintNameSpellings(value.ext_color))
     .eq('model_year', value.model_year)
     .eq('body_style', value.body_style)
     .eq('drivetrain', value.drivetrain)

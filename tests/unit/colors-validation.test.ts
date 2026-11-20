@@ -48,9 +48,9 @@ test('alias names are not offered as separate colors (#35)', () => {
   }
 });
 
-test('the duplicate "Eridan Blue Metallic" key is gone; "Eridan Blue" remains (#35)', () => {
+test('the duplicate "Eridan Blue Metallic" key is gone (#35); neither Eridan name is a BMW name, so neither is listed (#93)', () => {
   assert.equal('Eridan Blue Metallic' in BMW_COLORS, false);
-  assert.equal(BMW_COLORS['Eridan Blue'] !== undefined, true);
+  assert.equal('Eridan Blue' in BMW_COLORS, false);
 });
 
 test('unknown colors are still accepted as typed (custom Individual colors)', () => {
@@ -62,8 +62,12 @@ test('unknown colors are still accepted as typed (custom Individual colors)', ()
 
 test('alias color slugs point to their canonical color page (#37)', () => {
   assert.equal(aliasRedirectSlug('enzian-blue'), 'gentian-blue');
-  assert.equal(aliasRedirectSlug('verde-british-racing'), 'british-racing-green');
-  assert.equal(aliasRedirectSlug('daytona-violet-metallic'), 'daytona-violet');
+  // Verde British Racing (P6E) is its own BMW paint, so it is no longer an alias of British Racing Green (#93).
+  assert.equal(aliasRedirectSlug('verde-british-racing'), null);
+  assert.equal(aliasRedirectSlug('twilight-purple'), 'twilight-purple-pearl-effect');
+  // Daytona Violet is now the alias: BMW's name is "Daytona Violet Metallic" (#93).
+  assert.equal(aliasRedirectSlug('daytona-violet'), 'daytona-violet-metallic');
+  assert.equal(aliasRedirectSlug('daytona-violet-metallic'), null);
   assert.equal(aliasRedirectSlug('ENZIAN-BLUE'), 'gentian-blue');
 });
 

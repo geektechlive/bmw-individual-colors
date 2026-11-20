@@ -42,7 +42,7 @@ test('axe: /entries with the row menu open at 1440 is clean', async ({ page }) =
 
 test('axe: a paint page with the row menu open is clean', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
-  await gotoLoaded(page, '/colors/san-marino-blue');
+  await gotoLoaded(page, '/colors/san-marino-blue-metallic');
   await page.locator(ACTION).first().click();
   await expect(page.getByRole('menu')).toBeVisible();
   expect(await violations(page)).toEqual([]);

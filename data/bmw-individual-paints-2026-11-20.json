@@ -1,0 +1,2051 @@
+{
+ "source": "https://api.visualizer.aws.bmw.cloud/v1/colors/query?q=&numRows=1000&excludeTwoTone=true",
+ "citedPage": "https://individual.bmw-m.com/en-US/colors",
+ "fetched": "2026-11-20",
+ "note": "paints = BMW Individual paint list; archived = paints BMW has dropped, one archived visualizer page each; archivedWithoutPage = codes with no archived page found.",
+ "paints": [
+  {
+   "code": "071",
+   "name": "Agave",
+   "effect": "uni",
+   "hex": "#203529",
+   "mainColor": "green",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "138",
+   "name": "Cinabar",
+   "effect": "uni",
+   "hex": "#a2171a",
+   "mainColor": "red",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "266",
+   "name": "Laguna Green Metallic",
+   "effect": "metallic",
+   "hex": "#046b6c",
+   "mainColor": "green",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "275",
+   "name": "Boston Green Metallic",
+   "effect": "metallic",
+   "hex": "#004847",
+   "mainColor": "green",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "276",
+   "name": "Avus Blue Metallic",
+   "effect": "metallic",
+   "hex": "#183665",
+   "mainColor": "blue",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "283",
+   "name": "Daytona Violet Metallic",
+   "effect": "metallic",
+   "hex": "#43274f",
+   "mainColor": "violet",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "287",
+   "name": "Mauritius Blue Metallic",
+   "effect": "metallic",
+   "hex": "#002e56",
+   "mainColor": "blue",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "299",
+   "name": "Techno Violet Metallic",
+   "effect": "metallic",
+   "hex": "#2a1a47",
+   "mainColor": "violet",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "303",
+   "name": "Cosmos Black Metallic",
+   "effect": "metallic",
+   "hex": "#272939",
+   "mainColor": "black",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "312",
+   "name": "British Racing Green",
+   "effect": "uni",
+   "hex": "#22362a",
+   "mainColor": "green",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "314",
+   "name": "Light Red",
+   "effect": "uni",
+   "hex": "#e73615",
+   "mainColor": "red",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "327",
+   "name": "Santorin Blue II",
+   "effect": "uni",
+   "hex": "#3b83c0",
+   "mainColor": "blue",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "337",
+   "name": "Dakar Yellow II",
+   "effect": "uni",
+   "hex": "#f5e6ac",
+   "mainColor": "yellow",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "359",
+   "name": "Mora Metallic",
+   "effect": "metallic",
+   "hex": "#381d37",
+   "mainColor": "violet",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "375",
+   "name": "Fire Red II",
+   "effect": "uni",
+   "hex": "#e63f11",
+   "mainColor": "red",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "379",
+   "name": "Velvet Blue Metallic",
+   "effect": "metallic",
+   "hex": "#2f2381",
+   "mainColor": "blue",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "381",
+   "name": "Le Mans Blue Metallic",
+   "effect": "metallic",
+   "hex": "#073584",
+   "mainColor": "blue",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "405",
+   "name": "Imola Red",
+   "effect": "uni",
+   "hex": "#ca2a2e",
+   "mainColor": "red",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "406",
+   "name": "Orinoco Pearl Effect",
+   "effect": "metallic",
+   "hex": "#374048",
+   "mainColor": "blue",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "416",
+   "name": "M Carbon Black Metallic",
+   "effect": "metallic",
+   "hex": "#0f192b",
+   "mainColor": "black",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "430",
+   "name": "Oxford Green",
+   "effect": "metallic",
+   "hex": "#102f32",
+   "mainColor": "green",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "440",
+   "name": "Stratus Grey",
+   "effect": "metallic",
+   "hex": "#767b7f",
+   "mainColor": "grey",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "448",
+   "name": "Laguna Seca Blue",
+   "effect": "uni",
+   "hex": "#03597d",
+   "mainColor": "blue",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "453",
+   "name": "Night Blue Metallic",
+   "effect": "metallic",
+   "hex": "#092342",
+   "mainColor": "blue",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "621",
+   "name": "Brass Metallic",
+   "effect": "metallic",
+   "hex": "#797563",
+   "mainColor": "green",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "A15",
+   "name": "Maldives Blue II Metallic",
+   "effect": "metallic",
+   "hex": "#446c88",
+   "mainColor": "blue",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "A30",
+   "name": "Interlagos Blue Metallic",
+   "effect": "metallic",
+   "hex": "#004693",
+   "mainColor": "blue",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "A31",
+   "name": "Indianapolis Red",
+   "effect": "metallic",
+   "hex": "#7b2b37",
+   "mainColor": "red",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "A32",
+   "name": "Sepang Bronze",
+   "effect": "metallic",
+   "hex": "#766a62",
+   "mainColor": "brown",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "A39",
+   "name": "Barbera Red",
+   "effect": "metallic",
+   "hex": "#752830",
+   "mainColor": "red",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "A43",
+   "name": "Deep Green",
+   "effect": "metallic",
+   "hex": "#21352e",
+   "mainColor": "green",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "A53",
+   "name": "Platinum Bronze",
+   "effect": "metallic",
+   "hex": "#817f79",
+   "mainColor": "grey",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "A73",
+   "name": "Jerez Black Metallic",
+   "effect": "metallic",
+   "hex": "#1b1e23",
+   "mainColor": "black",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "A75",
+   "name": "Melbourne Red Metallic",
+   "effect": "uni",
+   "hex": "#de4237",
+   "mainColor": "red",
+   "g8x": []
+  },
+  {
+   "code": "A90",
+   "name": "Sophisto Grey Brilliant Effect Metallic",
+   "effect": "metallic",
+   "hex": "#232b34",
+   "mainColor": "grey",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "A96",
+   "name": "Mineral White Metallic",
+   "effect": "metallic",
+   "hex": "#e1e3e4",
+   "mainColor": "white",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "B51",
+   "name": "San Marino Blue Metallic",
+   "effect": "metallic",
+   "hex": "#000685",
+   "mainColor": "blue",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "B53",
+   "name": "Sparkling Brown Metallic",
+   "effect": "metallic",
+   "hex": "#36251c",
+   "mainColor": "brown",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "B65",
+   "name": "Jatoba Metallic",
+   "effect": "metallic",
+   "hex": "#41322c",
+   "mainColor": "brown",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "C17",
+   "name": "M Brands Hatch Grey Metallic",
+   "effect": "metallic",
+   "hex": "#343e49",
+   "mainColor": "grey",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "C1A",
+   "name": "Sonic Speed Blau Metallic",
+   "effect": "metallic",
+   "hex": "#014576",
+   "mainColor": "blue",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "C1K",
+   "name": "M Marina Bay Blue Metallic",
+   "effect": "metallic",
+   "hex": "#072594",
+   "mainColor": "blue",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "C1M",
+   "name": "Phytonic Blue Metallic",
+   "effect": "metallic",
+   "hex": "#264185",
+   "mainColor": "blue",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "C31",
+   "name": "M Portimao Blue Metallic",
+   "effect": "metallic",
+   "hex": "#1a2862",
+   "mainColor": "blue",
+   "g8x": []
+  },
+  {
+   "code": "C36",
+   "name": "BMW Individual Dravit Grey Metallic",
+   "effect": "uni",
+   "hex": "#73808b",
+   "mainColor": "grey",
+   "g8x": []
+  },
+  {
+   "code": "C38",
+   "name": "M Barcelona Blue Metallic",
+   "effect": "metallic",
+   "hex": "#6687a6",
+   "mainColor": "blue",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "C39",
+   "name": "Lime Rock Grey Metallic",
+   "effect": "metallic",
+   "hex": "#b1b0b3",
+   "mainColor": "grey",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "C3D",
+   "name": "Manhattan Metallic",
+   "effect": "metallic",
+   "hex": "#564c42",
+   "mainColor": "green",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "C3E",
+   "name": "Bernina Grey Amber effect Metallic",
+   "effect": "metallic",
+   "hex": "#7e8390",
+   "mainColor": "grey",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "C3N",
+   "name": "BMW Individual Storm Bay Metallic",
+   "effect": "metallic",
+   "hex": "#8c97a9",
+   "mainColor": "grey",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "C3Z",
+   "name": "BMW Individual Tansanit Blue II Metallic",
+   "effect": "metallic",
+   "hex": "#01195f",
+   "mainColor": "blue",
+   "g8x": []
+  },
+  {
+   "code": "C49",
+   "name": "BMW Individual Citrin Black Metallic",
+   "effect": "metallic",
+   "hex": "#312d2a",
+   "mainColor": "black",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "C4A",
+   "name": "Oxide Grey Metallic",
+   "effect": "metallic",
+   "hex": "#cfcbc5",
+   "mainColor": "grey",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "C4E",
+   "name": "Sanremo Green Metallic",
+   "effect": "metallic",
+   "hex": "#0a522a",
+   "mainColor": "green",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "C4F",
+   "name": "Arctic Race Blue Metallic",
+   "effect": "metallic",
+   "hex": "#395466",
+   "mainColor": "blue",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "C4G",
+   "name": "M Isle of Man Green Metallic",
+   "effect": "metallic",
+   "hex": "#036358",
+   "mainColor": "green",
+   "g8x": []
+  },
+  {
+   "code": "C4H",
+   "name": "M Sao Paulo Yellow Uni",
+   "effect": "uni",
+   "hex": "#c4cd4c",
+   "mainColor": "yellow",
+   "g8x": []
+  },
+  {
+   "code": "C4P",
+   "name": "M Brooklyn Grey Metallic",
+   "effect": "metallic",
+   "hex": "#898a8c",
+   "mainColor": "grey",
+   "g8x": []
+  },
+  {
+   "code": "C4W",
+   "name": "Skyscraper Grey Metallic",
+   "effect": "metallic",
+   "hex": "#7c8189",
+   "mainColor": "grey",
+   "g8x": []
+  },
+  {
+   "code": "C55",
+   "name": "Sparkling Copper Grey Metallic",
+   "effect": "metallic",
+   "hex": "#5e7186",
+   "mainColor": "grey",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "C57",
+   "name": "Aventurin Red Metallic",
+   "effect": "metallic",
+   "hex": "#611419",
+   "mainColor": "red",
+   "g8x": []
+  },
+  {
+   "code": "C5A",
+   "name": "BMW Individual Frozen Pure Grey Metallic",
+   "effect": "frozen",
+   "hex": "#606463",
+   "mainColor": "grey",
+   "g8x": [
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "C5L",
+   "name": "BMW Individual Blue Bay Lagoon Metallic",
+   "effect": "metallic",
+   "hex": "#376f7f",
+   "mainColor": "blue",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "C67",
+   "name": "Space Silver Metallic",
+   "effect": "metallic",
+   "hex": "#b8bab9",
+   "mainColor": "grey",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "C68",
+   "name": "Dragon Fire Red Metallic",
+   "effect": "metallic",
+   "hex": "#5e0612",
+   "mainColor": "red",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "C7R",
+   "name": "Night Dusk Blue",
+   "nameLanguage": "de",
+   "effect": "metallic",
+   "hex": "#2a3245",
+   "mainColor": "blue",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "L38",
+   "name": "Fame Green Metallic",
+   "effect": "metallic",
+   "hex": "#64ac75",
+   "mainColor": "green",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "L74",
+   "name": "Velvet Orchid II Metallic",
+   "effect": "metallic",
+   "hex": "#866c76",
+   "mainColor": "violet",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "P28",
+   "name": "Twilight Purple Pearl effect",
+   "effect": "metallic",
+   "hex": "#452767",
+   "mainColor": "violet",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "P56",
+   "name": "Signal Green",
+   "effect": "uni",
+   "hex": "#72bc72",
+   "mainColor": "green",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "P5C",
+   "name": "Riviera Blue",
+   "effect": "uni",
+   "hex": "#51bae2",
+   "mainColor": "blue",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "P5N",
+   "name": "Verde Mantis",
+   "effect": "uni",
+   "hex": "#9bc35f",
+   "mainColor": "green",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "P5T",
+   "name": "BMW Individual Frozen Marina Bay Blue Metallic",
+   "effect": "frozen",
+   "hex": "#343b67",
+   "mainColor": "blue",
+   "g8x": [
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "P5W",
+   "name": "Miami Blue",
+   "effect": "uni",
+   "hex": "#00a9bb",
+   "mainColor": "blue",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "P60",
+   "name": "Grey Black",
+   "effect": "uni",
+   "hex": "#414246",
+   "mainColor": "black",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "P6E",
+   "name": "Verde British Racing",
+   "effect": "uni",
+   "hex": "#23422b",
+   "mainColor": "green",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "P6F",
+   "name": "Violet Blue II",
+   "effect": "uni",
+   "hex": "#3e7cb4",
+   "mainColor": "blue",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "P6H",
+   "name": "Fashion Grey",
+   "effect": "uni",
+   "hex": "#cbcbc4",
+   "mainColor": "grey",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "P6K",
+   "name": "Nardo Grey",
+   "effect": "uni",
+   "hex": "#bfbfbf",
+   "mainColor": "grey",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "P6L",
+   "name": "Thunder Metallic",
+   "effect": "metallic",
+   "hex": "#626c7a",
+   "mainColor": "grey",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "P6M",
+   "name": "Grigio Telesto Pearl Effect Metallic",
+   "effect": "metallic",
+   "hex": "#85878d",
+   "mainColor": "grey",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "P78",
+   "name": "Burgundy Red Pearl Metallic",
+   "effect": "metallic",
+   "hex": "#411623",
+   "mainColor": "red",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "P79",
+   "name": "Frozen Dark Grey II Metallic",
+   "effect": "frozen",
+   "hex": "#565351",
+   "mainColor": "grey",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "P7B",
+   "name": "Chalk",
+   "effect": "uni",
+   "hex": "#ccccca",
+   "mainColor": "grey",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "P7E",
+   "name": "Fire Orange III",
+   "effect": "uni",
+   "hex": "#f16601",
+   "mainColor": "orange",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "P7G",
+   "name": "Irish Green",
+   "effect": "uni",
+   "hex": "#31513e",
+   "mainColor": "green",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "P7K",
+   "name": "Rosso Corsa",
+   "effect": "uni",
+   "hex": "#e53d14",
+   "mainColor": "red",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "P7L",
+   "name": "Voodoo Blue",
+   "effect": "uni",
+   "hex": "#2998d0",
+   "mainColor": "blue",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "P7P",
+   "name": "Maritime Blue",
+   "effect": "uni",
+   "hex": "#7a9fd1",
+   "mainColor": "blue",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "P7U",
+   "name": "Mahogany II Metallic",
+   "effect": "metallic",
+   "hex": "#371517",
+   "mainColor": "red",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "P7V",
+   "name": "Java Green",
+   "effect": "metallic",
+   "hex": "#6ba957",
+   "mainColor": "green",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "P7X",
+   "name": "BMW Individual Frozen Deep Grey Metallic",
+   "effect": "frozen",
+   "hex": "#3f434d",
+   "mainColor": "grey",
+   "g8x": [
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "P80",
+   "name": "BMW Individual Frozen Deep Green Metallic",
+   "effect": "frozen",
+   "hex": "#436648",
+   "mainColor": "green",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "P81",
+   "name": "Stone Grey",
+   "effect": "uni",
+   "hex": "#b8b9ab",
+   "mainColor": "grey",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "P85",
+   "name": "BMW Individual Malachite Green II Metallic",
+   "effect": "metallic",
+   "hex": "#213733",
+   "mainColor": "green",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "P86",
+   "name": "Pyrite Brown Metallic",
+   "effect": "metallic",
+   "hex": "#533f31",
+   "mainColor": "brown",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "P8T",
+   "name": "BMW Individual Liquid Copper Metallic",
+   "effect": "metallic",
+   "hex": "#a87759",
+   "mainColor": "brown",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "P8W",
+   "name": "Daytona Beach Blue",
+   "effect": "uni",
+   "hex": "#1092c6",
+   "mainColor": "blue",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "P8X",
+   "name": "BMW Individual Frozen Brooklyn Grey Metallic",
+   "effect": "frozen",
+   "hex": "#a9c0cd",
+   "mainColor": "grey",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "P8Y",
+   "name": "Atlas Grey Metallic",
+   "effect": "metallic",
+   "hex": "#353437",
+   "mainColor": "grey",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "P92",
+   "name": "Frozen Isle of Man Green Metallic",
+   "nameLanguage": "de",
+   "effect": "frozen",
+   "hex": "#145239",
+   "mainColor": "green",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "P93",
+   "name": "Sakhir Orange III Metallic",
+   "effect": "metallic",
+   "hex": "#de4210",
+   "mainColor": "orange",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "P94",
+   "name": "Singapore Grey II Metallic",
+   "effect": "metallic",
+   "hex": "#2a2d34",
+   "mainColor": "grey",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "P96",
+   "name": "BMW Individual Frozen Tanzanite Blue II Metallic",
+   "effect": "frozen",
+   "hex": "#101d47",
+   "mainColor": "blue",
+   "g8x": []
+  },
+  {
+   "code": "P9A",
+   "name": "Frozen Purple Metallic",
+   "effect": "frozen",
+   "hex": "#3b2c3f",
+   "mainColor": "violet",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "P9B",
+   "name": "Frozen Tampa Bay Green Metallic",
+   "effect": "frozen",
+   "hex": "#63a549",
+   "mainColor": "green",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "P9C",
+   "name": "Frozen Preciosa Red Metallic",
+   "effect": "frozen",
+   "hex": "#622129",
+   "mainColor": "red",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "P9D",
+   "name": "BMW Individual Deep Sea Green Metallic",
+   "effect": "metallic",
+   "hex": "#1d5a40",
+   "mainColor": "green",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "P9E",
+   "name": "Borusan Turkish Blue",
+   "effect": "uni",
+   "hex": "#4ab3c9",
+   "mainColor": "blue",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "P9F",
+   "name": "BMW Individual Frozen Pure Red Metallic",
+   "effect": "frozen",
+   "hex": "#a23c37",
+   "mainColor": "red",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "P9G",
+   "name": "BMW Individual Frozen Aquamarine Metallic",
+   "effect": "frozen",
+   "hex": "#8e9d97",
+   "mainColor": "green",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "P9L",
+   "name": "Ruby Star (NEO)",
+   "effect": "uni",
+   "hex": "#9c3c61",
+   "mainColor": "red",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "P9M",
+   "name": "Petrol Mica Metallic",
+   "effect": "metallic",
+   "hex": "#073751",
+   "mainColor": "blue",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "P9P",
+   "name": "Urban Green",
+   "effect": "uni",
+   "hex": "#50522e",
+   "mainColor": "green",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "P9R",
+   "name": "Anglesey Green Metallic",
+   "effect": "metallic",
+   "hex": "#37491e",
+   "mainColor": "green",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "P9Y",
+   "name": "Frozen Urban Green",
+   "effect": "frozen",
+   "hex": "#6b6448",
+   "mainColor": "green",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "R20",
+   "name": "Madeira Red Metallic",
+   "effect": "metallic",
+   "hex": "#42161d",
+   "mainColor": "red",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "R61",
+   "name": "Purple Silk Metallic",
+   "effect": "metallic",
+   "hex": "#633e54",
+   "mainColor": "violet",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "R71",
+   "name": "Midnight Sapphire II Metallic",
+   "effect": "metallic",
+   "hex": "#051944",
+   "mainColor": "blue",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "R94",
+   "name": "Dark Emerald Metallic",
+   "effect": "metallic",
+   "hex": "#082319",
+   "mainColor": "green",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "R95",
+   "name": "Belladonna Purple Metallic",
+   "effect": "metallic",
+   "hex": "#482e3c",
+   "mainColor": "violet",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "R9D",
+   "name": "Monteverde Metallic",
+   "effect": "metallic",
+   "hex": "#367374",
+   "mainColor": "green",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "S03",
+   "name": "Ruby Red II Pearl Effect Metallic",
+   "effect": "metallic",
+   "hex": "#761626",
+   "mainColor": "red",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "S0A",
+   "name": "Smyrna Green",
+   "effect": "uni",
+   "hex": "#01524e",
+   "mainColor": "green",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "S0F",
+   "name": "Desert Sand",
+   "effect": "uni",
+   "hex": "#a18d64",
+   "mainColor": "brown",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "S0G",
+   "name": "Midnight Amethyst Metallic",
+   "effect": "metallic",
+   "hex": "#3d393f",
+   "mainColor": "violet",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "S0K",
+   "name": "Viola Metallic",
+   "effect": "metallic",
+   "hex": "#605472",
+   "mainColor": "violet",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "S0M",
+   "name": "Aurora Diamond Green II Metallic",
+   "effect": "metallic",
+   "hex": "#3f5559",
+   "mainColor": "green",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "S0N",
+   "name": "Sepia III Metallic",
+   "effect": "metallic",
+   "hex": "#57545e",
+   "mainColor": "violet",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "S0P",
+   "name": "Chili Red III",
+   "effect": "uni",
+   "hex": "#980d12",
+   "mainColor": "red",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "S0R",
+   "name": "Legend Grey II Metallic",
+   "effect": "metallic",
+   "hex": "#2f3437",
+   "mainColor": "grey",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "S0V",
+   "name": "Macao Blue II Metallic",
+   "effect": "metallic",
+   "hex": "#10111a",
+   "mainColor": "blue",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "S10",
+   "name": "Malachite Green Dark Metallic",
+   "effect": "metallic",
+   "hex": "#1c3640",
+   "mainColor": "green",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "T09",
+   "name": "Wildberry Metallic",
+   "effect": "metallic",
+   "hex": "#711d3a",
+   "mainColor": "red",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "T42",
+   "name": "Brewster Green",
+   "effect": "uni",
+   "hex": "#1d2f2b",
+   "mainColor": "green",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "U21",
+   "name": "BMW Individual Brilliant White Metallic",
+   "effect": "metallic",
+   "hex": "#edeff0",
+   "mainColor": "white",
+   "g8x": []
+  },
+  {
+   "code": "U80",
+   "name": "Macadamia Metallic",
+   "effect": "metallic",
+   "hex": "#5b4034",
+   "mainColor": "brown",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "U86",
+   "name": "Nero Fuoco Metallic",
+   "effect": "metallic",
+   "hex": "#232226",
+   "mainColor": "black",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "U91",
+   "name": "BMW Individual Frozen Black Metallic",
+   "effect": "frozen",
+   "hex": "#202123",
+   "mainColor": "black",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "U96",
+   "name": "Speed Yellow",
+   "effect": "uni",
+   "hex": "#e8c200",
+   "mainColor": "yellow",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "W24",
+   "name": "Gunmetal II Metallic",
+   "effect": "metallic",
+   "hex": "#3b414a",
+   "mainColor": "grey",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "W32",
+   "name": "Black Blue",
+   "effect": "uni",
+   "hex": "#1c2134",
+   "mainColor": "blue",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "W37",
+   "name": "Gentian Blue",
+   "effect": "uni",
+   "hex": "#015ab4",
+   "mainColor": "blue",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "W65",
+   "name": "St James Red",
+   "effect": "uni",
+   "hex": "#b03028",
+   "mainColor": "red",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "W67",
+   "name": "Goodwood Green Pearl Effect Metallic",
+   "effect": "uni",
+   "hex": "#193c2e",
+   "mainColor": "green",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "W69",
+   "name": "Venetian Violet Pearl Effect Metallic",
+   "effect": "metallic",
+   "hex": "#281d47",
+   "mainColor": "violet",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "W81",
+   "name": "Peridot Green Metallic",
+   "effect": "metallic",
+   "hex": "#07402d",
+   "mainColor": "green",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "W90",
+   "name": "Chestnut Brown Metallic",
+   "effect": "metallic",
+   "hex": "#290605",
+   "mainColor": "brown",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "W93",
+   "name": "BMW Individual Frozen Brilliant White Metallic",
+   "effect": "frozen",
+   "hex": "#f7f7f3",
+   "mainColor": "white",
+   "g8x": []
+  },
+  {
+   "code": "W97",
+   "name": "Mint Green Uni",
+   "effect": "uni",
+   "hex": "#7ec2ad",
+   "mainColor": "green",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "X03",
+   "name": "Ruby Black Metallic",
+   "effect": "metallic",
+   "hex": "#271219",
+   "mainColor": "black",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  },
+  {
+   "code": "X16",
+   "name": "BMW Individual Frozen Brilliant White Metallic",
+   "effect": "frozen",
+   "hex": "#f7f7f3",
+   "mainColor": "white",
+   "g8x": []
+  },
+  {
+   "code": "X1E",
+   "name": "BMW Individual Frozen Portimao Blue Metallic",
+   "effect": "frozen",
+   "hex": "#283672",
+   "mainColor": "blue",
+   "g8x": []
+  },
+  {
+   "code": "X1G",
+   "name": "BMW Individual Frozen Tanzanite Blue Metallic",
+   "effect": "frozen",
+   "hex": "#101d47",
+   "mainColor": "blue",
+   "g8x": [
+    "G80",
+    "G81",
+    "G82",
+    "G83"
+   ]
+  }
+ ],
+ "archived": [
+  {
+   "code": "336",
+   "name": "Aegean Blue Metallic",
+   "effect": "metallic",
+   "url": "https://web.archive.org/web/20250304085308/https://individual.bmw-m.com/en-UK/G82-21HK-336"
+  },
+  {
+   "code": "427",
+   "name": "Neon Yellow Uni",
+   "effect": "uni",
+   "url": "https://web.archive.org/web/20250310005607/https://individual.bmw-m.com/en-UK/G82-21HK-427"
+  },
+  {
+   "code": "891",
+   "name": "Mocca Brown Metallic",
+   "effect": "metallic",
+   "url": "https://web.archive.org/web/20250221143802/https://individual.bmw-m.com/en-UK/G82-21HK-891"
+  },
+  {
+   "code": "A22",
+   "name": "Sparkling Graphite Metallic",
+   "effect": "metallic",
+   "url": "https://web.archive.org/web/20250221180953/https://individual.bmw-m.com/en-UK/G82-21HK-A22"
+  },
+  {
+   "code": "B03",
+   "name": "Damast Red Metallic",
+   "effect": "metallic",
+   "url": "https://web.archive.org/web/20250226120422/https://individual.bmw-m.com/en-UK/G82-21HK-B03"
+  },
+  {
+   "code": "B38",
+   "name": "Midnight Blue Metallic",
+   "effect": "metallic",
+   "url": "https://web.archive.org/web/20250221172437/https://individual.bmw-m.com/en-UK/G82-21HK-B38"
+  },
+  {
+   "code": "C3C",
+   "name": "Piemont Red Metallic",
+   "effect": "metallic",
+   "url": "https://web.archive.org/web/20250306120319/https://individual.bmw-m.com/en-UK/G82-21HK-C3C"
+  },
+  {
+   "code": "C3Y",
+   "name": "Enigmatic Black Metallic",
+   "effect": "metallic",
+   "url": "https://web.archive.org/web/20250220214029/https://individual.bmw-m.com/en-UK/G82-21HK-C3Y"
+  },
+  {
+   "code": "C56",
+   "name": "Thundernight Metallic",
+   "effect": "metallic",
+   "url": "https://web.archive.org/web/20250321013122/https://individual.bmw-m.com/en-FI/G82-21HK-C56"
+  },
+  {
+   "code": "P08",
+   "name": "Lava Grey Metallic",
+   "effect": "uni",
+   "url": "https://web.archive.org/web/20250220214023/https://individual.bmw-m.com/en-UK/G82-21HK-P08"
+  },
+  {
+   "code": "P5R",
+   "name": "Blue Hera Mica Metallic",
+   "effect": "metallic",
+   "url": "https://web.archive.org/web/20250227143749/https://individual.bmw-m.com/en-UK/G82-21HK-P5R"
+  },
+  {
+   "code": "P72",
+   "name": "Birch Green Uni",
+   "effect": "uni",
+   "url": "https://web.archive.org/web/20250123145514/https://individual.bmw-m.com/G80-21HJ-P72"
+  },
+  {
+   "code": "P7Y",
+   "name": "Sepia Brown II Metallic",
+   "effect": "metallic",
+   "url": "https://web.archive.org/web/20240322031308/https://individual.bmw-m.com/en-UK/G81-11GB-P7Y"
+  },
+  {
+   "code": "P82",
+   "name": "Anthracite III Metallic",
+   "effect": "metallic",
+   "url": "https://web.archive.org/web/20250220214016/https://individual.bmw-m.com/en-UK/G82-21HK-P82"
+  },
+  {
+   "code": "P98",
+   "name": "Frozen Tulum Blue Metallic",
+   "effect": "frozen",
+   "url": "https://web.archive.org/web/20230623192333/https://individual.bmw-m.com/_next/data/x3C5GoglCfoBEfI5-x5m5/en/G82-41AZ-P98.json?slug=G82-41AZ-P98"
+  },
+  {
+   "code": "R36",
+   "name": "Metropolitan Blue Metallic",
+   "effect": "metallic",
+   "url": "https://web.archive.org/web/20250306224640/https://individual.bmw-m.com/en-UK/G82-21HK-R36"
+  },
+  {
+   "code": "S11",
+   "name": "Blue Onyx Metallic",
+   "effect": "metallic",
+   "url": "https://web.archive.org/web/20250308003258/https://individual.bmw-m.com/en-UK/G82-21HK-S11"
+  },
+  {
+   "code": "W03",
+   "name": "Crystal Casserit Black Metallic",
+   "effect": "metallic",
+   "url": "https://web.archive.org/web/20250308091421/https://individual.bmw-m.com/en-UK/G82-21HK-W03"
+  }
+ ],
+ "archivedWithoutPage": [
+  "P6Y",
+  "W43",
+  "W87"
+ ]
+}

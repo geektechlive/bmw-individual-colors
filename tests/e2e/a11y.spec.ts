@@ -8,7 +8,7 @@ import { gotoLoaded } from './helpers';
 // KNOWN_ISSUES is the visible debt: rules that fail on a route today. Each one has a
 // test.fixme below that flips to a real assertion once the app is fixed. Anything NOT listed
 // here must be clean, so a new violation fails the suite. Remove an entry when it is fixed.
-const ROUTES = ['/', '/colors', '/colors/san-marino-blue', '/entries', '/reports', '/map', '/submit'];
+const ROUTES = ['/', '/colors', '/colors/san-marino-blue-metallic', '/entries', '/reports', '/map', '/submit'];
 
 // Empty: the four violations found on 2026-11-14 (empty flag/edit headers, "Prev" label
 // mismatch, unfocusable report matrices, default yellow map clusters) are fixed.

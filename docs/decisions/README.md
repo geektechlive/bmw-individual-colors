@@ -25,4 +25,5 @@ zone or resource IDs, email addresses, local paths or personal details. Start a 
 | [0016](0016-design-refresh-mix-direction.md)               | A token-based design system: "Build Sheet" for data, lit paint where paint is the point | #38–#52     |
 | [0017](0017-duplicate-builds-are-a-hard-stop.md)           | A duplicate build is a hard stop with a link to edit the existing one              | #35, #51        |
 | [0018](0018-stay-on-supabase.md)                           | Stay on Supabase; don't move the data to Cloudflare D1                              |                 |
+| [0019](0019-paint-names-follow-bmw.md)                     | Paint names follow BMW's paint list, cited on every paint page; old names are aliases | #93, #89      |
 | [0020](0020-global-kv-page-cache.md)                       | Pages are also cached globally in free KV, behind the per-data-center cache         | #21             |

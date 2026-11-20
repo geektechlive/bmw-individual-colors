@@ -16,8 +16,8 @@ test.describe('Bot-probe middleware', () => {
     expect(res.status()).toBe(403);
   });
 
-  test('allows /colors/twilight-purple with 200', async ({ request, baseURL }) => {
-    const res = await request.get(`${baseURL}/colors/twilight-purple`);
+  test('allows /colors/twilight-purple-pearl-effect with 200', async ({ request, baseURL }) => {
+    const res = await request.get(`${baseURL}/colors/twilight-purple-pearl-effect`);
     expect(res.status()).toBe(200);
   });
 

@@ -1,0 +1,617 @@
+{
+ "decided": "2026-11-20",
+ "usDocuments": {
+  "C3Z": {
+   "name": "Tanzanite Blue II Metallic",
+   "label": "BMW NA Ordering Guide, M3 (G80) MY2022",
+   "url": "https://machineswithsouls.com/wp-content/uploads/2022/02/2022-bmw-m3-order-guide.pdf"
+  }
+ },
+ "nameOverrides": {
+  "C4H": "São Paulo Yellow"
+ },
+ "aliases": {
+  "Enzian Blue": "W37",
+  "Twilight Purple": "P28",
+  "San Marino Blue": "B51",
+  "Frozen Dark Grey": "P79",
+  "Grigio Telesto": "P6M",
+  "Violet Blue": "P6F",
+  "Wildberry": "T09",
+  "Frozen Deep Grey": "P7X",
+  "Oxford Green II Metallic": "430",
+  "Sepia Metallic III": "S0N",
+  "Aegean Blue": "336",
+  "Daytona Violet": "283",
+  "Frozen Black": "U91",
+  "Frozen Portimao Blue": "X1E",
+  "Velvet Blue": "379",
+  "Cosmos Black": "303",
+  "Mauritius Blue": "287",
+  "Thunder": "P6L",
+  "Goodwood Green Pearl": "W67",
+  "Interlagos Blue": "A30",
+  "Isle of Man Green": "C4G",
+  "Jerez Black": "A73",
+  "Le Mans Blue": "381",
+  "Ruby Star Neo": "P9L",
+  "Sakhir Orange III": "P93",
+  "Signal Green Uni": "P56",
+  "Space Silver": "C67",
+  "Marina Bay Blue": "C1K",
+  "Tanzanite Blue II": "C3Z",
+  "Tanzanite Blue": "C3Z",
+  "Santorini Blue II": "327",
+  "Santorini Blue": "327",
+  "Dakar Yellow": "337",
+  "Fire Orange": "P7E",
+  "Lime Rock Grey": "C39",
+  "Cinnabar Red": "138",
+  "Zinnober Red": "138",
+  "Frozen Pure Grey": "C5A",
+  "Midnight Blue": "B38"
+ },
+ "archivedColors": {
+  "427": {
+   "hex": "#dfe52a",
+   "family": "Yellows"
+  },
+  "891": {
+   "hex": "#5a4636",
+   "family": "Greys & Blacks"
+  },
+  "A22": {
+   "hex": "#4d4f53",
+   "family": "Greys & Blacks"
+  },
+  "B03": {
+   "hex": "#7a1f2e",
+   "family": "Reds & Oranges"
+  },
+  "C3C": {
+   "hex": "#8a1c2b",
+   "family": "Reds & Oranges"
+  },
+  "C3Y": {
+   "hex": "#1c1d20",
+   "family": "Greys & Blacks"
+  },
+  "C56": {
+   "hex": "#2e3138",
+   "family": "Greys & Blacks"
+  },
+  "P08": {
+   "hex": "#4b4a49",
+   "family": "Greys & Blacks"
+  },
+  "P5R": {
+   "hex": "#1f4a7a",
+   "family": "Blues"
+  },
+  "P72": {
+   "hex": "#5b6b4a",
+   "family": "Greens"
+  },
+  "P7Y": {
+   "hex": "#4a3a2e",
+   "family": "Greys & Blacks"
+  },
+  "P82": {
+   "hex": "#3b3d40",
+   "family": "Greys & Blacks"
+  },
+  "P98": {
+   "hex": "#3f6f8f",
+   "family": "Blues"
+  },
+  "R36": {
+   "hex": "#2a4a7a",
+   "family": "Blues"
+  },
+  "S11": {
+   "hex": "#1b2a3d",
+   "family": "Blues"
+  },
+  "W03": {
+   "hex": "#1d1f22",
+   "family": "Greys & Blacks"
+  }
+ },
+ "hexOverrides": {
+  "Brilliant White Metallic": "#e6e8ea",
+  "Frozen Brilliant White Metallic": "#e6e8e4"
+ },
+ "unverified": [
+  {
+   "name": "Mexico Blue",
+   "note": "Reported renamed by BMW to Daytona Beach Blue.",
+   "noteSource": "carpaints.co",
+   "noteUrl": "https://www.carpaints.co/paints/detail/daytona-beach-blue"
+  },
+  {
+   "name": "Atlantis Blue Metallic",
+   "note": "Paint-code sites list this paint as Atlantis (code 399). No source gives the full name.",
+   "noteSource": "carpaints.co",
+   "noteUrl": "https://www.carpaints.co/paints/detail/atlantis"
+  },
+  {
+   "name": "Verde Ermes",
+   "note": "A touch-up paint seller lists Verde Ermes Pearl for the 2022 M5.",
+   "noteSource": "automotivetouchup.com",
+   "noteUrl": "https://www.automotivetouchup.com/touch-up-paint/bmw/2022/m5"
+  },
+  {
+   "name": "Frozen Orange II",
+   "note": "Touch-up paint sellers list this paint as Frozen Orange (code C41). No source found for the II.",
+   "noteSource": "automotivetouchup.com",
+   "noteUrl": "https://www.automotivetouchup.com/touch-up-paint/bmw/2022/m4"
+  },
+  {
+   "name": "Snapper Rocks Blue",
+   "note": "A touch-up paint seller lists Snapper Rocks Blue Metallic (code C1G) for the 2022 M4. BMW's current list does not.",
+   "noteSource": "automotivetouchup.com",
+   "noteUrl": "https://www.automotivetouchup.com/touch-up-paint/bmw/2022/m4"
+  },
+  {
+   "name": "Sunset Orange",
+   "note": "A touch-up paint seller lists Sunset Orange Metallic (codes C1F, C1X) for the 2025 M3. BMW's current list does not.",
+   "noteSource": "automotivetouchup.com",
+   "noteUrl": "https://www.automotivetouchup.com/touch-up-paint/bmw/2025/m3"
+  },
+  {
+   "name": "Malachite Green Metallic",
+   "aliases": ["Malachite Green"],
+   "hex": "#213733",
+   "family": "Greens",
+   "note": "BMW lists two paints with this name: Malachite Green II Metallic (P85) and Malachite Green Dark Metallic (S10). Which one this is has not been confirmed.",
+   "noteSource": "BMW Individual",
+   "noteUrl": "https://individual.bmw-m.com/en-US/colors"
+  }
+ ],
+ "familyByMainColor": {
+  "blue": "Blues",
+  "green": "Greens",
+  "grey": "Greys & Blacks",
+  "black": "Greys & Blacks",
+  "white": "Greys & Blacks",
+  "brown": "Greys & Blacks",
+  "red": "Reds & Oranges",
+  "orange": "Reds & Oranges",
+  "yellow": "Yellows",
+  "violet": "Purples"
+ },
+ "legacyCatalog": {
+  "Aegean Blue": {
+   "hex": "#1a3d6b",
+   "family": "Blues"
+  },
+  "Atlantis Blue Metallic": {
+   "hex": "#1a4b8c",
+   "family": "Blues"
+  },
+  "Black Blue": {
+   "hex": "#0d1a2e",
+   "family": "Blues"
+  },
+  "Daytona Beach Blue": {
+   "hex": "#1e5f8c",
+   "family": "Blues"
+  },
+  "Eridan Blue": {
+   "hex": "#1e3d6e",
+   "family": "Blues"
+  },
+  "Frozen Portimao Blue": {
+   "hex": "#1e3a8a",
+   "family": "Blues"
+  },
+  "Gentian Blue": {
+   "hex": "#1c3a7a",
+   "family": "Blues"
+  },
+  "Marina Bay Blue": {
+   "hex": "#1e5c8c",
+   "family": "Blues"
+  },
+  "Mauritius Blue": {
+   "hex": "#1e4a8c",
+   "family": "Blues"
+  },
+  "Mexico Blue": {
+   "hex": "#1e5c9c",
+   "family": "Blues"
+  },
+  "Miami Blue": {
+   "hex": "#1BBFE8",
+   "family": "Blues"
+  },
+  "Midnight Blue": {
+   "hex": "#1a2a4a",
+   "family": "Blues"
+  },
+  "Marhon Blue": {
+   "hex": "#1e4c7c",
+   "family": "Blues"
+  },
+  "Portimao Blue": {
+   "hex": "#1e3a8c",
+   "family": "Blues"
+  },
+  "Riviera Blue": {
+   "hex": "#1e6a9c",
+   "family": "Blues"
+  },
+  "San Marino Blue": {
+   "hex": "#1e4c8c",
+   "family": "Blues"
+  },
+  "Santorini Blue": {
+   "hex": "#1c3d6e",
+   "family": "Blues"
+  },
+  "Snapper Rocks Blue": {
+   "hex": "#1e6aac",
+   "family": "Blues"
+  },
+  "Tanzanite Blue": {
+   "hex": "#1e3a7c",
+   "family": "Blues"
+  },
+  "Tanzanite Blue II": {
+   "hex": "#1a3070",
+   "family": "Blues"
+  },
+  "Velvet Blue": {
+   "hex": "#1a2a5c",
+   "family": "Blues"
+  },
+  "Violet Blue": {
+   "hex": "#2a1a5c",
+   "family": "Blues"
+  },
+  "Voodoo Blue": {
+   "hex": "#1b3a6b",
+   "family": "Blues"
+  },
+  "Le Mans Blue": {
+   "hex": "#1c4c8c",
+   "family": "Blues"
+  },
+  "Brewster Green": {
+   "hex": "#1e3d20",
+   "family": "Greens"
+  },
+  "British Racing Green": {
+   "hex": "#1a3c2f",
+   "family": "Greens"
+  },
+  "Isle of Man Green": {
+   "hex": "#1a5c2a",
+   "family": "Greens"
+  },
+  "Jack Green": {
+   "hex": "#1a5c2a",
+   "family": "Greens"
+  },
+  "Oxford Green II Metallic": {
+   "hex": "#2a4a2a",
+   "family": "Greens"
+  },
+  "Verde Ermes": {
+   "hex": "#2a5a2a",
+   "family": "Greens"
+  },
+  "Fire Orange III": {
+   "hex": "#c44c0e",
+   "family": "Reds & Oranges"
+  },
+  "Frozen Orange II": {
+   "hex": "#d4661e",
+   "family": "Reds & Oranges"
+  },
+  "Imola Red": {
+   "hex": "#a51c1c",
+   "family": "Reds & Oranges"
+  },
+  "Rosso Corsa": {
+   "hex": "#c41c1c",
+   "family": "Reds & Oranges"
+  },
+  "Sunset Orange": {
+   "hex": "#d45c1e",
+   "family": "Reds & Oranges"
+  },
+  "Speed Yellow": {
+   "hex": "#e8c820",
+   "family": "Yellows"
+  },
+  "Dakar Yellow": {
+   "hex": "#e8c840",
+   "family": "Yellows"
+  },
+  "Dakar Yellow II": {
+   "hex": "#e0bc30",
+   "family": "Yellows"
+  },
+  "Twilight Purple": {
+   "hex": "#5a3a7a",
+   "family": "Purples"
+  },
+  "Wildberry": {
+   "hex": "#7a1a4a",
+   "family": "Purples"
+  },
+  "Chalk": {
+   "hex": "#d4cfc9",
+   "family": "Greys & Blacks"
+  },
+  "Cosmos Black": {
+   "hex": "#1a1a1a",
+   "family": "Greys & Blacks"
+  },
+  "Dravit Grey Metallic": {
+   "hex": "#5c5c6a",
+   "family": "Greys & Blacks"
+  },
+  "Fashion Grey": {
+   "hex": "#9e9e9e",
+   "family": "Greys & Blacks"
+  },
+  "Frozen Black": {
+   "hex": "#2a2a2a",
+   "family": "Greys & Blacks"
+  },
+  "Frozen Dark Grey": {
+   "hex": "#4a4a4a",
+   "family": "Greys & Blacks"
+  },
+  "Frozen Deep Grey": {
+   "hex": "#3a3a3a",
+   "family": "Greys & Blacks"
+  },
+  "Grey Black": {
+   "hex": "#2a2a2a",
+   "family": "Greys & Blacks"
+  },
+  "Grigio Telesto": {
+   "hex": "#7a7a8a",
+   "family": "Greys & Blacks"
+  },
+  "Gunmetal Gray II": {
+   "hex": "#5a5a5a",
+   "family": "Greys & Blacks"
+  },
+  "Jerez Black": {
+   "hex": "#1a1a2a",
+   "family": "Greys & Blacks"
+  },
+  "Lime Rock Grey": {
+   "hex": "#8a8a7a",
+   "family": "Greys & Blacks"
+  },
+  "Lime Rock Grey Metallic": {
+   "hex": "#8a8a7a",
+   "family": "Greys & Blacks"
+  },
+  "Mora Metallic": {
+   "hex": "#6a3a5a",
+   "family": "Greys & Blacks"
+  },
+  "Nardo Grey": {
+   "hex": "#9a9a9a",
+   "family": "Greys & Blacks"
+  },
+  "Oxide Grey": {
+   "hex": "#7a7a7a",
+   "family": "Greys & Blacks"
+  },
+  "Thunder": {
+   "hex": "#3a3a3a",
+   "family": "Greys & Blacks"
+  },
+  "Lime Green": {
+   "hex": "#4a8a1a",
+   "family": "Greens"
+  },
+  "Techno Violet Metallic": {
+   "hex": "#4a2a7a",
+   "family": "Purples"
+  },
+  "Agave": {
+   "hex": "#3a6a3a",
+   "family": "Greens"
+  },
+  "Anglesey Green Metallic": {
+   "hex": "#1e4a2a",
+   "family": "Greens"
+  },
+  "Blue Bay Lagoon Metallic": {
+   "hex": "#1a6a8c",
+   "family": "Blues"
+  },
+  "Borusan Turkish Blue": {
+   "hex": "#1a4a8c",
+   "family": "Blues"
+  },
+  "Daytona Violet": {
+   "hex": "#4a1a6a",
+   "family": "Purples"
+  },
+  "Goodwood Green Pearl": {
+   "hex": "#1a3a2a",
+   "family": "Greens"
+  },
+  "Irish Green": {
+   "hex": "#1a6a2a",
+   "family": "Greens"
+  },
+  "Laguna Seca Blue": {
+   "hex": "#1e5a9c",
+   "family": "Blues"
+  },
+  "Ruby Star Neo": {
+   "hex": "#8c1a2a",
+   "family": "Reds & Oranges"
+  },
+  "Sakhir Orange III": {
+   "hex": "#c45a1a",
+   "family": "Reds & Oranges"
+  },
+  "Santorini Blue II": {
+   "hex": "#1a3560",
+   "family": "Blues"
+  },
+  "Sepia Metallic III": {
+   "hex": "#7a5a3a",
+   "family": "Greys & Blacks"
+  },
+  "Frozen Cashmere Silver Metallic": {
+   "hex": "#c4bfb8",
+   "family": "Greys & Blacks"
+  },
+  "Frozen Dark Silver": {
+   "hex": "#8a8a8a",
+   "family": "Greys & Blacks"
+  },
+  "Frozen Maple": {
+   "hex": "#c4a87a",
+   "family": "Yellows"
+  },
+  "Frozen Pure Grey": {
+   "hex": "#8a8a8a",
+   "family": "Greys & Blacks"
+  },
+  "Frozen Preciosa Red Metallic": {
+   "hex": "#c87272",
+   "family": "Reds & Oranges"
+  },
+  "Preciosa Red Metallic": {
+   "hex": "#b01c1c",
+   "family": "Reds & Oranges"
+  },
+  "Almandine Brown Metallic": {
+   "hex": "#6a3a2a",
+   "family": "Greys & Blacks"
+  },
+  "Almeria Blue": {
+   "hex": "#1e4a8c",
+   "family": "Blues"
+  },
+  "Cashmere Silver Metallic": {
+   "hex": "#b4b0aa",
+   "family": "Greys & Blacks"
+  },
+  "Cedar Brown": {
+   "hex": "#6a3a1a",
+   "family": "Greys & Blacks"
+  },
+  "Chianti Red": {
+   "hex": "#8c1a1a",
+   "family": "Reds & Oranges"
+  },
+  "Cinnabar Red": {
+   "hex": "#b42a1a",
+   "family": "Reds & Oranges"
+  },
+  "Como Blue Metallic": {
+   "hex": "#1a3a6a",
+   "family": "Blues"
+  },
+  "Copper": {
+   "hex": "#aa5c1e",
+   "family": "Greys & Blacks"
+  },
+  "Dolomite Grey": {
+   "hex": "#9a9a9a",
+   "family": "Greys & Blacks"
+  },
+  "Gold Bronze": {
+   "hex": "#aa7a2a",
+   "family": "Greys & Blacks"
+  },
+  "Himalaya Grey": {
+   "hex": "#8a8a8a",
+   "family": "Greys & Blacks"
+  },
+  "Kyoto Green Metallic": {
+   "hex": "#2a5a3a",
+   "family": "Greens"
+  },
+  "Lanzarote Bronze": {
+   "hex": "#7a5a2a",
+   "family": "Greys & Blacks"
+  },
+  "Macao Blue Metallic": {
+   "hex": "#1a3a7a",
+   "family": "Blues"
+  },
+  "Mandalika Blue": {
+   "hex": "#1a4a8c",
+   "family": "Blues"
+  },
+  "Monza Blue": {
+   "hex": "#1a2a6a",
+   "family": "Blues"
+  },
+  "Mugello Blue": {
+   "hex": "#1a3a7a",
+   "family": "Blues"
+  },
+  "Nurburgring Blue": {
+   "hex": "#1a2a5c",
+   "family": "Blues"
+  },
+  "Picasso Red": {
+   "hex": "#8c1a1a",
+   "family": "Reds & Oranges"
+  },
+  "Pyrite Bronze": {
+   "hex": "#7a5a1a",
+   "family": "Greys & Blacks"
+  },
+  "Sepang Bronze": {
+   "hex": "#8a6a2a",
+   "family": "Greys & Blacks"
+  },
+  "Silicon Grey": {
+   "hex": "#8a8a8a",
+   "family": "Greys & Blacks"
+  },
+  "Smoked White": {
+   "hex": "#ddd8d2",
+   "family": "Greys & Blacks"
+  },
+  "Snowy White": {
+   "hex": "#f0ede8",
+   "family": "Greys & Blacks"
+  },
+  "Solar Orange": {
+   "hex": "#d45a1a",
+   "family": "Reds & Oranges"
+  },
+  "Stormwater": {
+   "hex": "#6a7a8a",
+   "family": "Greys & Blacks"
+  },
+  "Turbine Grey": {
+   "hex": "#7a7a7a",
+   "family": "Greys & Blacks"
+  },
+  "Verde Mantis": {
+   "hex": "#4a8a2a",
+   "family": "Greens"
+  },
+  "Violett Petrol": {
+   "hex": "#2a4a6a",
+   "family": "Blues"
+  },
+  "Wagon Green": {
+   "hex": "#2a5a2a",
+   "family": "Greens"
+  },
+  "Zinnober Red": {
+   "hex": "#b42a1a",
+   "family": "Reds & Oranges"
+  }
+ }
+}

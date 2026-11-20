@@ -59,7 +59,7 @@ test.describe('Submit form page', () => {
     await input.fill('twilight');
     await input.press('ArrowDown');
     await input.press('Enter');
-    await expect(input).toHaveValue('Twilight Purple');
+    await expect(input).toHaveValue('Twilight Purple Pearl effect');
   });
 
   test('transmission is disabled with a reason for Competition and editable for Base (#57)', async ({ page }) => {
@@ -104,14 +104,14 @@ test.describe('Row action (report a problem)', () => {
   });
 
   test('the row action appears on the color detail page, and no red flag does', async ({ page }) => {
-    await page.goto('/colors/san-marino-blue');
+    await page.goto('/colors/san-marino-blue-metallic');
     expect(await page.locator(ACTION).count()).toBeGreaterThan(0);
     await expect(page.locator('button[title="Flag this entry as incorrect"]')).toHaveCount(0);
     await expect(page.getByText('🚩')).toHaveCount(0);
   });
 
   test('on a paint page, the menu opens the reason picker', async ({ page }) => {
-    await page.goto('/colors/san-marino-blue');
+    await page.goto('/colors/san-marino-blue-metallic');
     await page.locator(ACTION).first().click();
     await expect(page.getByRole('menuitem', { name: 'Edit this build' })).toHaveAttribute('href', /\/edit\//);
     await page.getByRole('menuitem', { name: 'Report a problem' }).click();

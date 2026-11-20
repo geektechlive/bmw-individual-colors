@@ -27,8 +27,8 @@ test.describe('SEO routes', () => {
     }
   });
 
-  test('/colors/twilight-purple has og:title meta and canonical link', async ({ page }) => {
-    await page.goto('/colors/twilight-purple');
+  test('/colors/twilight-purple-pearl-effect has og:title meta and canonical link', async ({ page }) => {
+    await page.goto('/colors/twilight-purple-pearl-effect');
     const ogTitle = page.locator('meta[property="og:title"]');
     await expect(ogTitle).toHaveCount(1);
     const content = await ogTitle.getAttribute('content');
@@ -37,7 +37,7 @@ test.describe('SEO routes', () => {
     const canonical = page.locator('link[rel="canonical"]');
     await expect(canonical).toHaveCount(1);
     const href = await canonical.getAttribute('href');
-    expect(href).toContain('/colors/twilight-purple');
+    expect(href).toContain('/colors/twilight-purple-pearl-effect');
   });
 
   test('site pages share the static 1200x630 image as a large card', async ({ page, request, baseURL }) => {
@@ -53,9 +53,9 @@ test.describe('SEO routes', () => {
   });
 
   test('color pages keep their own card on Open Graph and X', async ({ page }) => {
-    await page.goto('/colors/twilight-purple');
-    await expect(page.locator('meta[property="og:image"]')).toHaveAttribute('content', /\/colors\/twilight-purple\/opengraph-image/);
-    await expect(page.locator('meta[name="twitter:image"]')).toHaveAttribute('content', /\/colors\/twilight-purple\/opengraph-image/);
+    await page.goto('/colors/twilight-purple-pearl-effect');
+    await expect(page.locator('meta[property="og:image"]')).toHaveAttribute('content', /\/colors\/twilight-purple-pearl-effect\/opengraph-image/);
+    await expect(page.locator('meta[name="twitter:image"]')).toHaveAttribute('content', /\/colors\/twilight-purple-pearl-effect\/opengraph-image/);
   });
 
   test('the dev-only /og-hero source page is not part of the sitemap', async ({ request, baseURL }) => {
@@ -63,8 +63,8 @@ test.describe('SEO routes', () => {
     expect(await res.text()).not.toContain('/og-hero');
   });
 
-  test('/colors/twilight-purple/opengraph-image returns 200 image', async ({ request, baseURL }) => {
-    const res = await request.get(`${baseURL}/colors/twilight-purple/opengraph-image`);
+  test('/colors/twilight-purple-pearl-effect/opengraph-image returns 200 image', async ({ request, baseURL }) => {
+    const res = await request.get(`${baseURL}/colors/twilight-purple-pearl-effect/opengraph-image`);
     expect(res.status()).toBe(200);
     const contentType = res.headers()['content-type'] ?? '';
     expect(contentType).toMatch(/^image\//);

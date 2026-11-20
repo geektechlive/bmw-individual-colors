@@ -7,7 +7,7 @@ import { gotoLoaded } from './helpers';
 test.use({ viewport: { width: 390, height: 844 } });
 
 const MIN = 44;
-const PAGES = ['/', '/entries', '/colors', '/colors/signal-green-uni'];
+const PAGES = ['/', '/entries', '/colors', '/colors/signal-green'];
 const CONTROLS = 'a, button, input, select, [role=option]';
 
 // Exemptions from the spec (docs/design/2026-11-direction-b.md, unit (a)):

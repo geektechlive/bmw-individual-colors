@@ -7,12 +7,12 @@ import { PAINT_FINISH, getPaintFinish, FINISHES } from '../../src/lib/paint-fini
 // (Frozen, then Pearl, then Metallic), then solid.
 
 test('a hand-filled catalog finish wins even when the name says nothing', () => {
-  assert.equal(PAINT_FINISH['San Marino Blue'], 'metallic');
-  assert.equal(getPaintFinish('San Marino Blue'), 'metallic');
+  assert.equal(PAINT_FINISH['Snapper Rocks Blue'], 'metallic');
+  assert.equal(getPaintFinish('Snapper Rocks Blue'), 'metallic');
 });
 
 test('catalog lookup ignores case and extra spaces', () => {
-  assert.equal(getPaintFinish('  san marino   BLUE '), 'metallic');
+  assert.equal(getPaintFinish('  snapper   ROCKS blue '), 'metallic');
 });
 
 test('a paint outside the catalog takes its finish from the name: Frozen first', () => {
@@ -40,7 +40,7 @@ test('empty or missing names are solid, not an error', () => {
 test('every catalog finish is a known finish and names a catalog paint', () => {
   for (const [name, finish] of Object.entries(PAINT_FINISH)) {
     assert.ok(FINISHES.includes(finish), `${name}: ${finish}`);
-    assert.ok(name in BMW_COLORS, `${name} is not in BMW_COLORS`);
+    assert.ok(Object.hasOwn(BMW_COLORS, name), `${name} is not in BMW_COLORS`);
   }
 });
 

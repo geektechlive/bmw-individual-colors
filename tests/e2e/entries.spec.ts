@@ -196,7 +196,7 @@ test.describe('Forum tag', () => {
   test('a non-BimmerPost forum shows as "Other forum" (Oxfg.m3, live data)', async ({ page }) => {
     await gotoLoaded(page, '/entries');
     await page.getByLabel('Filter entries').fill('Oxfg.m3');
-    const row = page.locator('table tbody tr', { hasText: 'Oxford Green II Metallic' });
+    const row = page.locator('table tbody tr', { hasText: 'Oxford Green' });
     await expect(row).toHaveCount(1);
     await expect(row).toContainText('Other forum');
     await expect(row).toContainText('Oxfg.m3');

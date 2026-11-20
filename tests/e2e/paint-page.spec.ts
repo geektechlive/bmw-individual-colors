@@ -4,8 +4,8 @@ import { gotoLoaded } from './helpers';
 // Direction B unit (b), #67. Counts are read from the page, not assumed: the live data moves.
 // MIN_CHART_BUILDS mirrors the constant in src/app/colors/[slug]/page.tsx (spec: 3).
 const MIN_CHART_BUILDS = 3;
-const SINGLE = '/colors/signal-green-uni';
-const MANY = '/colors/san-marino-blue';
+const SINGLE = '/colors/signal-green';
+const MANY = '/colors/san-marino-blue-metallic';
 
 async function buildCount(page: Page): Promise<number> {
   const text = await page.locator('dl dt', { hasText: /^Builds$/ }).locator('xpath=following-sibling::dd').innerText();

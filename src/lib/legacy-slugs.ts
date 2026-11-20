@@ -1,10 +1,13 @@
-// Old color slugs that changed when colorToSlug started transliterating accents (#75).
-// No imports on purpose: worker.ts uses this to answer before the Next server loads,
-// and 10 ms of CPU on Workers Free leaves no room for the catalog.
+// Old color slugs, answered with a 308 in worker.ts before the Next server loads:
+//  - slugs that changed when colorToSlug started transliterating accents (#75), and
+//  - the slugs of old paint names that BMW's naming replaced (#89, #93), from the generated
+//    paint-redirects.ts.
+// No catalog imports on purpose: 10 ms of CPU on Workers Free leaves no room for it.
+import { PAINT_SLUG_REDIRECTS } from './paint-redirects';
 
 /**
- * old slug -> new slug. Only São Paulo Yellow (a registry paint, not in the catalog)
- * has an accent today; tests/unit/legacy-slugs.test.ts proves no catalog or alias
+ * old slug -> new slug for accents. Only São Paulo Yellow has one today (it is in the
+ * catalog since #93); tests/unit/legacy-slugs.test.ts proves no other catalog or alias
  * name needs an entry. Add one here if a stored paint name with an accent ever has
  * a public link under its old slug.
  */
@@ -20,7 +23,8 @@ export function oldColorToSlug(colorName: string): string {
 /** The current slug for an old one, else null. Own keys only: slugs come from URLs. */
 export function legacySlugTarget(slug: string): string | null {
   const key = slug.toLowerCase();
-  return Object.hasOwn(LEGACY_SLUGS, key) ? LEGACY_SLUGS[key] : null;
+  if (Object.hasOwn(LEGACY_SLUGS, key)) return LEGACY_SLUGS[key];
+  return Object.hasOwn(PAINT_SLUG_REDIRECTS, key) ? PAINT_SLUG_REDIRECTS[key] : null;
 }
 
 const COLOR_PATH = /^\/colors\/([^/]+)(\/opengraph-image)?$/;

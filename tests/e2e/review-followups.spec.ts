@@ -4,7 +4,7 @@ import { gotoLoaded } from './helpers';
 // Follow-ups from the post-landing review of Direction B (#78-#81, #84-#86).
 const PHONE = { width: 390, height: 844 };
 const DESKTOP = { width: 1440, height: 900 };
-const PAINT = '/colors/san-marino-blue';
+const PAINT = '/colors/san-marino-blue-metallic';
 
 for (const [name, size] of [['phone', PHONE], ['desktop', DESKTOP]] as const) {
   test.describe(`M stripe (${name})`, () => {

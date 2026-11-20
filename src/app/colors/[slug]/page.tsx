@@ -10,6 +10,7 @@ import { rankOf, rankNote, paintSummary } from '../../../lib/paint-summary';
 import RowActions from '../../../components/RowActions';
 import { forumTagLabel } from '../../../lib/entry-display';
 import PaintSwatch from '../../../components/PaintSwatch';
+import PaintSource from '../../../components/PaintSource';
 import type { Metadata } from 'next';
 import { cssVars } from '../../../lib/css-vars';
 import styles from './page.module.css';
@@ -168,6 +169,7 @@ export default async function ColorDetailPage({ params }: { params: Promise<{ sl
               Also known as <span className={styles.aliasNames}>{aliases.join(', ')}</span>
             </p>
           )}
+          <PaintSource name={colorName} />
         </div>
 
         <div className={styles.cove} aria-hidden="true">

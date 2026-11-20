@@ -55,7 +55,7 @@ test.describe('Fixture page screenshots', () => {
 test.describe('No horizontal overflow at 390px', () => {
   test.use({ viewport: { width: 390, height: 844 } });
 
-  const ROUTES = ['/', '/colors', '/colors/san-marino-blue', '/entries', '/reports', '/map', '/submit'];
+  const ROUTES = ['/', '/colors', '/colors/san-marino-blue-metallic', '/entries', '/reports', '/map', '/submit'];
   for (const route of ROUTES) {
     test(route, async ({ page }) => {
       await gotoLoaded(page, route);
@@ -69,7 +69,7 @@ test.describe('Fonts load', () => {
   const ROUTES: Array<{ route: string; paintName: boolean }> = [
     { route: '/', paintName: true },
     { route: '/colors', paintName: true },
-    { route: '/colors/san-marino-blue', paintName: true },
+    { route: '/colors/san-marino-blue-metallic', paintName: true },
     { route: '/entries', paintName: false },
     { route: '/reports', paintName: false },
     { route: '/map', paintName: false },
@@ -92,7 +92,7 @@ test.describe('Fonts load', () => {
 
 test.describe('Swatch finishes', () => {
   test('San Marino Blue (catalog metallic) shows a metallic swatch', async ({ page }) => {
-    await gotoLoaded(page, '/colors/san-marino-blue');
+    await gotoLoaded(page, '/colors/san-marino-blue-metallic');
     await expect(page.locator('[data-finish="metallic"]').first()).toBeAttached();
     await expect(page.locator('[data-finish="solid"]')).toHaveCount(0);
   });

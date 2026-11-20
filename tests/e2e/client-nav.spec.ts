@@ -169,8 +169,8 @@ test.describe('Paint pages after in-app navigation', () => {
   test('Home: a wall strip opens its paint page, with charts for a paint that has enough builds', async ({ page }) => {
     await gotoLoaded(page, '/');
     await markSpa(page);
-    const strip = page.locator('a[href="/colors/san-marino-blue"]:visible').first();
-    await clickThrough(page, strip, /\/colors\/san-marino-blue$/);
+    const strip = page.locator('a[href="/colors/san-marino-blue-metallic"]:visible').first();
+    await clickThrough(page, strip, /\/colors\/san-marino-blue-metallic$/);
     await expect(page.getByRole('heading', { level: 1 })).toContainText(/san marino blue/i);
     await expect(page.locator('dl dt', { hasText: /^Builds$/ })).toBeVisible();
     await expect(page.locator('svg').first()).toBeVisible();
@@ -179,8 +179,8 @@ test.describe('Paint pages after in-app navigation', () => {
   test('Colors: a tile opens its paint page, and its builds offer the report dialog', async ({ page }) => {
     await gotoLoaded(page, '/colors');
     await markSpa(page);
-    const tile = page.locator('a[href="/colors/san-marino-blue"]:visible').first();
-    await clickThrough(page, tile, /\/colors\/san-marino-blue$/);
+    const tile = page.locator('a[href="/colors/san-marino-blue-metallic"]:visible').first();
+    await clickThrough(page, tile, /\/colors\/san-marino-blue-metallic$/);
     await expect(page.getByRole('heading', { level: 1 })).toContainText(/san marino blue/i);
     await openReportDialog(page);
     await expectSpa(page);
@@ -203,7 +203,7 @@ test.describe('Paint search after in-app navigation', () => {
     await input.fill('san marino');
     const option = page.getByRole('option').first();
     await expect(option).toBeVisible();
-    await clickThrough(page, option, /\/colors\/san-marino-blue$/);
+    await clickThrough(page, option, /\/colors\/san-marino-blue-metallic$/);
     await expect(page.getByRole('heading', { level: 1 })).toContainText(/san marino blue/i);
   }
 
@@ -243,7 +243,7 @@ test.describe('Paint search after in-app navigation', () => {
     await expect(page).toHaveURL(/\/$/, { timeout: 20000 });
     await expectSpa(page);
     await waitLoaded(page);
-    const strip = page.locator('a[href="/colors/san-marino-blue"]:visible').first();
+    const strip = page.locator('a[href="/colors/san-marino-blue-metallic"]:visible').first();
     await strip.focus();
     await expect(page.locator('[aria-live="polite"] b').filter({ hasText: /san marino blue/i })).toBeVisible();
     await expectSpa(page);

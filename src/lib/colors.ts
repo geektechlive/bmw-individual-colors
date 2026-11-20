@@ -1,139 +1,14 @@
 import { legacySlugTarget } from './legacy-slugs';
+import { PAINT_ALIASES, PAINT_REFERENCE } from './paint-reference';
 
-// BMW Individual Program colors — G80/G82 M3/M4 era
-// Hex values are best-match approximations for visualization purposes.
-export const BMW_COLORS: Record<string, string> = {
-  // Blues
-  "Aegean Blue":               "#1a3d6b",
-  "Atlantis Blue Metallic":    "#1a4b8c",
-  "Black Blue":                "#0d1a2e",
-  "Daytona Beach Blue":        "#1e5f8c",
-  "Eridan Blue":               "#1e3d6e",
-  "Frozen Portimao Blue":      "#1e3a8a",
-  "Gentian Blue":              "#1c3a7a",
-  "Marina Bay Blue":           "#1e5c8c",
-  "Mauritius Blue":            "#1e4a8c",
-  "Mexico Blue":               "#1e5c9c",
-  // Porsche M5C, ordered via BMW Individual (#16). Hex: colors.stuttcars.com structured data.
-  "Miami Blue":                "#1BBFE8",
-  "Midnight Blue":             "#1a2a4a",
-  "Marhon Blue":               "#1e4c7c",
-  "Portimao Blue":             "#1e3a8c",
-  "Riviera Blue":              "#1e6a9c",
-  "San Marino Blue":           "#1e4c8c",
-  "Santorini Blue":            "#1c3d6e",
-  "Snapper Rocks Blue":        "#1e6aac",
-  "Tanzanite Blue":            "#1e3a7c",
-  "Tanzanite Blue II":         "#1a3070",
-  "Velvet Blue":               "#1a2a5c",
-  "Violet Blue":               "#2a1a5c",
-  "Voodoo Blue":               "#1b3a6b",
-  "Le Mans Blue":              "#1c4c8c",
-
-  // Greens
-  "Brewster Green":            "#1e3d20",
-  "British Racing Green":      "#1a3c2f",
-  "Isle of Man Green":         "#1a5c2a",
-  "Jack Green":                "#1a5c2a",
-  "Oxford Green II Metallic":  "#2a4a2a",
-  "Verde Ermes":               "#2a5a2a",
-
-  // Reds & Oranges
-  "Fire Orange III":           "#c44c0e",
-  "Frozen Orange II":          "#d4661e",
-  "Imola Red":                 "#a51c1c",
-  "Rosso Corsa":               "#c41c1c",
-  "Sunset Orange":             "#d45c1e",
-  "Speed Yellow":              "#e8c820",
-
-  // Yellows
-  "Dakar Yellow":              "#e8c840",
-  "Dakar Yellow II":           "#e0bc30",
-
-  // Purples
-  "Twilight Purple":           "#5a3a7a",
-  "Wildberry":                 "#7a1a4a",
-
-  // Greys & Blacks
-  "Chalk":                     "#d4cfc9",
-  "Cosmos Black":              "#1a1a1a",
-  "Dravit Grey Metallic":      "#5c5c6a",
-  "Fashion Grey":              "#9e9e9e",
-  "Frozen Black":              "#2a2a2a",
-  "Frozen Dark Grey":          "#4a4a4a",
-  "Frozen Deep Grey":          "#3a3a3a",
-  "Grey Black":                "#2a2a2a",
-  "Grigio Telesto":            "#7a7a8a",
-  "Gunmetal Gray II":          "#5a5a5a",
-  "Jerez Black":               "#1a1a2a",
-  "Lime Rock Grey":            "#8a8a7a",
-  "Lime Rock Grey Metallic":   "#8a8a7a",
-  "Mora Metallic":             "#6a3a5a",
-  "Nardo Grey":                "#9a9a9a",
-  "Oxide Grey":                "#7a7a7a",
-  "Thunder":                   "#3a3a3a",
-
-  // Others
-  "Lime Green":                "#4a8a1a",
-
-  // MY2024 additions
-  "Techno Violet Metallic":    "#4a2a7a",
-
-  // MY2027 additions
-  "Agave":                     "#3a6a3a",
-  "Anglesey Green Metallic":   "#1e4a2a",
-  "Blue Bay Lagoon Metallic":  "#1a6a8c",
-  "Borusan Turkish Blue":      "#1a4a8c",
-  "Daytona Violet":            "#4a1a6a",
-  "Goodwood Green Pearl":      "#1a3a2a",
-  "Irish Green":               "#1a6a2a",
-  "Laguna Seca Blue":          "#1e5a9c",
-  "Ruby Star Neo":             "#8c1a2a",
-  "Sakhir Orange III":         "#c45a1a",
-  "Santorini Blue II":         "#1a3560",
-  "Sepia Metallic III":        "#7a5a3a",
-
-  // Frozen individual colors
-  "Frozen Cashmere Silver Metallic":  "#c4bfb8",
-  "Frozen Dark Silver":               "#8a8a8a",
-  "Frozen Maple":                     "#c4a87a",
-  "Frozen Pure Grey":                 "#8a8a8a",
-  "Frozen Preciosa Red Metallic":     "#c87272",
-  "Preciosa Red Metallic":            "#b01c1c",
-
-  // Additional Individual program colors
-  "Almandine Brown Metallic":  "#6a3a2a",
-  "Almeria Blue":              "#1e4a8c",
-  "Cashmere Silver Metallic":  "#b4b0aa",
-  "Cedar Brown":               "#6a3a1a",
-  "Chianti Red":               "#8c1a1a",
-  "Cinnabar Red":              "#b42a1a",
-  "Como Blue Metallic":        "#1a3a6a",
-  "Copper":                    "#aa5c1e",
-  "Dolomite Grey":             "#9a9a9a",
-  "Gold Bronze":               "#aa7a2a",
-  "Himalaya Grey":             "#8a8a8a",
-  "Kyoto Green Metallic":      "#2a5a3a",
-  "Lanzarote Bronze":          "#7a5a2a",
-  "Macao Blue Metallic":       "#1a3a7a",
-  "Mandalika Blue":            "#1a4a8c",
-  "Monza Blue":                "#1a2a6a",
-  "Mugello Blue":              "#1a3a7a",
-  "Nurburgring Blue":          "#1a2a5c",
-  "Picasso Red":               "#8c1a1a",
-  "Pyrite Bronze":             "#7a5a1a",
-  "Sepang Bronze":             "#8a6a2a",
-  "Silicon Grey":              "#8a8a8a",
-  "Smoked White":              "#ddd8d2",
-  "Snowy White":               "#f0ede8",
-  "Solar Orange":              "#d45a1a",
-  "Stormwater":                "#6a7a8a",
-  "Turbine Grey":              "#7a7a7a",
-  "Verde Mantis":              "#4a8a2a",
-  "Violett Petrol":            "#2a4a6a",
-  "Wagon Green":               "#2a5a2a",
-  "Zinnober Red":              "#b42a1a",
-};
+// The paint catalog (#93, ADR 0019). The paint CODE is the identity and the name follows BMW,
+// so the list, hex and family live in the generated paint-reference.ts (BMW's Individual
+// paint list, its archived visualizer pages, plus a few unverified names that have builds).
+// Hex values are display colors: the old catalog value where the paint was already listed,
+// else BMW's own; archived paints are approximations.
+export const BMW_COLORS: Record<string, string> = Object.fromEntries(
+  Object.entries(PAINT_REFERENCE).map(([name, ref]) => [name, ref.hex])
+);
 
 /**
  * For custom/unknown color names, infer a reasonable hex from keywords in the name.
@@ -189,70 +64,10 @@ export function getColorHex(colorName: string): string {
   return ownValue(BMW_COLORS, colorName) ?? guessColorFromName(colorName);
 }
 
-export const COLOR_FAMILY_MAP: Record<string, string> = {
-  // Blues
-  "Aegean Blue": "Blues", "Atlantis Blue Metallic": "Blues", "Black Blue": "Blues",
-  "Daytona Beach Blue": "Blues", "Eridan Blue": "Blues", "Miami Blue": "Blues",
-  "Frozen Portimao Blue": "Blues", "Gentian Blue": "Blues",
-  "Marina Bay Blue": "Blues", "Mauritius Blue": "Blues", "Mexico Blue": "Blues",
-  "Midnight Blue": "Blues", "Marhon Blue": "Blues", "Portimao Blue": "Blues",
-  "Riviera Blue": "Blues", "San Marino Blue": "Blues", "Santorini Blue": "Blues",
-  "Snapper Rocks Blue": "Blues", "Tanzanite Blue": "Blues", "Tanzanite Blue II": "Blues",
-  "Velvet Blue": "Blues", "Violet Blue": "Blues", "Voodoo Blue": "Blues",
-  "Blue Bay Lagoon Metallic": "Blues", "Borusan Turkish Blue": "Blues",
-  "Laguna Seca Blue": "Blues", "Santorini Blue II": "Blues", "Le Mans Blue": "Blues",
-  // Greens
-  "Brewster Green": "Greens", "British Racing Green": "Greens",
-  "Isle of Man Green": "Greens", "Jack Green": "Greens",
-  "Oxford Green II Metallic": "Greens", "Verde Ermes": "Greens",
-  "Agave": "Greens", "Anglesey Green Metallic": "Greens",
-  "Goodwood Green Pearl": "Greens", "Irish Green": "Greens", "Lime Green": "Greens",
-  // Reds & Oranges
-  "Fire Orange III": "Reds & Oranges",
-  "Frozen Orange II": "Reds & Oranges", "Imola Red": "Reds & Oranges",
-  "Rosso Corsa": "Reds & Oranges", "Sunset Orange": "Reds & Oranges",
-  "Sakhir Orange III": "Reds & Oranges", "Ruby Star Neo": "Reds & Oranges",
-  // Yellows
-  "Speed Yellow": "Yellows", "Dakar Yellow": "Yellows", "Dakar Yellow II": "Yellows",
-  // Purples
-  "Twilight Purple": "Purples", "Wildberry": "Purples",
-  "Techno Violet Metallic": "Purples", "Daytona Violet": "Purples",
-  // Reds & Oranges (additional)
-  "Frozen Preciosa Red Metallic": "Reds & Oranges", "Preciosa Red Metallic": "Reds & Oranges",
-  "Chianti Red": "Reds & Oranges", "Cinnabar Red": "Reds & Oranges",
-  "Picasso Red": "Reds & Oranges", "Zinnober Red": "Reds & Oranges",
-  "Solar Orange": "Reds & Oranges",
-  // Greens (additional)
-  "Kyoto Green Metallic": "Greens", "Verde Mantis": "Greens", "Wagon Green": "Greens",
-  // Blues (additional)
-  "Almeria Blue": "Blues", "Como Blue Metallic": "Blues", "Macao Blue Metallic": "Blues",
-  "Mandalika Blue": "Blues", "Monza Blue": "Blues", "Mugello Blue": "Blues",
-  "Nurburgring Blue": "Blues", "Violett Petrol": "Blues",
-  // Greys & Blacks (additional)
-  "Cashmere Silver Metallic": "Greys & Blacks", "Frozen Cashmere Silver Metallic": "Greys & Blacks",
-  "Dolomite Grey": "Greys & Blacks", "Frozen Dark Silver": "Greys & Blacks",
-  "Frozen Pure Grey": "Greys & Blacks", "Himalaya Grey": "Greys & Blacks",
-  "Silicon Grey": "Greys & Blacks", "Smoked White": "Greys & Blacks",
-  "Snowy White": "Greys & Blacks", "Stormwater": "Greys & Blacks",
-  "Turbine Grey": "Greys & Blacks",
-  // Browns & Metallic (map to Greys & Blacks for now)
-  "Almandine Brown Metallic": "Greys & Blacks", "Cedar Brown": "Greys & Blacks",
-  "Copper": "Greys & Blacks", "Gold Bronze": "Greys & Blacks",
-  "Lanzarote Bronze": "Greys & Blacks", "Pyrite Bronze": "Greys & Blacks",
-  "Sepang Bronze": "Greys & Blacks",
-  // Yellows (additional)
-  "Frozen Maple": "Yellows",
-  // Greys & Blacks
-  "Chalk": "Greys & Blacks", "Cosmos Black": "Greys & Blacks",
-  "Dravit Grey Metallic": "Greys & Blacks", "Fashion Grey": "Greys & Blacks",
-  "Frozen Black": "Greys & Blacks", "Frozen Dark Grey": "Greys & Blacks",
-  "Frozen Deep Grey": "Greys & Blacks", "Grey Black": "Greys & Blacks",
-  "Grigio Telesto": "Greys & Blacks", "Gunmetal Gray II": "Greys & Blacks",
-  "Jerez Black": "Greys & Blacks", "Lime Rock Grey": "Greys & Blacks", "Lime Rock Grey Metallic": "Greys & Blacks",
-  "Mora Metallic": "Greys & Blacks", "Nardo Grey": "Greys & Blacks",
-  "Oxide Grey": "Greys & Blacks", "Thunder": "Greys & Blacks",
-  "Sepia Metallic III": "Greys & Blacks",
-};
+/** Every listed color has an explicit family (tests/unit/colors-validation.test.ts). */
+export const COLOR_FAMILY_MAP: Record<string, string> = Object.fromEntries(
+  Object.entries(PAINT_REFERENCE).map(([name, ref]) => [name, ref.family])
+);
 
 export function getColorFamily(colorName: string): string {
   const known = ownValue(COLOR_FAMILY_MAP, colorName);
@@ -323,19 +138,14 @@ export function isLightColor(hex: string): boolean {
 }
 
 /**
- * Alternate / regional names that BMW (and forum posters) use for a color that
- * already exists in BMW_COLORS under a different canonical name.
- * Key = alias as it appears in the wild, value = canonical BMW_COLORS key.
+ * Old and alternate names for a color that is listed under a different name: "Twilight Purple"
+ * is BMW's "Twilight Purple Pearl effect" (P28), "Enzian Blue" is "Gentian Blue", "Fire Orange"
+ * is "Fire Orange III" (#91). Key = the name as stored or typed, value = the listed name.
+ * Generated from data/paint-rulings.json by scripts/gen-paint-reference.ts (#93).
  *
  * Note: wheel designations ("826M", "1000M", ...) are NOT colors and never belong here.
  */
-export const COLOR_ALIASES: Record<string, string> = {
-  'Enzian Blue': 'Gentian Blue',
-  'Verde British Racing': 'British Racing Green',
-  'Daytona Violet Metallic': 'Daytona Violet',
-  // On a G80/G82 the Individual Fire Orange is Fire Orange III; owners drop the "III" (#91).
-  'Fire Orange': 'Fire Orange III',
-};
+export const COLOR_ALIASES: Record<string, string> = { ...PAINT_ALIASES };
 
 // Lowercase lookup tables built once at module scope — canonicalColorName runs
 // once per registry row per request, so per-call map construction would be hot.
@@ -373,6 +183,18 @@ export function canonicalColorName(name: string): string {
   if (exact) return exact;
   // "Twilight-Purple" and "twilight_purple" are the same paint as "Twilight Purple" (#55).
   return catalogNameForSlug(colorToSlug(cleaned)) ?? cleaned;
+}
+
+/**
+ * Every spelling a stored row may carry for one paint: the listed name plus every alias that
+ * points at it. Rows written before a rename keep their old ext_color (the database is not
+ * rewritten, ADR 0019), so a database filter on a paint must match all of them.
+ */
+export function paintNameSpellings(canonicalName: string): string[] {
+  const aliases = Object.entries(COLOR_ALIASES)
+    .filter(([, target]) => target === canonicalName)
+    .map(([alias]) => alias);
+  return [canonicalName, ...aliases];
 }
 
 /** Slug → canonical catalog name, aliases included. A Map: slugs are derived from free text. */

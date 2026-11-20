@@ -1,0 +1,33 @@
+/* Source line on a paint page (#93). Sits on the paint-tinted hero wash, so text stays ink-2
+   or ink (both are checked against the wash in tests/unit/paint-page.test.ts). */
+
+.source {
+  display: grid;
+  gap: var(--s-1);
+  margin: var(--s-3) 0 0;
+  font-size: var(--t-13);
+  color: var(--ink-2);
+}
+
+.source p {
+  margin: 0;
+}
+
+.label {
+  font-family: var(--font-mono);
+}
+
+.code {
+  font-family: var(--font-mono);
+  color: var(--ink);
+}
+
+.source a {
+  color: var(--paint-ink);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.source a:hover {
+  text-decoration-thickness: 2px;
+}

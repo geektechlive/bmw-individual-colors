@@ -39,7 +39,7 @@ test('ownValue only reads own keys', () => {
 });
 
 test('real paints still resolve', () => {
-  assert.equal(getColorHex('Twilight Purple'), '#5a3a7a');
-  assert.equal(getColorFamily('Twilight Purple'), 'Purples');
-  assert.equal(canonicalColorName('twilight purple'), 'Twilight Purple');
+  assert.equal(getColorHex('Twilight Purple Pearl effect'), '#5a3a7a');
+  assert.equal(getColorFamily('Twilight Purple Pearl effect'), 'Purples');
+  assert.equal(canonicalColorName('twilight purple'), 'Twilight Purple Pearl effect');
 });
