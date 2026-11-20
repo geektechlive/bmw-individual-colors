@@ -39,6 +39,8 @@ test('paint-page links use IntentLink', () => {
     (file) =>
       !file.includes('opengraph-image') &&
       !file.includes(join('colors', '[slug]', 'page.tsx')) &&
+      // Redirect targets, not links (#94).
+      !file.includes(join('colors', '[slug]', 'layout.tsx')) &&
       !file.endsWith('PaintLookup.tsx'),
   );
   assert.ok(linking.length >= 5, `expected the 5 linking components, found ${linking.length}`);

@@ -8,6 +8,8 @@ Run `npx tsx scripts/post-to-bimmerpost.ts` to publish pending items to the foru
 
 ## [Unreleased]
 
+- **Fixed:** unknown paint pages answer a real 404 (#94)
+
 - **Added:** paint names follow BMW, with the source on every paint page (#93)
 
 - **Improved:** first visits reuse a page rendered anywhere, not just at their data center (#21)

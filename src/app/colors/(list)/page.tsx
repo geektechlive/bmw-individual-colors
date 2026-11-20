@@ -1,9 +1,9 @@
 import Link from 'next/link';
-import { getEntries } from '../../lib/queries';
-import { computeColorCounts, computeRarityLabel } from '../../lib/analytics';
-import { getColorFamily, colorToSlug } from '../../lib/colors';
-import { getPaintFinish } from '../../lib/paint-finish';
-import ColorsBrowser from '../../components/colors/ColorsBrowser';
+import { getEntries } from '../../../lib/queries';
+import { computeColorCounts, computeRarityLabel } from '../../../lib/analytics';
+import { getColorFamily, colorToSlug } from '../../../lib/colors';
+import { getPaintFinish } from '../../../lib/paint-finish';
+import ColorsBrowser from '../../../components/colors/ColorsBrowser';
 import type { Metadata } from 'next';
 import styles from './page.module.css';
 
