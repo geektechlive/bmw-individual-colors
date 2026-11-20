@@ -39,7 +39,6 @@ export const BMW_COLORS: Record<string, string> = {
   "Verde Ermes":               "#2a5a2a",
 
   // Reds & Oranges
-  "Fire Orange":               "#c45c1e",
   "Fire Orange III":           "#c44c0e",
   "Frozen Orange II":          "#d4661e",
   "Imola Red":                 "#a51c1c",
@@ -209,7 +208,7 @@ export const COLOR_FAMILY_MAP: Record<string, string> = {
   "Agave": "Greens", "Anglesey Green Metallic": "Greens",
   "Goodwood Green Pearl": "Greens", "Irish Green": "Greens", "Lime Green": "Greens",
   // Reds & Oranges
-  "Fire Orange": "Reds & Oranges", "Fire Orange III": "Reds & Oranges",
+  "Fire Orange III": "Reds & Oranges",
   "Frozen Orange II": "Reds & Oranges", "Imola Red": "Reds & Oranges",
   "Rosso Corsa": "Reds & Oranges", "Sunset Orange": "Reds & Oranges",
   "Sakhir Orange III": "Reds & Oranges", "Ruby Star Neo": "Reds & Oranges",
@@ -334,6 +333,8 @@ export const COLOR_ALIASES: Record<string, string> = {
   'Enzian Blue': 'Gentian Blue',
   'Verde British Racing': 'British Racing Green',
   'Daytona Violet Metallic': 'Daytona Violet',
+  // On a G80/G82 the Individual Fire Orange is Fire Orange III; owners drop the "III" (#91).
+  'Fire Orange': 'Fire Orange III',
 };
 
 // Lowercase lookup tables built once at module scope — canonicalColorName runs

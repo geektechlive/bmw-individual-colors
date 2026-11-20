@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { BMW_COLORS, COLOR_ALIASES, COLOR_FAMILY_MAP, aliasRedirectSlug, colorToSlug, getColorFamily, getColorHex, slugToColor } from '../../src/lib/colors';
+import { BMW_COLORS, COLOR_ALIASES, COLOR_FAMILY_MAP, aliasRedirectSlug, canonicalColorName, colorToSlug, getColorFamily, getColorHex, slugToColor } from '../../src/lib/colors';
 import { snapColorName, normalizeTransmission, normalizeWheels, updateErrorMessage } from '../../src/lib/validation';
 
 // ---- #36 duplicate on edit -----------------------------------------------------------------
@@ -32,6 +32,14 @@ test('aliases are canonicalized on write, so one car cannot be stored under two 
     assert.equal(snapColorName(alias), canonical, alias);
     assert.equal(snapColorName(alias.toUpperCase()), canonical, `${alias} upper`);
   }
+});
+
+test('"Fire Orange" folds into Fire Orange III and its old page redirects (#91)', () => {
+  assert.equal(canonicalColorName('Fire Orange'), 'Fire Orange III');
+  assert.equal(snapColorName('fire orange'), 'Fire Orange III');
+  assert.equal('Fire Orange' in BMW_COLORS, false);
+  assert.equal(aliasRedirectSlug('fire-orange'), 'fire-orange-iii');
+  assert.equal(canonicalColorName('Fire Orange III'), 'Fire Orange III');
 });
 
 test('alias names are not offered as separate colors (#35)', () => {
