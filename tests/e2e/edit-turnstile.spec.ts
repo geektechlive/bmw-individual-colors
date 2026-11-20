@@ -1,5 +1,5 @@
 import { test, expect, type Page } from '@playwright/test';
-import { gotoLoaded, openFirstEditLink } from './helpers';
+import { clickNav, gotoLoaded, openFirstEditLink } from './helpers';
 
 /*
  * #90: the security check must appear however a visitor reaches a form. The Turnstile
@@ -14,13 +14,6 @@ const TOKEN = 'input[name="cf-turnstile-response"]';
 async function expectOneIssuedToken(page: Page) {
   await expect(page.locator(TOKEN)).toHaveCount(1, { timeout: 20000 });
   await expect.poll(async () => page.locator(TOKEN).inputValue(), { timeout: 20000 }).not.toBe('');
-}
-
-/** Click a main-nav link the way a visitor would: through the hamburger on a phone. */
-async function clickNav(page: Page, name: string) {
-  const toggle = page.locator('.nav-toggle');
-  if (await toggle.isVisible()) await toggle.click();
-  await page.getByRole('link', { name, exact: true }).locator('visible=true').first().click();
 }
 
 const clickNavSubmit = (page: Page) => clickNav(page, 'Submit');

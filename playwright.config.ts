@@ -20,7 +20,7 @@ export default defineConfig({
       // iPhone 14 on real WebKit (Safari's engine). Needs `npx playwright install webkit`.
       name: 'mobile',
       use: { ...devices['iPhone 14'] },
-      testMatch: /mobile-nav|edit|targets|entries-phone|colors-phone|map-phone/,
+      testMatch: /mobile-nav|edit|targets|entries-phone|colors-phone|map-phone|client-nav/,
     },
     {
       // Always-on WebKit for the design matrix and interactions (design spec, "How it is
