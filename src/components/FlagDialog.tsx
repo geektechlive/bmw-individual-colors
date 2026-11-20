@@ -2,28 +2,10 @@
 
 import { useId, useState, useTransition, useRef, useEffect } from 'react';
 import { flagEntry } from '../app/actions';
+import { useTurnstile } from './form/useTurnstile';
 import { FLAG_NOTE_MAX, FLAG_REASONS, FLAG_REASON_LABELS, type FlagReason } from '../lib/flag-validation';
 
 import styles from './FlagDialog.module.css';
-
-const TURNSTILE_SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? '0x4AAAAAAC6yXfM_xBBaAkKj';
-
-declare global {
-  interface Window {
-    turnstile?: {
-      render: (el: HTMLElement, options: {
-        sitekey: string;
-        callback?: (token: string) => void;
-        'error-callback'?: () => void;
-        'expired-callback'?: () => void;
-        size?: 'normal' | 'compact' | 'invisible';
-        theme?: 'light' | 'dark' | 'auto';
-      }) => string;
-      remove: (widgetId: string) => void;
-      reset: (widgetId: string) => void;
-    };
-  }
-}
 
 interface Props {
   id: string;
@@ -47,8 +29,11 @@ export default function FlagDialog({ id, onClose }: Props) {
   const canSubmit = Boolean(tsToken) && reason !== '' && (!noteRequired || note.trim() !== '');
   const [pending, startTransition] = useTransition();
   const dialogRef = useRef<HTMLDialogElement>(null);
-  const widgetContainerRef = useRef<HTMLDivElement>(null);
-  const widgetIdRef = useRef<string | null>(null);
+  const { containerRef: turnstileRef, reset: resetTurnstile } = useTurnstile({
+    onToken: (token) => setTsToken(token),
+    onLost: () => setTsToken(null),
+    size: 'compact',
+  });
   const flaggedRef = useRef(false);
   const reasonId = useId();
   const titleId = useId();
@@ -57,38 +42,6 @@ export default function FlagDialog({ id, onClose }: Props) {
     const dialog = dialogRef.current;
     if (dialog && !dialog.open) dialog.showModal();
   }, []);
-
-  useEffect(() => {
-    if (flagged || !widgetContainerRef.current || widgetIdRef.current) return;
-
-    let attempts = 0;
-    let timer: ReturnType<typeof setTimeout> | undefined;
-    const tryRender = () => {
-      if (!widgetContainerRef.current) return;
-      if (window.turnstile && !widgetIdRef.current) {
-        widgetIdRef.current = window.turnstile.render(widgetContainerRef.current, {
-          sitekey: TURNSTILE_SITE_KEY,
-          callback: (token: string) => setTsToken(token),
-          'error-callback': () => setTsToken(null),
-          'expired-callback': () => setTsToken(null),
-          size: 'compact',
-          theme: 'dark',
-        });
-      } else if (attempts < 20) {
-        attempts++;
-        timer = setTimeout(tryRender, 200);
-      }
-    };
-    tryRender();
-
-    return () => {
-      clearTimeout(timer);
-      if (widgetIdRef.current && window.turnstile) {
-        window.turnstile.remove(widgetIdRef.current);
-        widgetIdRef.current = null;
-      }
-    };
-  }, [flagged]);
 
   function close() {
     dialogRef.current?.close();
@@ -144,7 +97,7 @@ export default function FlagDialog({ id, onClose }: Props) {
             rows={2}
             className={`input ${styles.field} ${styles.note}`}
           />
-          <div ref={widgetContainerRef} />
+          <div ref={turnstileRef} />
           {flagError && <span className={styles.error}>{flagError}</span>}
           <div className={styles.actions}>
             <button
@@ -162,9 +115,7 @@ export default function FlagDialog({ id, onClose }: Props) {
                   }
                   setFlagError(result.error);
                   setTsToken(null);
-                  if (widgetIdRef.current && window.turnstile) {
-                    window.turnstile.reset(widgetIdRef.current);
-                  }
+                  resetTurnstile();
                 });
               }}
               className={`btn btn--danger ${styles.small}`}

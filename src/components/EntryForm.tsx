@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useTurnstile } from './form/useTurnstile';
 import Link from 'next/link';
 import { submitEntry } from '../app/actions';
 import { defaultsFromSubmission, useActionStateKeepingValues } from './form/keep-values';
@@ -10,19 +11,6 @@ import { fieldErrorProps, fieldForError } from './form/field-error';
 import { SUBMIT_DEFAULTS } from './form/options';
 import { useLocation } from './form/useLocation';
 import styles from './EntryForm.module.css';
-
-// Cloudflare Turnstile attaches a global widget API and invokes our named
-// callbacks via the data-callback/data-*-callback attributes. This is a
-// local, self-contained type — deliberately not shared with FlagDialog's
-// global Window augmentation, so this component doesn't depend on it.
-interface TurnstileWindow {
-  __entryFormTsSuccess?: (token: string) => void;
-  __entryFormTsExpired?: () => void;
-  __entryFormTsError?: () => void;
-  turnstile?: { reset: (selector: string) => void };
-}
-
-const TURNSTILE_SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || '0x4AAAAAAC6yXfM_xBBaAkKj';
 
 export default function EntryForm() {
   // Keeps the last submission so a duplicate warning or error doesn't reset the fields.
@@ -34,23 +22,15 @@ export default function EntryForm() {
   // Turnstile: the server consumes the token on every submitEntry call, even
   // when it just returns an error or a duplicate warning. Once that happens
   // the rendered widget's token is stale, so both submit buttons are disabled
-  // until a fresh token comes back via the widget's data-callback.
+  // until a fresh token comes back via the widget's callback.
   // It starts true: until the widget issues its FIRST token a submit would cost a round
-  // trip and an error.
+  // trip and an error. The widget is rendered by this component (#90), so its callbacks
+  // exist before it can issue a token.
   const [needsFreshToken, setNeedsFreshToken] = useState(true);
-
-  // Register the Turnstile callbacks once on mount.
-  useEffect(() => {
-    const w = window as Window & TurnstileWindow;
-    w.__entryFormTsSuccess = () => setNeedsFreshToken(false);
-    w.__entryFormTsExpired = () => setNeedsFreshToken(true);
-    w.__entryFormTsError = () => setNeedsFreshToken(true);
-    // The widget lives in the layout's script and can issue its token before these
-    // callbacks exist (a cached script, a fast check). Its token sits in a hidden input,
-    // so look for one now; otherwise submit would wait forever for a callback already gone.
-    const token = document.querySelector<HTMLInputElement>('.cf-turnstile [name="cf-turnstile-response"]');
-    if (token?.value) w.__entryFormTsSuccess(token.value);
-  }, []);
+  const { containerRef: turnstileRef, reset: resetTurnstile } = useTurnstile({
+    onToken: () => setNeedsFreshToken(false),
+    onLost: () => setNeedsFreshToken(true),
+  });
 
   // A server error or duplicate warning means the Turnstile token was consumed
   // server-side, so submits stay disabled until the widget issues a new one.
@@ -67,10 +47,8 @@ export default function EntryForm() {
   // (the same duplicate warning twice) must each reset the widget, or the buttons stay
   // disabled waiting for a token that never comes.
   useEffect(() => {
-    if ((state?.error || state?.duplicate) && (window as Window & TurnstileWindow).turnstile) {
-      (window as Window & TurnstileWindow).turnstile!.reset('.cf-turnstile');
-    }
-  }, [state]);
+    if (state?.error || state?.duplicate) resetTurnstile();
+  }, [state, resetTurnstile]);
 
   const submitDisabled = isPending || !forumUsername.trim() || needsFreshToken;
 
@@ -123,15 +101,8 @@ export default function EntryForm() {
         )}
       />
 
-      {/* Turnstile bot protection — script tag is loaded once in the root layout */}
-      <div
-        className="cf-turnstile"
-        data-sitekey={TURNSTILE_SITE_KEY}
-        data-theme="dark"
-        data-callback="__entryFormTsSuccess"
-        data-expired-callback="__entryFormTsExpired"
-        data-error-callback="__entryFormTsError"
-      />
+      {/* Turnstile bot protection, rendered by useTurnstile (#90) */}
+      <div className="cf-turnstile" ref={turnstileRef} />
 
       {needsFreshToken && !isPending && (
         <p className="field-hint" role="status">Waiting for the security check before you can submit.</p>

@@ -2,11 +2,8 @@
 
 import { useActionState, useEffect } from 'react';
 import { adminLogin } from '../actions';
+import { useTurnstile } from '../../components/form/useTurnstile';
 import styles from './AdminLoginForm.module.css';
-
-const TURNSTILE_SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? '0x4AAAAAAC6yXfM_xBBaAkKj';
-
-type TurnstileApi = { reset: (target: string) => void };
 
 /**
  * Admin sign-in (#32). The token is typed here once per 12 h and never put in
@@ -15,11 +12,11 @@ type TurnstileApi = { reset: (target: string) => void };
  */
 export default function AdminLoginForm() {
   const [state, action, pending] = useActionState(adminLogin, {});
+  const { containerRef: turnstileRef, reset: resetTurnstile } = useTurnstile();
 
   useEffect(() => {
-    const turnstile = (window as Window & { turnstile?: TurnstileApi }).turnstile;
-    if (state.error && turnstile) turnstile.reset('.cf-turnstile');
-  }, [state]);
+    if (state.error) resetTurnstile();
+  }, [state, resetTurnstile]);
 
   return (
     <form action={action} className={styles.form}>
@@ -34,7 +31,7 @@ export default function AdminLoginForm() {
         required
         className="input"
       />
-      <div className="cf-turnstile" data-sitekey={TURNSTILE_SITE_KEY} data-theme="dark" />
+      <div className="cf-turnstile" ref={turnstileRef} />
       {state.error && (
         <div role="alert" className={styles.error}>
           {state.error}

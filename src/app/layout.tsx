@@ -83,8 +83,9 @@ export default function RootLayout({
       className={`${archivo.variable} ${jetbrainsMono.variable} ${barlowCondensed.variable}`}
     >
       <body>
+        {/* Explicit render: each form draws its own check via useTurnstile (#90). */}
         <Script
-          src="https://challenges.cloudflare.com/turnstile/v0/api.js"
+          src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit"
           strategy="afterInteractive"
         />
         <a href="#main-content" className={styles.skip}>

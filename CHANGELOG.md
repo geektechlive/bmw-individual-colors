@@ -8,6 +8,8 @@ Run `npx tsx scripts/post-to-bimmerpost.ts` to publish pending items to the foru
 
 ## [Unreleased]
 
+- **Fixed:** submit and edit forms work after an in-app link (#90)
+
 ## [2026-11-18] https://g80.bimmerpost.com/forums/showpost.php?p=33075064 (posted by hand)
 
 - **Fixed:** São Paulo Yellow's page is /colors/sao-paulo-yellow, the old link still works (#75)

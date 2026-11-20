@@ -4,17 +4,8 @@ import { useActionState, useEffect, useState } from 'react';
 import { verifyForumUsername } from '../../actions';
 import FormError from '../../../components/form/FormError';
 import { fieldErrorProps } from '../../../components/form/field-error';
+import { useTurnstile } from '../../../components/form/useTurnstile';
 import styles from './EditVerifyForm.module.css';
-
-const TURNSTILE_SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? '0x4AAAAAAC6yXfM_xBBaAkKj';
-
-// Cloudflare Turnstile attaches callbacks and the widget API to window.
-interface TurnstileWindow {
-  __tsSuccess?: () => void;
-  __tsExpired?: () => void;
-  __tsError?: () => void;
-  turnstile?: { reset: (selector: string) => void };
-}
 
 interface Props {
   entryId: string;
@@ -23,24 +14,21 @@ interface Props {
 export default function EditVerifyForm({ entryId }: Props) {
   const [state, action, isPending] = useActionState(verifyForumUsername, {});
   const [turnstileDone, setTurnstileDone] = useState(false);
+  // Rendered by this component, so it appears after an in-app link too (#90).
+  const { containerRef: turnstileRef, reset: resetTurnstile } = useTurnstile({
+    onToken: () => setTurnstileDone(true),
+    onLost: () => setTurnstileDone(false),
+  });
 
-  // Register global Turnstile callbacks once on mount
+  // The server consumed the token, so ask for a new one before the next try.
+  // Keyed on the response object: the same error twice must reset twice.
   useEffect(() => {
-    (window as Window & TurnstileWindow).__tsSuccess = () => setTurnstileDone(true);
-    (window as Window & TurnstileWindow).__tsExpired = () => setTurnstileDone(false);
-    (window as Window & TurnstileWindow).__tsError = () => setTurnstileDone(false);
-  }, []);
-
-  // Reset the widget whenever the server returns an error so the user can retry.
-  // setTurnstileDone(false) here is intentional — we're responding to an external
-  // state change (server error) and there's no dependency cycle risk.
-  useEffect(() => {
-    if (state?.error && (window as Window & TurnstileWindow).turnstile) {
-      (window as Window & TurnstileWindow).turnstile!.reset('.cf-turnstile');
+    if (state?.error) {
+      resetTurnstile();
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setTurnstileDone(false);
     }
-  }, [state?.error]);
+  }, [state, resetTurnstile]);
 
   const canSubmit = !isPending && turnstileDone;
 
@@ -70,14 +58,7 @@ export default function EditVerifyForm({ entryId }: Props) {
         />
       </div>
 
-      <div
-        className="cf-turnstile"
-        data-sitekey={TURNSTILE_SITE_KEY}
-        data-theme="dark"
-        data-callback="__tsSuccess"
-        data-expired-callback="__tsExpired"
-        data-error-callback="__tsError"
-      />
+      <div className="cf-turnstile" ref={turnstileRef} />
 
       <button
         type="submit"
