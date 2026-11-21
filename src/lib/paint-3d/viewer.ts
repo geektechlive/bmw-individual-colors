@@ -36,7 +36,7 @@ import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { FlakesTexture } from 'three/addons/textures/FlakesTexture.js';
 import { RectAreaLightUniformsLib } from 'three/addons/lights/RectAreaLightUniformsLib.js';
 import type { Finish } from '../paint-finish';
-import { ease, lerp, smooth, viewMetrics, rectToPose, targetPose, type Pose } from './flight';
+import { ease, lerp, smooth, stepMix, OPEN_MS, CLOSE_MS, SWAP_IN_MS, SWAP_OUT_MS, viewMetrics, rectToPose, targetPose, type Pose } from './flight';
 import { FLAKE_REPEAT, materialParams } from './material';
 import { buildSpeedShape, SPEED_SHAPE } from './speed-shape';
 
@@ -73,8 +73,6 @@ const START_YAW = -0.28; // the page card is tilted about -16 degrees in CSS
 const INTRO_YAW = 0.42;
 const INTRO_PITCH = -0.18;
 const CAR_PITCH = 0.32;
-const OPEN_MS = 650;
-const CLOSE_MS = 520;
 const DRAG_RADIANS_PER_PX = 0.008;
 const TAP_SLOP_PX = 6;
 const KEY_STEP = 0.06;
@@ -186,6 +184,8 @@ export function mountPaintViewer(canvas: HTMLCanvasElement, opts: ViewerOptions)
     dur: OPEN_MS,
     carMix: 0,
     carTarget: 0,
+    /** Timestamp of the previous frame, for the time-based swap (#97); 0 = none yet. */
+    lastFrame: 0,
     aspect: 0.714,
     yaw: 0,
     pitch: 0,
@@ -235,7 +235,7 @@ export function mountPaintViewer(canvas: HTMLCanvasElement, opts: ViewerOptions)
     st.aspect = rect.width / Math.max(1, rect.height);
     slab.scale.set(st.aspect, 1, 1);
     resize();
-    Object.assign(st, { open: true, firstFrame: false, yaw: 0, pitch: 0, vYaw: 0, vPitch: 0, carMix: 0, carTarget: 1, dir: 1, p: 0 });
+    Object.assign(st, { open: true, firstFrame: false, yaw: 0, pitch: 0, vYaw: 0, vPitch: 0, carMix: 0, carTarget: 1, lastFrame: 0, dir: 1, p: 0 });
     st.start = rectToPose(rect, metrics());
     st.target = targetPose(metrics());
     st.t0 = performance.now();
@@ -307,9 +307,13 @@ export function mountPaintViewer(canvas: HTMLCanvasElement, opts: ViewerOptions)
     }
 
     // Card and shape swap by scale: one shrinks away as the other grows in. The shape waits
-    // until the card is most of the way off the page.
+    // until the card is most of the way off the page. Timed in milliseconds (#97), so it runs
+    // the same on 60 Hz and 120 Hz screens; a long gap (tab switch) counts as one frame.
+    const dt = st.lastFrame ? Math.min(now - st.lastFrame, 50) : 16;
+    st.lastFrame = now;
     const carGo = st.dir === 1 ? (p > 0.7 ? st.carTarget : 0) : st.carTarget;
-    st.carMix += (carGo - st.carMix) * (rm ? 1 : st.dir === -1 ? 0.25 : 0.12);
+    const swapMs = rm ? 0 : carGo > st.carMix ? SWAP_IN_MS : SWAP_OUT_MS;
+    st.carMix = stepMix(st.carMix, carGo, dt, swapMs);
     const cm = smooth(0, 1, st.carMix);
     const flat = Math.max(0.001, 1 - cm);
     slab.visible = cm < 0.995;

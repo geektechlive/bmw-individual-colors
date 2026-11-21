@@ -8,6 +8,8 @@ Run `npx tsx scripts/post-to-bimmerpost.ts` to publish pending items to the foru
 
 ## [Unreleased]
 
+- **Fixed:** the paint card turns into the speed shape slowly enough to watch, on any screen (#97)
+
 - **Added:** tap the paint card to see the paint in 3D on a speed shape (#96)
 
 - **Fixed:** unknown paint pages answer a real 404 (#94)

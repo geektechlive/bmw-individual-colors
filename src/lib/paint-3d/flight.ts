@@ -38,6 +38,25 @@ export function rectToPose(rect: { left: number; top: number; width: number; hei
   };
 }
 
+/** The card's lift-off and landing flights (#96; slowed in #97 at the owner's request). */
+export const OPEN_MS = 800;
+export const CLOSE_MS = 950;
+/** How long the airborne card takes to become the speed shape (#97). Slow enough to watch. */
+export const SWAP_IN_MS = 1100;
+/** How long the shape takes to shrink back into the card on close; under CLOSE_MS so it lands flat. */
+export const SWAP_OUT_MS = 750;
+
+/**
+ * Moves the card-to-shape mix toward its target at a fixed rate per millisecond, so the swap
+ * takes the same time on a 60 Hz and a 120 Hz screen (#97; it used to step a fraction per frame).
+ * A duration of 0 (reduced motion) jumps straight to the target; a negative gap is ignored.
+ */
+export function stepMix(mix: number, target: number, dtMs: number, durMs: number): number {
+  if (durMs <= 0) return target;
+  const step = Math.max(0, dtMs) / durMs;
+  return target > mix ? Math.min(target, mix + step) : Math.max(target, mix - step);
+}
+
 /** Where the shape floats once airborne: centred, a little above the middle, half the view wide. */
 export function targetPose(m: ViewMetrics, refAspect = 1.6): Pose {
   const width = Math.min(m.visW * 0.5, m.visH * 0.5 * refAspect);
