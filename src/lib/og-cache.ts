@@ -28,9 +28,9 @@ export interface OgStore {
  * Bump when the card layout changes, so cached cards re-render. Deliberately NOT the deploy
  * id: keying on the deploy wiped every card on every deploy, and a crawler then re-rendered
  * them all at 1-2 s CPU each; Cloudflare killed some (2026-11-14, ADR 0006 addendum).
- * Also bump when a paint's hex changes (card-2: frozen paints use BMW's hex, #98).
+ * Also bump when a paint's hex changes (card-2: frozen paints use BMW's hex, #98; card-3: every BMW paint does, #99).
  */
-export const OG_DESIGN_VERSION = 'card-2';
+export const OG_DESIGN_VERSION = 'card-3';
 
 export interface OgCacheDeps {
   /** Undefined when the binding is not configured; the handler then steps aside. */

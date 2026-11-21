@@ -24,9 +24,24 @@ export function rarePaintCount(counts: readonly ColorCount[]): number {
   return counts.filter((c) => c.count <= RARE_MAX_BUILDS).length;
 }
 
-/** Every paint, ordered by hue: the order of the wall. */
+/** Families around the wheel, the wall's order. A family not listed here goes last. */
+const WALL_FAMILY_ORDER = ['Reds & Oranges', 'Yellows', 'Greens', 'Blues', 'Purples', 'Greys & Blacks'];
+
+const familyRank = (color: string): number => {
+  const i = WALL_FAMILY_ORDER.indexOf(getColorFamily(color));
+  return i === -1 ? WALL_FAMILY_ORDER.length : i;
+};
+
+/**
+ * Every paint, grouped by family in wheel order, then by hue within the family: the order of
+ * the wall. Family first, because the wall's ticks name families, and by hue alone a tinted
+ * grey lands among the blues and splits them into many runs (#99).
+ */
 export function wallPaintsByHue<T extends ColorCount>(counts: readonly T[]): T[] {
-  return sortByHue(counts);
+  return sortByHue(counts)
+    .map((p, i) => ({ p, i, f: familyRank(p.color) }))
+    .sort((a, b) => a.f - b.f || a.i - b.i)
+    .map(({ p }) => p);
 }
 
 export interface WallRun<T extends ColorCount = ColorCount> {

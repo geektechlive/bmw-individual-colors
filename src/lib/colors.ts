@@ -4,9 +4,8 @@ import { PAINT_ALIASES, PAINT_REFERENCE } from './paint-reference';
 // The paint catalog (#93, ADR 0019). The paint CODE is the identity and the name follows BMW,
 // so the list, hex and family live in the generated paint-reference.ts (BMW's Individual
 // paint list, its archived visualizer pages, plus a few unverified names that have builds).
-// Hex values are display colors: the old catalog value where the paint was already listed
-// (frozen paints use BMW's, #98),
-// else BMW's own; archived paints are approximations.
+// Hex values are display colors: BMW's own for every paint BMW lists (#98, #99); archived
+// and unverified paints are approximations.
 export const BMW_COLORS: Record<string, string> = Object.fromEntries(
   Object.entries(PAINT_REFERENCE).map(([name, ref]) => [name, ref.hex])
 );

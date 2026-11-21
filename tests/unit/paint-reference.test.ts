@@ -184,21 +184,22 @@ test('every paint with builds that BMW lists keeps a BMW source; only the named 
   assert.deepEqual([...unverified].sort(), ['Atlantis Blue Metallic', 'Frozen Orange II', 'Malachite Green Metallic', 'Mexico Blue', 'Snapper Rocks Blue', 'Sunset Orange', 'Verde Ermes']);
 });
 
-// #98: the old catalog drew frozen paints as a paler version of the base colour, so Frozen
-// Preciosa Red (P9C) showed as pink. Frozen paint is satin, not pastel: use BMW's own hex.
-test('every frozen paint BMW lists draws with BMW\'s own hex', () => {
+// #98, #99: the old catalog's display hex drifted from the real paint (Frozen Preciosa Red
+// drew as pink, Voodoo Blue as navy). Owners know their paint, so every paint BMW lists
+// draws with BMW's own hex. Only the near-white label-contrast overrides differ.
+test('every paint BMW lists draws with BMW\'s own hex', () => {
   const snapshot = JSON.parse(readFileSync('data/bmw-individual-paints-2026-11-20.json', 'utf8')) as {
     paints: { code: string; effect: string; hex: string }[];
   };
   // hexOverrides exist only for label contrast on near-white paints; they still win.
   const { hexOverrides } = JSON.parse(readFileSync('data/paint-rulings.json', 'utf8')) as { hexOverrides: Record<string, string> };
-  const frozen = snapshot.paints.filter((p) => p.effect === 'frozen');
-  assert.ok(frozen.length > 10);
-  for (const p of frozen) {
+  assert.ok(snapshot.paints.length > 150);
+  for (const p of snapshot.paints) {
     const entry = Object.entries(PAINT_REFERENCE).find(([, r]) => r.code?.split(', ').includes(p.code));
     assert.ok(entry, `${p.code} missing`);
     const expected = Object.hasOwn(hexOverrides, entry[0]) ? hexOverrides[entry[0]] : p.hex;
     assert.equal(entry[1].hex.toLowerCase(), expected.toLowerCase(), `${entry[0]} (${p.code})`);
   }
   assert.equal(BMW_COLORS['Frozen Preciosa Red Metallic'], '#622129');
+  assert.equal(BMW_COLORS['Voodoo Blue'], '#2998d0');
 });

@@ -8,6 +8,8 @@ Run `npx tsx scripts/post-to-bimmerpost.ts` to publish pending items to the foru
 
 ## [Unreleased]
 
+- **Fixed:** every paint draws in BMW's own colour; the home wall keeps each family together (#99)
+
 - **Fixed:** frozen paints draw in their real colour; Frozen Preciosa Red is wine red, not pink (#98)
 
 - **Fixed:** unknown paint pages answer a real 404 (#94)

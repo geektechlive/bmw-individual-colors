@@ -79,6 +79,21 @@ test('wallRuns keeps every paint exactly once', () => {
   assert.equal(runs.reduce((n, r) => n + r.paints.length, 0), palette.length);
 });
 
+// #99: BMW's greys carry a slight tint, so by hue alone a grey lands among the blues and the
+// wall splits into many runs, each with its own tick (17 runs overflowed a 320 px phone).
+test('the wall keeps each family in one run, in wheel order, even when a grey is tinted blue', () => {
+  const wall = wallPaintsByHue([
+    cc('San Marino Blue Metallic', 6, '#000685'),
+    cc('Frozen Pure Grey Metallic', 2, '#3f5a80'), // a grey-family paint with a blue hue
+    cc('Riviera Blue', 2, '#51bae2'),
+    cc('Twilight Purple Pearl effect', 1, '#452767'),
+    cc('Imola Red', 1, '#ca2a2e'),
+  ]);
+  const runs = wallRuns(wall);
+  assert.deepEqual(runs.map((r) => r.family), ['Reds & Oranges', 'Blues', 'Purples', 'Greys & Blacks']);
+  assert.deepEqual(runs[1].paints.map((p) => p.color), ['Riviera Blue', 'San Marino Blue Metallic']);
+});
+
 test('singleBuildPaints is exactly the paints with one build, in hue order', () => {
   assert.deepEqual(singleBuildPaints(palette).map((p) => p.color), ['Crimson', 'Green']);
   assert.deepEqual(singleBuildPaints([cc('A', 2), cc('B', 3)]), []);

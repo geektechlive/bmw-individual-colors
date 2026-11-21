@@ -17,9 +17,9 @@ test('other save errors keep the generic retry message (#36)', () => {
 // ---- #16 Miami Blue -------------------------------------------------------------
 
 test('Miami Blue is a known color with its sourced hex and the Blues family (#16)', () => {
-  // Porsche M5C, ordered through BMW Individual; hex from colors.stuttcars.com (structured data).
-  assert.equal(BMW_COLORS['Miami Blue'], '#1BBFE8');
-  assert.equal(getColorHex('Miami Blue'), '#1BBFE8');
+  // Porsche M5C, ordered through BMW Individual (P5W); hex from BMW's own data since #99.
+  assert.equal(BMW_COLORS['Miami Blue'], '#00a9bb');
+  assert.equal(getColorHex('Miami Blue'), '#00a9bb');
   assert.equal(getColorFamily('Miami Blue'), 'Blues');
   assert.equal(slugToColor('miami-blue'), 'Miami Blue');
   assert.equal(snapColorName('miami blue'), 'Miami Blue');
