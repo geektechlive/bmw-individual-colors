@@ -4,7 +4,8 @@ import { PAINT_ALIASES, PAINT_REFERENCE } from './paint-reference';
 // The paint catalog (#93, ADR 0019). The paint CODE is the identity and the name follows BMW,
 // so the list, hex and family live in the generated paint-reference.ts (BMW's Individual
 // paint list, its archived visualizer pages, plus a few unverified names that have builds).
-// Hex values are display colors: the old catalog value where the paint was already listed,
+// Hex values are display colors: the old catalog value where the paint was already listed
+// (frozen paints use BMW's, #98),
 // else BMW's own; archived paints are approximations.
 export const BMW_COLORS: Record<string, string> = Object.fromEntries(
   Object.entries(PAINT_REFERENCE).map(([name, ref]) => [name, ref.hex])
@@ -12,26 +13,24 @@ export const BMW_COLORS: Record<string, string> = Object.fromEntries(
 
 /**
  * For custom/unknown color names, infer a reasonable hex from keywords in the name.
- * "Frozen" variants get a muted/desaturated version of their base color.
+ * A frozen (satin) name gets its base colour: frozen paint is less glossy, not paler (#98).
  */
 export function guessColorFromName(name: string): string {
   const n = name.toLowerCase();
-  const isFrozen = n.includes('frozen') || n.includes('matte');
-
   if (/\bred\b|scarlet|crimson|carmine|corsa|ruby|preciosa|chianti|cinnabar|imola|zinnober|picasso|rosso/.test(n))
-    return isFrozen ? '#c87878' : '#b01c1c';
+    return '#b01c1c';
   if (/\borange\b|sakhir|solar/.test(n))
-    return isFrozen ? '#d4906a' : '#c2410c';
+    return '#c2410c';
   if (/\byellow\b|dakar|speed\s*yellow/.test(n))
-    return isFrozen ? '#d4c46a' : '#ca8a04';
+    return '#ca8a04';
   if (/\bgreen\b|verde|isle\s*of\s*man|brewster|racing\s*green|kyoto|mantis|wagon\s*green|irish\s*green|jack\s*green/.test(n))
-    return isFrozen ? '#6a9c6a' : '#15803d';
+    return '#15803d';
   if (/\bblue\b|azure|cobalt|sapphire|portimao|tanzanite|enzian|gentian|marina|mauritius|riviera|snapper|voodoo|aegean|atlantis|eridan|laguna|monza|macao|mandalika|mugello|nurburgring|como|almeria/.test(n))
-    return isFrozen ? '#6a7a9c' : '#1e3a8a';
+    return '#1e3a8a';
   if (/\bpurple\b|\bviolet\b|\bwildberry\b|twilight/.test(n))
-    return isFrozen ? '#8a6a9c' : '#6d28d9';
+    return '#6d28d9';
   if (/\bpink\b|\brose\b/.test(n))
-    return isFrozen ? '#d49aaa' : '#db2777';
+    return '#db2777';
   if (/\bbronze\b|pyrite|sepang|lanzarote/.test(n))
     return '#8a6a2a';
   if (/\bgold\b|\bcopper\b/.test(n))
@@ -39,13 +38,13 @@ export function guessColorFromName(name: string): string {
   if (/\bbrown\b|\bsepia\b|\bcedar\b|almandine/.test(n))
     return '#7a4a2a';
   if (/\bsilver\b|cashmere/.test(n))
-    return isFrozen ? '#c4bfb8' : '#9ca3af';
+    return '#9ca3af';
   if (/\bwhite\b|smoked\s*white|snowy/.test(n))
     return '#e0dbd5';
   if (/\bblack\b|cosmos|jerez/.test(n))
     return '#1a1a1a';
   if (/\bgrey\b|\bgray\b|nardo|oxide|dravit|grigio|gunmetal|fashion\s*grey|silicon|dolomite|turbine|himalaya|stormwater|lime\s*rock/.test(n))
-    return isFrozen ? '#9a9a9a' : '#6b7280';
+    return '#6b7280';
 
   return '#888888';
 }

@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { BMW_COLORS, COLOR_ALIASES, COLOR_FAMILY_MAP, aliasRedirectSlug, canonicalColorName, colorToSlug, getColorFamily, getColorHex, slugToColor } from '../../src/lib/colors';
+import { BMW_COLORS, COLOR_ALIASES, COLOR_FAMILY_MAP, aliasRedirectSlug, canonicalColorName, colorToSlug, getColorFamily, getColorHex, guessColorFromName, slugToColor } from '../../src/lib/colors';
 import { snapColorName, normalizeTransmission, normalizeWheels, updateErrorMessage } from '../../src/lib/validation';
 
 // ---- #36 duplicate on edit -----------------------------------------------------------------
@@ -111,4 +111,11 @@ test('wheels normalize known spellings and pass empty as null (validation)', () 
   assert.equal(normalizeWheels(''), null);
   assert.equal(normalizeWheels(null), null);
   assert.equal(typeof normalizeWheels('826M'), 'string');
+});
+
+// #98: a typed frozen name gets its base colour, not a pastel of it.
+test('guessColorFromName does not lighten frozen names', () => {
+  for (const base of ['Red', 'Blue', 'Green', 'Grey', 'Silver', 'Orange', 'Yellow', 'Purple', 'Pink']) {
+    assert.equal(guessColorFromName(`Frozen Custom ${base}`), guessColorFromName(`Custom ${base}`), base);
+  }
 });

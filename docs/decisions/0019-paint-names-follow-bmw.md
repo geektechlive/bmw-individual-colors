@@ -42,3 +42,7 @@ The catalog (`BMW_COLORS`) is every paint in the BMW snapshot, the archived pain
 - `scripts/trim-bmw-snapshot.ts` and `scripts/gen-paint-reference.ts`, which generate `src/lib/paint-reference.ts` and `src/lib/paint-redirects.ts`.
 - `tests/unit/paint-reference.test.ts`, `tests/unit/legacy-slugs.test.ts`, `tests/unit/paint-source.test.ts`.
 - Issues #93, #89, #91, #75.
+
+## Addendum 2026-11-21: frozen paints use BMW's hex (#98)
+
+The "existing hex wins" rule kept a wrong value for frozen paints. The old catalog drew a frozen paint as a paler version of its base colour, so Frozen Preciosa Red Metallic (P9C) showed as salmon pink (`#c87272`) where BMW gives a deep wine red (`#622129`), and an owner of that paint said the 3D view (ADR 0021) looked nothing like the car. Frozen paint is satin, not pastel. Frozen paints now take BMW's hex (the contrast overrides still win), and `guessColorFromName` no longer lightens a typed frozen name. Six paints changed, two of them a lot (P9C, and C5A Frozen Pure Grey `#8a8a8a` to `#606463`). The other 31 non-frozen paints whose old hex differs a lot from BMW's need a ruling per paint, because some of BMW's swatches look wrong too; that is #99. The decision above stands for them until then.

@@ -8,6 +8,8 @@ Run `npx tsx scripts/post-to-bimmerpost.ts` to publish pending items to the foru
 
 ## [Unreleased]
 
+- **Fixed:** frozen paints draw in their real colour; Frozen Preciosa Red is wine red, not pink (#98)
+
 - **Fixed:** unknown paint pages answer a real 404 (#94)
 
 ## [2026-11-20] https://g80.bimmerpost.com/forums/showpost.php?p=33078081 (posted by hand; also in thread 2229924 as p=33078082)

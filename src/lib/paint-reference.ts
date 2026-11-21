@@ -3,7 +3,7 @@
 //
 // The paint CODE is the identity; the name follows BMW. BMW_COLORS, COLOR_FAMILY_MAP and
 // COLOR_ALIASES in colors.ts are built from this file. Hex: the catalog's existing value
-// where the paint was already listed, else BMW's own; archived paints have no BMW hex,
+// where the paint was already listed (except frozen paints, #98), else BMW's own; archived paints have no BMW hex,
 // so theirs are approximations (like the rest of the catalog, for display only).
 
 export type PaintSource = 'bmw' | 'archived' | 'us-doc' | 'unverified';
@@ -78,18 +78,18 @@ export const PAINT_REFERENCE: Readonly<Record<string, PaintReference>> = {
   "Fire Orange III": { code: "P7E", hex: "#c44c0e", family: "Reds & Oranges", source: "bmw" },
   "Fire Red II": { code: "375", hex: "#e63f11", family: "Reds & Oranges", source: "bmw" },
   "Frozen Aquamarine Metallic": { code: "P9G", hex: "#8e9d97", family: "Greens", source: "bmw" },
-  "Frozen Black Metallic": { code: "U91", hex: "#2a2a2a", family: "Greys & Blacks", source: "bmw" },
+  "Frozen Black Metallic": { code: "U91", hex: "#202123", family: "Greys & Blacks", source: "bmw" },
   "Frozen Brilliant White Metallic": { code: "W93, X16", hex: "#e6e8e4", family: "Greys & Blacks", source: "bmw" },
   "Frozen Brooklyn Grey Metallic": { code: "P8X", hex: "#a9c0cd", family: "Greys & Blacks", source: "bmw" },
-  "Frozen Dark Grey II Metallic": { code: "P79", hex: "#4a4a4a", family: "Greys & Blacks", source: "bmw" },
+  "Frozen Dark Grey II Metallic": { code: "P79", hex: "#565351", family: "Greys & Blacks", source: "bmw" },
   "Frozen Deep Green Metallic": { code: "P80", hex: "#436648", family: "Greens", source: "bmw" },
-  "Frozen Deep Grey Metallic": { code: "P7X", hex: "#3a3a3a", family: "Greys & Blacks", source: "bmw" },
+  "Frozen Deep Grey Metallic": { code: "P7X", hex: "#3f434d", family: "Greys & Blacks", source: "bmw" },
   "Frozen Isle of Man Green Metallic": { code: "P92", hex: "#145239", family: "Greens", source: "bmw" },
   "Frozen Marina Bay Blue Metallic": { code: "P5T", hex: "#343b67", family: "Blues", source: "bmw" },
   "Frozen Orange II": { hex: "#d4661e", family: "Reds & Oranges", source: "unverified", note: "Touch-up paint sellers list this paint as Frozen Orange (code C41). No source found for the II.", noteSource: "automotivetouchup.com", noteUrl: "https://www.automotivetouchup.com/touch-up-paint/bmw/2022/m4" },
-  "Frozen Portimao Blue Metallic": { code: "X1E", hex: "#1e3a8a", family: "Blues", source: "bmw" },
-  "Frozen Preciosa Red Metallic": { code: "P9C", hex: "#c87272", family: "Reds & Oranges", source: "bmw" },
-  "Frozen Pure Grey Metallic": { code: "C5A", hex: "#8a8a8a", family: "Greys & Blacks", source: "bmw" },
+  "Frozen Portimao Blue Metallic": { code: "X1E", hex: "#283672", family: "Blues", source: "bmw" },
+  "Frozen Preciosa Red Metallic": { code: "P9C", hex: "#622129", family: "Reds & Oranges", source: "bmw" },
+  "Frozen Pure Grey Metallic": { code: "C5A", hex: "#606463", family: "Greys & Blacks", source: "bmw" },
   "Frozen Pure Red Metallic": { code: "P9F", hex: "#a23c37", family: "Reds & Oranges", source: "bmw" },
   "Frozen Purple Metallic": { code: "P9A", hex: "#3b2c3f", family: "Purples", source: "bmw" },
   "Frozen Tampa Bay Green Metallic": { code: "P9B", hex: "#63a549", family: "Greens", source: "bmw" },
