@@ -8,6 +8,8 @@ Run `npx tsx scripts/post-to-bimmerpost.ts` to publish pending items to the foru
 
 ## [Unreleased]
 
+- **Added:** tap the paint card to see the paint in 3D on a speed shape (#96)
+
 - **Fixed:** unknown paint pages answer a real 404 (#94)
 
 ## [2026-11-20] https://g80.bimmerpost.com/forums/showpost.php?p=33077333 (posted by hand; also in thread 2229924 as p=33076941)

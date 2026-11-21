@@ -20,14 +20,14 @@ export default defineConfig({
       // iPhone 14 on real WebKit (Safari's engine). Needs `npx playwright install webkit`.
       name: 'mobile',
       use: { ...devices['iPhone 14'] },
-      testMatch: /mobile-nav|edit|targets|entries-phone|colors-phone|map-phone|client-nav/,
+      testMatch: /mobile-nav|edit|targets|entries-phone|colors-phone|map-phone|client-nav|paint-3d/,
     },
     {
       // Always-on WebKit for the design matrix and interactions (design spec, "How it is
       // checked"): paint swatches, blend modes and -webkit-box-reflect render differently here.
       name: 'webkit',
       use: { ...devices['Desktop Safari'] },
-      testMatch: /design|interactions/,
+      testMatch: /design|interactions|paint-3d/,
     },
   ],
   // Against a deployed site (PLAYWRIGHT_BASE_URL) no local server is needed or started.

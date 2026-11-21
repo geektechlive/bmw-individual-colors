@@ -11,6 +11,9 @@ import RowActions from '../../../components/RowActions';
 import { forumTagLabel } from '../../../lib/entry-display';
 import PaintSwatch from '../../../components/PaintSwatch';
 import PaintSource from '../../../components/PaintSource';
+import PaintViewer from '../../../components/PaintViewer';
+import { getPaintFinish } from '../../../lib/paint-finish';
+import { paintSourceLine } from '../../../lib/paint-source';
 import type { Metadata } from 'next';
 import { cssVars } from '../../../lib/css-vars';
 import styles from './page.module.css';
@@ -172,18 +175,19 @@ export default async function ColorDetailPage({ params }: { params: Promise<{ sl
           <PaintSource name={colorName} />
         </div>
 
-        <div className={styles.cove} aria-hidden="true">
-          <div className={styles.lamp} />
-          <div className={`${styles.spray}`}>
+        {/* The card is a real button (#96): the cove is not aria-hidden, only its decoration is. */}
+        <div className={styles.cove}>
+          <div className={styles.lamp} aria-hidden="true" />
+          <PaintViewer name={colorName} hex={hex} finish={getPaintFinish(colorName)} code={paintSourceLine(colorName).code} className={styles.spray}>
             <ViewTransition name={`paint-${colorToSlug(colorName)}`} share="morph" default="none">
               <PaintSwatch name={colorName} hex={hex} size="fill" />
             </ViewTransition>
-            <div className={styles.sprayLabel}>
+            <span className={styles.sprayLabel} aria-hidden="true">
               <span>{colorName}</span>
               <span>BMW Individual</span>
-            </div>
-            <div className={styles.sprayHide} />
-          </div>
+            </span>
+            <span className={styles.sprayHide} aria-hidden="true" />
+          </PaintViewer>
         </div>
       </section>
 

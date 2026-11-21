@@ -375,7 +375,8 @@
 
 @media (max-width: 720px) {
   /* Reading order on a phone: text, then the stat tiles, then the spray card, as one paint-washed
-     band (#67). The card is aria-hidden, so moving it changes nothing for focus or reading order. */
+     band (#67). The card is a button since #96, so `order` moves it visually but not in the tab order:
+     the DOM order (text, card, tiles) is what keyboard and screen reader users get. */
   .page {
     display: flex;
     flex-direction: column;

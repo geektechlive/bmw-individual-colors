@@ -27,3 +27,4 @@ zone or resource IDs, email addresses, local paths or personal details. Start a 
 | [0018](0018-stay-on-supabase.md)                           | Stay on Supabase; don't move the data to Cloudflare D1                              |                 |
 | [0019](0019-paint-names-follow-bmw.md)                     | Paint names follow BMW's paint list, cited on every paint page; old names are aliases | #93, #89      |
 | [0020](0020-global-kv-page-cache.md)                       | Pages are also cached globally in free KV, behind the per-data-center cache         | #21             |
+| [0021](0021-3d-paint-view.md)                              | The paint page shows the paint in 3D: vanilla three.js, a code-built shape, loaded on intent | #96 |
