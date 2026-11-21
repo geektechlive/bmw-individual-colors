@@ -3,9 +3,10 @@
  * scripts/post-to-bimmerpost.ts
  *
  * Reads the [Unreleased] section of CHANGELOG.md, converts it to BBCode,
- * and posts it as a reply to the registry's BimmerPost thread.
+ * and posts it as a reply to both registry threads on BimmerPost (FORUM_THREADS in
+ * scripts/lib/forum-post.ts, #100).
  *
- * After posting, marks the section as [YYYY-MM-DD] — <post url> in CHANGELOG.md.
+ * After posting, moves the entries under a [YYYY-MM-DD] heading that links every post.
  *
  * Usage:
  *   npx tsx scripts/post-to-bimmerpost.ts            # post and update changelog
@@ -20,6 +21,7 @@ import { createHash } from 'crypto';
 import { readFileSync, writeFileSync, existsSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
+import { FORUM_THREADS, markPosted, postLink, readPending, type ForumThread, type PostedThread } from './lib/forum-post';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -35,10 +37,10 @@ if (existsSync(envFile)) {
 }
 
 const MAX_POST_LENGTH = 10_000;
+/** vBulletin's default flood check refuses a second post from one user within 30 s. */
+const FLOOD_WAIT_MS = 35_000;
 
 const FORUM_BASE = 'https://g80.bimmerpost.com/forums';
-const THREAD_ID = '2237372';
-const THREAD_ANCHOR_POST = '32758986'; // p= value used to fetch the reply form
 
 // ─── Cookie jar ───────────────────────────────────────────────────────────────
 
@@ -158,9 +160,9 @@ function getInputValue(html: string, name: string): string {
   return html.match(nameFirst)?.[1] ?? html.match(valueFirst)?.[1] ?? '';
 }
 
-async function fetchReplyForm(jar: CookieJar): Promise<ReplyFormFields> {
+async function fetchReplyForm(jar: CookieJar, thread: ForumThread): Promise<ReplyFormFields> {
   const res = await fetch(
-    `${FORUM_BASE}/newreply.php?do=newreply&noquote=1&p=${THREAD_ANCHOR_POST}`,
+    `${FORUM_BASE}/newreply.php?do=newreply&noquote=1&p=${thread.anchorPost}`,
     {
       headers: {
         'Cookie': jar.header(),
@@ -205,17 +207,18 @@ async function fetchReplyForm(jar: CookieJar): Promise<ReplyFormFields> {
 
 async function submitReply(
   jar: CookieJar,
+  thread: ForumThread,
   fields: ReplyFormFields,
   message: string
 ): Promise<string> {
   const body = new URLSearchParams({
     do: 'postreply',
-    t: THREAD_ID,
+    t: thread.id,
     securitytoken: fields.securitytoken,
     posthash: fields.posthash,
     poststarttime: fields.poststarttime,
     loggedinuser: fields.loggedinuser,
-    subject: fields.subject || `Re: M-Color Individual Registry`,
+    subject: fields.subject || `Re: ${thread.name}`,
     message,
     wysiwyg: '0',
     parseurl: '1',
@@ -224,7 +227,7 @@ async function submitReply(
   });
 
   const res = await fetch(
-    `${FORUM_BASE}/newreply.php?do=postreply&t=${THREAD_ID}`,
+    `${FORUM_BASE}/newreply.php?do=postreply&t=${thread.id}`,
     {
       method: 'POST',
       redirect: 'manual',
@@ -232,7 +235,7 @@ async function submitReply(
         'Content-Type': 'application/x-www-form-urlencoded',
         'Cookie': jar.header(),
         'User-Agent': 'Mozilla/5.0 (compatible; bmwic-registry-bot/1.0)',
-        'Referer': `${FORUM_BASE}/newreply.php?do=newreply&noquote=1&p=${THREAD_ANCHOR_POST}`,
+        'Referer': `${FORUM_BASE}/newreply.php?do=newreply&noquote=1&p=${thread.anchorPost}`,
       },
       body: body.toString(),
     }
@@ -252,7 +255,7 @@ async function submitReply(
   if (html.includes('Thank you for posting')) {
     const metaUrl = extractMetaRefreshUrl(html);
     if (metaUrl) return resolveForumUrl(metaUrl);
-    return `${FORUM_BASE}/showthread.php?t=${THREAD_ID}`;
+    return `${FORUM_BASE}/showthread.php?t=${thread.id}`;
   }
 
   const metaUrl = extractMetaRefreshUrl(html);
@@ -287,46 +290,18 @@ function extractMetaRefreshUrl(html: string): string | null {
 
 // ─── Changelog handling ───────────────────────────────────────────────────────
 
-function readPending(changelogPath: string): string {
-  const content = readFileSync(changelogPath, 'utf8');
-  // Match everything between ## [Unreleased] and the next --- separator or ## section
-  const match = content.match(/## \[Unreleased\][^\n]*\n([\s\S]*?)(?=\n---|\n## |$)/);
-  return match ? match[1].trim() : '';
-}
-
-function markPosted(changelogPath: string, postUrl: string, entries: number): void {
-  const content = readFileSync(changelogPath, 'utf8');
-  const date = new Date().toISOString().split('T')[0];
-
-  // Record the last successful post BEFORE touching CHANGELOG.md, so a
-  // failed/aborted rewrite still leaves a durable record that the forum
-  // post itself succeeded.
-  const lastPostPath = join(ROOT, '.last-post.json');
+/**
+ * Records the posts in CHANGELOG.md. .last-post.json is written first, so a failed rewrite
+ * still leaves a durable record that the forum posts went up.
+ */
+function recordPosts(changelogPath: string, posted: PostedThread[], failed: string[]): void {
   writeFileSync(
-    lastPostPath,
-    JSON.stringify({ url: postUrl, postedAt: new Date().toISOString(), entries }, null, 2) + '\n',
+    join(ROOT, '.last-post.json'),
+    JSON.stringify({ posted, failed, postedAt: new Date().toISOString() }, null, 2) + '\n',
     'utf8'
   );
-
-  // Replace ## [Unreleased] header + its content block with:
-  //   ## [Unreleased] (empty)
-  //   ---
-  //   ## [DATE] — URL
-  //   <the old content>
-  const updated = content.replace(
-    /(## \[Unreleased\][^\n]*\n)([\s\S]*?)(\n---)/,
-    (_, header, body, sep) =>
-      `${header}\n${sep}\n\n## [${date}] — ${postUrl}\n${body.trimEnd()}\n`
-  );
-
-  if (updated === content) {
-    throw new Error(
-      'markPosted: CHANGELOG.md rewrite produced no change — the [Unreleased] section format may have changed. ' +
-      `The post itself succeeded (${postUrl}); .last-post.json was written. Fix CHANGELOG.md manually.`
-    );
-  }
-
-  writeFileSync(changelogPath, updated, 'utf8');
+  const date = new Date().toISOString().split('T')[0];
+  writeFileSync(changelogPath, markPosted(readFileSync(changelogPath, 'utf8'), date, posted, failed), 'utf8');
 }
 
 // ─── Markdown → BBCode ────────────────────────────────────────────────────────
@@ -400,7 +375,7 @@ async function main() {
   const dryRun = process.argv.includes('--dry-run');
   const changelogPath = join(ROOT, 'CHANGELOG.md');
 
-  const pending = readPending(changelogPath);
+  const pending = readPending(readFileSync(changelogPath, 'utf8'));
   if (!pending) {
     console.log('Nothing pending in CHANGELOG.md — nothing to post.');
     return;
@@ -414,7 +389,6 @@ async function main() {
   ].join('\n');
 
   const fullMessage = bbcode + footer;
-  const entryCount = (pending.match(/^[-*]\s+/gm) ?? []).length;
 
   console.log('\n══════════════════════════════════════');
   console.log('  BBCode preview');
@@ -446,15 +420,32 @@ async function main() {
   await login(jar);
   console.log('Logged in.');
 
-  console.log('Fetching reply form...');
-  const fields = await fetchReplyForm(jar);
+  const posted: PostedThread[] = [];
+  const failed: string[] = [];
+  for (const [i, thread] of FORUM_THREADS.entries()) {
+    if (i > 0) {
+      console.log(`Waiting ${FLOOD_WAIT_MS / 1000} s for the forum's flood limit...`);
+      await new Promise((resolve) => setTimeout(resolve, FLOOD_WAIT_MS));
+    }
+    try {
+      console.log(`Posting to thread ${thread.id} (${thread.name})...`);
+      const fields = await fetchReplyForm(jar, thread);
+      const url = postLink(await submitReply(jar, thread, fields, fullMessage));
+      posted.push({ threadId: thread.id, url });
+      console.log(`Posted: ${url}`);
+    } catch (err) {
+      failed.push(thread.id);
+      console.error(`Thread ${thread.id} failed: ${(err as Error).message}`);
+    }
+  }
 
-  console.log('Submitting reply...');
-  const postUrl = await submitReply(jar, fields, fullMessage);
-
-  console.log(`\nPosted: ${postUrl}`);
-  markPosted(changelogPath, postUrl, entryCount);
+  if (posted.length === 0) throw new Error('No thread accepted the post; CHANGELOG.md is unchanged.');
+  recordPosts(changelogPath, posted, failed);
   console.log('CHANGELOG.md updated.\n');
+  if (failed.length > 0) {
+    console.error(`Not posted to: ${failed.join(', ')}. Post there by hand and add the link to the new heading.`);
+    process.exit(1);
+  }
 }
 
 main().catch((err: Error) => {

@@ -85,11 +85,11 @@ Keep heavy packages out of server code: `country-state-city` once reached the se
 
 ## Changelog & forum thread posting
 
-The repo includes an automated system for maintaining a public changelog and posting updates to a vBulletin forum thread.
+The repo includes an automated system for maintaining a public changelog and posting updates to vBulletin forum threads.
 
 ### How it works
 
-**`CHANGELOG.md`** uses [Keep a Changelog](https://keepachangelog.com) format. A `## [Unreleased]` section accumulates pending entries. When you post, it becomes a dated section with the forum URL.
+**`CHANGELOG.md`** uses [Keep a Changelog](https://keepachangelog.com) format. A `## [Unreleased]` section accumulates pending entries. When you post, the entries move under a dated heading that links every post.
 
 **Git hook** (`.githooks/post-commit`) prepends a changelog entry to `## [Unreleased]`
 automatically after every meaningful commit. Wire it up once after cloning:
@@ -109,7 +109,7 @@ Entries are generated from [Conventional Commits](https://www.conventionalcommit
 | `docs:` | Docs |
 | `chore:` / `ci:` / `build:` / `test:` / `style:` | skipped |
 
-**Posting script** converts the pending entries to BBCode and posts them as a reply to your designated vBulletin thread. It handles login, CSRF token extraction, and post submission — no browser required.
+**Posting script** converts the pending entries to BBCode and posts them as a reply to each configured vBulletin thread, 35 seconds apart for the forum's flood limit. It handles login, CSRF token extraction, and post submission, with no browser. If one thread fails, the others are still recorded and the heading names the thread that was missed.
 
 ```bash
 npx tsx scripts/post-to-bimmerpost.ts --dry-run   # preview BBCode without posting
@@ -123,12 +123,11 @@ npx tsx scripts/post-to-bimmerpost.ts             # post and update CHANGELOG.md
    BIMMERPOST_USERNAME=your-forum-username
    BIMMERPOST_PASSWORD=your-forum-password
    ```
-2. In `scripts/post-to-bimmerpost.ts`, update the two constants at the top:
+2. In `scripts/lib/forum-post.ts`, list your threads in `FORUM_THREADS`:
    ```ts
-   const THREAD_ID = 'your-thread-id';         // from the thread URL (?t=)
-   const THREAD_ANCHOR_POST = 'your-post-id';  // any post ID in that thread (?p=)
+   { id: 'your-thread-id', anchorPost: 'your-post-id', name: 'Thread title' },
    ```
-   Both values are visible in your browser's address bar when viewing or replying to the thread.
+   `id` is the thread URL's `?t=`, `anchorPost` any post ID in that thread (`?p=`). Both are visible in your browser's address bar.
 
 3. Run `--dry-run` first to confirm the BBCode renders as expected.
 
